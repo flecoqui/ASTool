@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ASTool": {
+      "commandName": "Project",
+      "commandLineArgs": "--help  "
+    }
+  }
+}
