@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ASTool\ASIndexType.cs" Link="ASIndexType.cs" />
+    <Compile Include="..\ASTool\ASInput.cs" Link="ASInput.cs" />
+    <Compile Include="..\ASTool\ASTrackType.cs" Link="ASTrackType.cs" />
+    <Compile Include="..\ASTool\ASVersion.cs" Link="ASVersion.cs" />
+  </ItemGroup>
+
+</Project>
