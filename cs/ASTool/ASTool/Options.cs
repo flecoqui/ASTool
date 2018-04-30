@@ -15,7 +15,7 @@ namespace ASTool
             Route
         }
         public string ErrorMessagePrefix = "ASTool Error: \r\n";
-        public string InformationMessage = "ASTool:\r\nSyntax:\r\nASTool --route --inputuri <inputUri> --inputplugin <pluginName> --outputuri <outputuri> --outputplugin <pluginName> [--minbitrate <bitrate b/s> --maxbitrate <bitrate b/s> --plugindirectory <path>]\r\nASTool --listplugins [--plugindirectory <path>]\r\nASTool --help";
+        public string InformationMessage = "ASTool:\r\nSyntax:\r\nASTool --route --inputuri <inputUri>  --outputuri <outputuri>  [--minbitrate <bitrate b/s> --maxbitrate <bitrate b/s> --plugindirectory <path>]\r\nASTool --listplugins [--plugindirectory <path>]\r\nASTool --help";
         public string ErrorMessage = string.Empty;
         public string InputUri { get; set; }
 
@@ -66,24 +66,24 @@ namespace ASTool
                                 else
                                     options.ErrorMessage = "Input URI not set";
                                 break;
-                            case "--inputplugin":
-                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
-                                    options.InputPluginName = args[i++];
-                                else
-                                    options.ErrorMessage = "Input Plugin Name not set";
-                                break;
+                            //case "--inputplugin":
+                            //    if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                            //        options.InputPluginName = args[i++];
+                            //    else
+                            //        options.ErrorMessage = "Input Plugin Name not set";
+                            //    break;
                             case "--outputuri":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                     options.OutputUri = args[i++];
                                 else
                                     options.ErrorMessage = "Output URI not set";
                                 break;
-                            case "--outputplugin":
-                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
-                                    options.OutputPluginName = args[i++];
-                                else
-                                    options.ErrorMessage = "Output Plugin Name not set";
-                                break;
+                            //case "--outputplugin":
+                            //    if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                            //        options.OutputPluginName = args[i++];
+                            //    else
+                            //        options.ErrorMessage = "Output Plugin Name not set";
+                            //    break;
                             case "--minbitrate":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                 {
@@ -150,9 +150,11 @@ namespace ASTool
             else if (options.ASToolAction == Action.Route)
             {
                 if ((!string.IsNullOrEmpty(options.InputUri)) &&
-                    (!string.IsNullOrEmpty(options.InputPluginName)) &&
-                    (!string.IsNullOrEmpty(options.InputUri)) &&
-                    (!string.IsNullOrEmpty(options.InputPluginName)))
+                    //(!string.IsNullOrEmpty(options.InputPluginName)) &&
+                    (!string.IsNullOrEmpty(options.InputUri)) 
+                    //&&
+                    //(!string.IsNullOrEmpty(options.InputPluginName))
+                    )
                 {
                     return options;
                 }

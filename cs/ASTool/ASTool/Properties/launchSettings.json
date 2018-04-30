@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "--listplugins"
+      "commandLineArgs": "--route --inputuri http://localhost/VideoApp/MediaroomAds/MediaroomAds.ism/manifest --outputuri  http://localhost/VideoApp/Live/_live1.isml "
     }
   }
 }

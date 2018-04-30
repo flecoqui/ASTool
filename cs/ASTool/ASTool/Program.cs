@@ -195,44 +195,66 @@ namespace ASTool
         static bool Route(Options opt)
         {
             bool result = false;
-            if( InputPlugins.ContainsKey(opt.InputPluginName) &&
-                OutputPlugins.ContainsKey(opt.OutputPluginName))
+
+            AdaptiveMediaCache.DiskCache d = new AdaptiveMediaCache.DiskCache();
+            d.Initialize("C:\\TEMP\\ASTOOL\\");
+            AdaptiveMediaCache.ManifestCache mc = AdaptiveMediaCache.ManifestCache.CreateManifestCache(new Uri(opt.InputUri), true, -1, -1, 512000, 40);
+            mc.SetDiskCache(d);
+            var t = d.RemoveAsset(mc);
+            t.Wait();
+            t = mc.DownloadManifest();
+            t.Wait();
+            result = t.Result;
+            if (result == true)
             {
-                dynamic InputInstance = GetPluginInstance("ASTool.ASInput", opt.InputPluginName, InputPlugins[opt.InputPluginName].Path);
-                dynamic OutputInstance = GetPluginInstance("ASTool.ASOutput", opt.OutputPluginName, OutputPlugins[opt.OutputPluginName].Path);
-                if((InputInstance != null)&&
-                   (OutputInstance != null))
+                var tt = mc.StartDownloadChunks();
+                tt.Wait();
+                result = tt.Result;
+                while (mc.GetAssetStatus() != AdaptiveMediaCache.AssetStatus.ChunksDownloaded)
                 {
-                    // Loading the Input
-                    if(InputInstance.LoadInput(opt.InputUri))
-                    {
-                        if (OutputInstance.LoadOutput(opt.OutputUri))
-                        {
-                            ASIndexType InputIndexType = InputInstance.GetInputIndexType();
-                            ASIndexType OutputIndexType = OutputInstance.GetOutputIndexType();
-                            if(OutputIndexType == InputIndexType)
-                            {
-                                if(OutputIndexType == ASIndexType.Byte)
-                                {
-                                   return RouteByByte(opt, InputInstance, OutputInstance);
-                                }
-                                else if (OutputIndexType == ASIndexType.Time)
-                                {
-
-                                }
-                                else if (OutputIndexType == ASIndexType.ByteAndTime)
-                                {
-
-                                }
-
-                            }
-                            else
-                                Console.WriteLine("Input and Output are not using the same index type (Time, Byte,...)");
-
-                        }
-                    }
+                    System.Threading.Tasks.Task.Delay(1000);
                 }
             }
+
+
+            //if( InputPlugins.ContainsKey(opt.InputPluginName) &&
+            //    OutputPlugins.ContainsKey(opt.OutputPluginName))
+            //{
+            //    dynamic InputInstance = GetPluginInstance("ASTool.ASInput", opt.InputPluginName, InputPlugins[opt.InputPluginName].Path);
+            //    dynamic OutputInstance = GetPluginInstance("ASTool.ASOutput", opt.OutputPluginName, OutputPlugins[opt.OutputPluginName].Path);
+            //    if((InputInstance != null)&&
+            //       (OutputInstance != null))
+            //    {
+            // Loading the Input
+            //if(InputInstance.LoadInput(opt.InputUri))
+            //{
+            //    if (OutputInstance.LoadOutput(opt.OutputUri))
+            //    {
+            //        ASIndexType InputIndexType = InputInstance.GetInputIndexType();
+            //        ASIndexType OutputIndexType = OutputInstance.GetOutputIndexType();
+            //        if(OutputIndexType == InputIndexType)
+            //        {
+            //            if(OutputIndexType == ASIndexType.Byte)
+            //            {
+            //               return RouteByByte(opt, InputInstance, OutputInstance);
+            //            }
+            //            else if (OutputIndexType == ASIndexType.Time)
+            //            {
+
+            //            }
+            //            else if (OutputIndexType == ASIndexType.ByteAndTime)
+            //            {
+
+            //            }
+
+            //        }
+            //        else
+            //            Console.WriteLine("Input and Output are not using the same index type (Time, Byte,...)");
+
+            //    }
+            //}
+            //    }
+            //}
             return result;
         }
         static void Main(string[] args)
@@ -262,7 +284,7 @@ namespace ASTool
             }
             if (opt.ASToolAction == Options.Action.Route)
             {
-                LoadPlugins(opt.PluginDirectory);
+               // LoadPlugins(opt.PluginDirectory);
                 Route(opt);
                 return;
             }
