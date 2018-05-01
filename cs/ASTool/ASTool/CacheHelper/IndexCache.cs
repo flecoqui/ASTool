@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveMediaCache
+namespace ASTool.CacheHelper
 {
     class IndexCache
     {

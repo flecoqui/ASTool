@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.IsolatedStorage;
 
-namespace AdaptiveMediaCache
+namespace ASTool.CacheHelper
 {
      class DiskCache
     {

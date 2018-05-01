@@ -5,12 +5,6 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASTool", "ASTool\ASTool.csproj", "{9D666AAB-0839-4E77-AF7C-FB4566C995FF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASInputLiveSmooth", "ASInputLiveSmooth\ASInputLiveSmooth.csproj", "{6851E342-4AFD-4DB7-B9FA-5B901F36BDEF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASInputFile", "ASInputFile\ASInputFile.csproj", "{213CDF58-13ED-4AB6-A0F7-3C103FC73799}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASOutputFile", "ASOutputFile\ASOutputFile.csproj", "{D53959C0-032F-4A89-87C9-F5C13BED210E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,18 +15,6 @@ Global
 		{9D666AAB-0839-4E77-AF7C-FB4566C995FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D666AAB-0839-4E77-AF7C-FB4566C995FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D666AAB-0839-4E77-AF7C-FB4566C995FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6851E342-4AFD-4DB7-B9FA-5B901F36BDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6851E342-4AFD-4DB7-B9FA-5B901F36BDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6851E342-4AFD-4DB7-B9FA-5B901F36BDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6851E342-4AFD-4DB7-B9FA-5B901F36BDEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{213CDF58-13ED-4AB6-A0F7-3C103FC73799}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{213CDF58-13ED-4AB6-A0F7-3C103FC73799}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{213CDF58-13ED-4AB6-A0F7-3C103FC73799}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{213CDF58-13ED-4AB6-A0F7-3C103FC73799}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D53959C0-032F-4A89-87C9-F5C13BED210E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D53959C0-032F-4A89-87C9-F5C13BED210E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D53959C0-032F-4A89-87C9-F5C13BED210E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D53959C0-032F-4A89-87C9-F5C13BED210E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

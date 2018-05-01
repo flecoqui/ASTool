@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="SmoothStreaming\" />
+    <Folder Include="ISMHelper\" />
+    <Folder Include="SmoothHelper\" />
   </ItemGroup>
 
 </Project>

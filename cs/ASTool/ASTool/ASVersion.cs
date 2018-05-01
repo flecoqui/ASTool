@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ASTool
 {
-    class ASVersion
+    public class ASVersion
     {
 
         public static Int32 SetVersion(byte b1, byte b2, byte b3, byte b4)

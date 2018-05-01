@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
-namespace AdaptiveMediaCache
+namespace ASTool.CacheHelper
 {
     [DataContract(Name = "ChunkList")]
      class ChunkList : IDisposable

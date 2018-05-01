@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveMediaCache
+namespace ASTool.CacheHelper
 {
     // Further information here:
     // http://blogs.msdn.com/b/pfxteam/archive/2012/02/12/building-async-coordination-primitives-part-7-asyncreaderwriterlock.aspx?PageIndex=2

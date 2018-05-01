@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace AdaptiveMediaCache.SmoothStreaming
+namespace ASTool.SmoothHelper
 {
     /// <summary>
     /// XmlReader extension methods.

@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveMediaCache.SmoothStreaming
+namespace ASTool.SmoothHelper
 {
     /// <summary>
     /// Represents a chunk.

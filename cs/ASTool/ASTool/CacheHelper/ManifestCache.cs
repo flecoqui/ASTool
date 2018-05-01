@@ -13,12 +13,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AdaptiveMediaCache.SmoothStreaming;
+using ASTool.SmoothHelper;
 using System.IO;
 using System.Xml;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization;
-namespace AdaptiveMediaCache
+namespace ASTool.CacheHelper
 {
     public enum AssetStatus
     {

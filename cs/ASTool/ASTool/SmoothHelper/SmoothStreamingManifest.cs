@@ -14,12 +14,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveMediaCache.SmoothStreaming
+namespace ASTool.SmoothHelper
 {
     using System.Collections.Generic;
     using System.IO;
     using System.Xml;
-    using SmoothStreaming;
+
     /// <summary>
     /// Parses a Smooth Streaming Manifest.
     /// </summary>

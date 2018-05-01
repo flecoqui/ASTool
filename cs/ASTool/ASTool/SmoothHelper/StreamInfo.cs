@@ -14,8 +14,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveMediaCache.SmoothStreaming
-{
+namespace ASTool.SmoothHelper
+{ 
     /// <summary>
     /// Represents the information of a Stream in a manifest.
     /// </summary>
