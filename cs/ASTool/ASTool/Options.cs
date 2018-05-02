@@ -86,6 +86,9 @@ namespace ASTool
                             case "--push":
                                 options.ASToolAction = Action.Push;
                                 break;
+                            case "--parse":
+                                options.ASToolAction = Action.Parse;
+                                break;
                             case "--input":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                     options.InputUri = args[i++];

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Collections.Generic;
 
 namespace ASTool.ISMHelper
 {
@@ -37,7 +38,44 @@ namespace ASTool.ISMHelper
             }
             return -1;
         }
+        static public byte[] CreateBox(string Type, Int32 length, byte[] data)
+        {
 
+            if ((!string.IsNullOrEmpty(Type) && (Type.Length == 4)) &&
+                (data != null) && (data.Length > 0) &&
+                (length <= (data.Length + 8))
+                )
+            {
+                byte[] Buffer =  new byte[length];
+                if(Buffer!=null)
+                {
+                    if( WriteMp4BoxLength(Buffer, 0,length)&&
+                        WriteMp4BoxType(Buffer, 0, Type)&&
+                        WriteMp4BoxData(Buffer, 0, data, length - 8))
+                    {
+                        return Buffer;
+                    }
+                }
+            }
+            return null;
+        }
+        static public byte[] CreateFTYPBox(string major_brand, Int32 minor_version, List<string> compatible_brands)
+        {
+            if( (!string.IsNullOrEmpty(major_brand) && (major_brand.Length == 4)) &&
+                (compatible_brands !=null) && (compatible_brands.Count>0)
+                )
+            {
+                byte[] Buffer = new byte[8 + compatible_brands.Count*4];
+                if(Buffer!=null)
+                {
+                    WriteMp4BoxString(Buffer, 0, major_brand, 4);
+                    WriteMp4BoxInt32(Buffer, 4, minor_version);
+                    for(int i = 0; i < compatible_brands.Count;i++)
+                        WriteMp4BoxString(Buffer, 8 + 4*i, compatible_brands[i], 4);
+                }
+            }
+            return null;
+        }
         static public int ReadMp4BoxLength(byte[] buffer, int offset)
         {
             int mp4BoxLen = 0;
@@ -62,22 +100,76 @@ namespace ASTool.ISMHelper
             return s;
         }
 
-        static public void WriteMp4BoxLength(byte[] buffer, int offset, int length)
+        static public bool WriteMp4BoxLength(byte[] buffer, int offset, int length)
         {
-            buffer[offset++] = (byte)(length >> 24);
-            buffer[offset++] = (byte)(length >> 16);
-            buffer[offset++] = (byte)(length >> 8);
-            buffer[offset++] = (byte)(length >> 0);
-        }
-
-        static public void WriteMp4Type(byte[] buffer, int offset, string boxType)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                buffer[offset + 4 + i] = (byte)boxType[i];
+            if (buffer != null)
+            { 
+                buffer[offset++] = (byte)(length >> 24);
+                buffer[offset++] = (byte)(length >> 16);
+                buffer[offset++] = (byte)(length >> 8);
+                buffer[offset++] = (byte)(length >> 0);
+                return true;
             }
+            return false;
         }
-
+        static public bool WriteMp4BoxInt32(byte[] buffer, int offset, Int32 value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value >> 24);
+                buffer[offset++] = (byte)(value >> 16);
+                buffer[offset++] = (byte)(value >> 8);
+                buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxString(byte[] buffer, int offset, string value, int Len)
+        {
+            if ((buffer != null) &&
+                (!string.IsNullOrEmpty(value)) &&
+                (value.Length >0)
+                )
+            {
+                for (int i = 0; i < Len; i++)
+                {
+                    buffer[offset + i] = (byte)value[i];
+                }
+                return true;
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxType(byte[] buffer, int offset, string boxType)
+        {
+            if ((buffer != null) &&
+                (!string.IsNullOrEmpty(boxType)) &&
+                (boxType.Length == 4)
+                )
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    buffer[offset + 4 + i] = (byte)boxType[i];
+                }
+                return true;
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxData(byte[] buffer, int offset, byte[] data, int len)
+        {
+            if ( (buffer!=null)&&
+                (data != null) &&
+                (len <= data.Length) &&
+                (buffer.Length >= (offset + 8 + len))
+                )
+            { 
+                for (int i = 0; i < len; i++)
+                {
+                    buffer[offset + 8 + i] = (byte)data[i];
+                }
+                return true;
+            }
+            return false;
+        }
         static byte[] GuidToNetworkOrderArray(Guid input)
         {
             byte[] guidAsByteArray = input.ToByteArray();
@@ -127,7 +219,7 @@ namespace ASTool.ISMHelper
         {
             int newBoxSize = ((null == boxData) ? 0 : boxData.Length) + kBoxHeaderSize;
             // add our headers
-            WriteMp4Type(buffer, offset, boxType);
+            WriteMp4BoxType(buffer, offset, boxType);
             WriteMp4BoxLength(buffer, offset, newBoxSize);
             if (null != boxData)
             {

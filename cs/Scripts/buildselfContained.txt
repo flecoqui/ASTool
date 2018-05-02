@@ -7,3 +7,9 @@ dotnet ASTool.dll
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
 dotnet ASTool.dll --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\temp\\astool\\test1
+dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml  --loop 0
+http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/preview.isml/manifest
+
+AppID: 95bf4b5b-7b88-4472-b7c1-7debd9695931
+
+Key: K/JMFYjBxaFdDgyLrDo8+toRMvHnd5vhWqJsLrPbFXA=

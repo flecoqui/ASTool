@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ISMHelper\" />
     <Folder Include="SmoothHelper\" />
   </ItemGroup>
 
