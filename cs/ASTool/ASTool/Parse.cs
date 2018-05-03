@@ -67,17 +67,17 @@ namespace ASTool
         {
             bool result = false;
             Console.WriteLine("Parsing file: " + opt.InputUri);
-            //Console.Write(Mp4Box.ParseFile(opt.InputUri));
+            Console.Write(Mp4Box.ParseFile(opt.InputUri));
             //Console.WriteLine("Dump FTYP: ");
             //byte[] data = GetFTYPBoxData();
             //if(data!=null)
             //    DumpHex(data);
             Console.WriteLine("Parsing file: " + opt.InputUri + " done");
-            Int32 TimeScale = 10000000;
-            Int64 Duration = 120*10000000;
-            byte[] data = GetMVHDBoxData(DateTime.Now, DateTime.Now, TimeScale, Duration, 3);
-            if(data!=null)
-                DumpHex(data);
+            //Int32 TimeScale = 10000000;
+            //Int64 Duration = 120*10000000;
+            //byte[] data = GetMVHDBoxData(DateTime.Now, DateTime.Now, TimeScale, Duration, 3);
+            //if(data!=null)
+            //    DumpHex(data);
             return result;
         }
     }
