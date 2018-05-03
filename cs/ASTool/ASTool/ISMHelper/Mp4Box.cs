@@ -6,10 +6,10 @@ namespace ASTool.ISMHelper
 {
     class Mp4Box
     {
-        Int32 Length;
-        string Type;
-        byte[] Data;
-
+        protected Int32 Length;
+        protected string Type;
+        protected byte[] Data;
+        protected List<Mp4Box> Children;
         public Int32 GetBoxLength()
         {
             return Length;
@@ -22,7 +22,48 @@ namespace ASTool.ISMHelper
         {
             return Data;
         }
-
+        public byte[] GetBoxBytes()
+        {
+            byte[] result = new byte[Length];
+            if(WriteMp4BoxInt32(result, 0, Length))
+            {
+                if(WriteMp4BoxString(result,4,this.Type))
+                {
+                    if (WriteMp4BoxData(result, 8, this.Data))
+                    {
+                        return result;
+                    }
+                }
+            }
+            return null;
+        }
+        public bool AddMp4Box(Mp4Box box, bool bAddInData = false)
+        {
+            if (Children == null)
+                Children = new List<Mp4Box>();
+            if (Children != null)
+            {
+                Children.Add(box);
+                if(bAddInData == true)
+                {
+                    Append(box.Data);
+                }
+                return true;
+            }
+            return false;
+        }
+        public bool Append(byte[] data)
+        {
+            if ((data != null)&&(Data != null))
+            {
+                byte[] newData = new byte[data.Length + Data.Length];
+                Buffer.BlockCopy(Data, 0, newData, 0, Data.Length);
+                Buffer.BlockCopy(data, 0, newData, Data.Length,data.Length);
+                Data = newData;
+                return true;
+            }
+            return false;
+        }
         public static Mp4Box CreateMp4Box(byte[] buffer, int offset)
         {
             if((buffer != null)&&
@@ -36,10 +77,32 @@ namespace ASTool.ISMHelper
                     {
                         box.Type = ReadMp4BoxType(buffer, offset);
                         box.Data = ReadMp4BoxData(buffer, offset, box.Length);
+                        List<Mp4Box> list = box.GetChildren();
+                        if((list!=null)&&(list.Count>0))
+                        {
+                            foreach (var b in list)
+                                box.AddMp4Box(box);
+                        }
                         return box;
                     }
                 }
             }
+            return null;
+        }
+        public static Mp4Box CreateEmptyMp4Box(string Type)
+        {
+            Mp4Box box = new Mp4Box();
+            if (box != null)
+            {
+                box.Length = 8;
+                if (!string.IsNullOrEmpty(Type) &&
+                    (Type.Length <= 4))
+                {
+                    box.Type = Type;
+                    return box;
+                }
+            }
+            
             return null;
         }
         static public int ReadMp4BoxLength(byte[] buffer, int offset)
@@ -76,6 +139,22 @@ namespace ASTool.ISMHelper
                 array[i] = buffer[offset + 8 + i];
             return array;
         }
+        static public bool WriteMp4BoxInt64(byte[] buffer, int offset, Int64 value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value >> 56);
+                buffer[offset++] = (byte)(value >> 48);
+                buffer[offset++] = (byte)(value >> 40);
+                buffer[offset++] = (byte)(value >> 32);
+                buffer[offset++] = (byte)(value >> 24);
+                buffer[offset++] = (byte)(value >> 16);
+                buffer[offset++] = (byte)(value >> 8);
+                buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
         static public bool WriteMp4BoxInt32(byte[] buffer, int offset, Int32 value)
         {
             if (buffer != null)
@@ -85,6 +164,71 @@ namespace ASTool.ISMHelper
                 buffer[offset++] = (byte)(value >> 8);
                 buffer[offset++] = (byte)(value >> 0);
                 return true;
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxInt16(byte[] buffer, int offset, Int16 value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value >> 8);
+                buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
+        static public Int64 GetMp4BoxTime(DateTime time)
+        {
+            DateTime Begin = new DateTime(1904, 1, 1, 0, 0, 0);
+            TimeSpan t = time - Begin;
+            Int64 Total = (Int64) t.TotalSeconds;
+            return Total;
+        }
+
+        static public bool WriteMp4BoxString(byte[] buffer, int offset, string Message)
+        {
+            if ((buffer != null)&&(!string.IsNullOrEmpty(Message)))
+            {
+                char[] array = Message.ToCharArray();
+                if(offset + array.Length < buffer.Length)
+                {
+                    for(int i = 0; i < array.Length; i++)
+                    {
+                        buffer[offset+i] = (byte)array[i];
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxString(byte[] buffer, int offset, string Message, int MessageLength)
+        {
+            if ((buffer != null) && (!string.IsNullOrEmpty(Message)))
+            {
+                char[] array = Message.ToCharArray();
+                if ((array.Length >= MessageLength) && (offset + MessageLength <= buffer.Length))
+                {
+                    for (int i = 0; i < MessageLength; i++)
+                    {
+                        buffer[offset + i] = (byte)array[i];
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxData(byte[] buffer, int offset, byte[] data)
+        {
+            if ((buffer != null) && (data != null))
+            {
+                if (offset + data.Length <= buffer.Length)
+                {
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        buffer[offset + i] = (byte)data[i];
+                    }
+                    return true;
+                }
             }
             return false;
         }
