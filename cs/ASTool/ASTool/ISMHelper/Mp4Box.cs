@@ -167,12 +167,32 @@ namespace ASTool.ISMHelper
             }
             return false;
         }
+        static public bool WriteMp4BoxInt24(byte[] buffer, int offset, Int32 value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value >> 16);
+                buffer[offset++] = (byte)(value >> 8);
+                buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
         static public bool WriteMp4BoxInt16(byte[] buffer, int offset, Int16 value)
         {
             if (buffer != null)
             {
                 buffer[offset++] = (byte)(value >> 8);
                 buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
+        static public bool WriteMp4BoxByte(byte[] buffer, int offset, byte value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value);
                 return true;
             }
             return false;
@@ -190,7 +210,7 @@ namespace ASTool.ISMHelper
             if ((buffer != null)&&(!string.IsNullOrEmpty(Message)))
             {
                 char[] array = Message.ToCharArray();
-                if(offset + array.Length < buffer.Length)
+                if(offset + array.Length <= buffer.Length)
                 {
                     for(int i = 0; i < array.Length; i++)
                     {

@@ -8,7 +8,7 @@ namespace ASTool.ISMHelper
     {
         static public Mp4BoxMVHD CreateMVHDBox(DateTime CreationTime, DateTime ModificationTime, Int32 TimeScale, Int64 duration, Int32 NextTrackID)
         {
-            Int32 version = 0x01000000;
+            byte version = 0x01;
             Mp4BoxMVHD box = new Mp4BoxMVHD();
             if (box != null)
             {
@@ -17,7 +17,7 @@ namespace ASTool.ISMHelper
                 byte[] Buffer = new byte[box.Length - 8 ];
                 if (Buffer != null)
                 {
-                    WriteMp4BoxInt32(Buffer, 0, version);
+                    WriteMp4BoxByte(Buffer, 0, version);
                     WriteMp4BoxInt64(Buffer, 4, GetMp4BoxTime(CreationTime));
                     WriteMp4BoxInt64(Buffer, 12, GetMp4BoxTime(ModificationTime));
 
