@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using ASTool.CacheHelper;
 using ASTool.ISMHelper;
 namespace ASTool
@@ -126,11 +127,54 @@ namespace ASTool
                 }
             }
         }
+        public static bool InsertFTYPMOOV(string path)
+        {
+            bool result = false;
+            try
+            {
+                FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+                if (fs != null)
+                {
+
+                    FileStream fso = new FileStream(path + ".isma", FileMode.Create, FileAccess.ReadWrite);
+                    if (fso != null)
+                    {
+                        byte[] data = GetFTYPBoxData();
+                        fso.Write(data, 0, data.Length);
+                        data = new byte[65535];
+                        long offset = 0;
+                        while (offset < fs.Length)
+                        {
+                            int Len = fs.Read(data, 0, data.Length);
+                            if (Len == 0)
+                                break;
+                            fso.Write(data, 0, Len);
+                            offset += Len;
+                        }
+                        if (offset == fs.Length)
+                            result = true;
+                        fso.Close();
+
+                    }
+                    fs.Close();
+                }
+            }
+            catch(Exception ex)
+            {
+                result = false;
+            }
+            
+            return result;
+        }
+
+
+
         static bool Parse(Options opt)
         {
             bool result = false;
             Console.WriteLine("Parsing file: " + opt.InputUri);
-            //Console.Write(Mp4Box.ParseFile(opt.InputUri));
+
+            Console.Write(Mp4Box.ParseFile(opt.InputUri));
             //Console.WriteLine("Dump FTYP: ");
             //byte[] data = GetFTYPBoxData();
             //if(data!=null)
@@ -200,27 +244,57 @@ namespace ASTool
             //    }
             //}
 
-            string url = string.Empty;
-            Mp4BoxURL box = Mp4BoxURL.CreateURLBox(url);
+            //string url = string.Empty;
+            //Mp4BoxURL box = Mp4BoxURL.CreateURLBox(url);
+            //if (box != null)
+            //{
+            //    List<Mp4Box> l = new List<Mp4Box>();
+            //    if (l != null)
+            //    {
+            //        l.Add(box);
+            //        Mp4BoxDREF boxDREF = Mp4BoxDREF.CreateDREFBox((Int32)l.Count, l);
+            //        if (boxDREF != null)
+            //        {
+            //            List<Mp4Box> ldref = new List<Mp4Box>();
+            //            if (ldref != null)
+            //            {
+            //                ldref.Add(boxDREF);
+            //                byte[] data = GetDINFBoxData(ldref);
+            //                if (data != null)
+            //                    DumpHex(data);
+            //            }
+            //        }
+            //    }
+            //}
+
+            // InsertFTYPMOOV(opt.InputUri);
+            //Mp4BoxESDS box = Mp4BoxESDS.CreateESDSBox(1024, 64000, 44100, 2);
+            //if(box!=null)
+            //{
+            //    byte[] data = box.GetBoxBytes();
+            //    if (data != null)
+            //                  DumpHex(data);
+            //}
+            Int16 RefIndex = 1;
+            Int16 ChannelCount = 2;
+            Int16 SampleSize = 16;
+            Int32 SampleRate = 44100;
+            Int32 Bitrate = 64000;
+            Int32 FrameLength = 1024;
+
+           Mp4BoxESDS box = Mp4BoxESDS.CreateESDSBox(FrameLength, Bitrate, SampleRate, ChannelCount);
             if (box != null)
             {
-                List<Mp4Box> l = new List<Mp4Box>();
-                if (l != null)
+                List<Mp4Box> list = new List<Mp4Box>();
+                if(list!=null)
                 {
-                    l.Add(box);
-                    Mp4BoxDREF boxDREF = Mp4BoxDREF.CreateDREFBox((Int32)l.Count, l);
-                    if (boxDREF != null)
-                    {
-                        List<Mp4Box> ldref = new List<Mp4Box>();
-                        if (ldref != null)
-                        {
-                            ldref.Add(boxDREF);
-                            byte[] data = GetDINFBoxData(ldref);
-                            if (data != null)
-                                DumpHex(data);
-                        }
-                    }
+                    list.Add(box);
+                    Mp4BoxMP4A boxend = Mp4BoxMP4A.CreateMP4ABox(RefIndex, ChannelCount, SampleSize, SampleRate, list);
+                    byte[] data = boxend.GetBoxBytes();
+                    if (data != null)
+                        DumpHex(data);
                 }
+
             }
             return result;
         }
