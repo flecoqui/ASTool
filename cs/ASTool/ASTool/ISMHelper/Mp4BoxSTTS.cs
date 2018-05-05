@@ -4,17 +4,17 @@ using System.Text;
 using System.IO;
 namespace ASTool.ISMHelper
 {
-    class Mp4BoxCTTS : Mp4Box
+    class Mp4BoxSTTS : Mp4Box
     {
-        static public Mp4BoxCTTS CreateCTTSBox(Int32 count)
+        static public Mp4BoxSTTS CreateSTTSBox(Int32 count)
         {
            
-            Mp4BoxCTTS box = new Mp4BoxCTTS();
+            Mp4BoxSTTS box = new Mp4BoxSTTS();
             if ((box != null)&&(count == 0))
             {
                 
                 box.Length = 8 + 4 + 4 ;
-                box.Type = "ctts";
+                box.Type = "stts";
                 byte[] Buffer = new byte[box.Length - 8 ];
                 if (Buffer != null)
                 {
