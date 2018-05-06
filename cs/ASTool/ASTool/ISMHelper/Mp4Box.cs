@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 namespace ASTool.ISMHelper
 {
-    class Mp4Box
+    public class Mp4Box
     {
         protected Int32 Length;
         protected string Type;

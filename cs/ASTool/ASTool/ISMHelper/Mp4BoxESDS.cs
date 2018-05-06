@@ -50,7 +50,7 @@ namespace ASTool.ISMHelper
 
             byte[] decConfigDescr = new byte[2 + decConfigDescr_top[1]];
 
-            decConfigDescr.CopyTo(decConfigDescr, 0);
+            decConfigDescr_top.CopyTo(decConfigDescr, 0);
             //System.arraycopy(decConfigDescr_top, 0, decConfigDescr, 0, decConfigDescr_top.length);
 
             offset = decConfigDescr_top.Length;

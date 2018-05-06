@@ -4,12 +4,12 @@ using System.Text;
 using System.IO;
 namespace ASTool.ISMHelper
 {
-    public class Mp4BoxMOOV : Mp4Box
+    class Mp4BoxMVEX : Mp4Box
     {
-        static public Mp4BoxMOOV CreateMOOVBox(List<Mp4Box> listChild)
+        static public Mp4BoxMVEX CreateMVEXBox(List<Mp4Box> listChild)
         {
            
-            Mp4BoxMOOV box = new Mp4BoxMOOV();
+            Mp4BoxMVEX box = new Mp4BoxMVEX();
             if (box != null)
             {
                 int ChildLen = 0;
@@ -19,7 +19,7 @@ namespace ASTool.ISMHelper
                         ChildLen += c.GetBoxLength();
                 }
                 box.Length = 8 + ChildLen ;
-                box.Type = "moov";
+                box.Type = "mvex";
                 byte[] Buffer = new byte[box.Length - 8 ];
                 if (Buffer != null)
                 {

@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 namespace ASTool.ISMHelper
 {
-    class Mp4BoxFTYP : Mp4Box
+    public class Mp4BoxFTYP : Mp4Box
     {
         static public Mp4BoxFTYP CreateFTYPBox(string major_brand, Int32 minor_version, List<string> compatible_brands)
         {
