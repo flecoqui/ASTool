@@ -180,7 +180,7 @@ namespace ASTool
             DateTime CreationTime = DateTime.Now;
             DateTime UpdateTime = DateTime.Now;
             Int32 Flags = 7;
-            Mp4BoxESDS boxesds = Mp4BoxESDS.CreateESDSBox(MaxFrameSize, Bitrate, SampleRate, Channels);
+            Mp4BoxESDS boxesds = Mp4BoxESDS.CreateESDSBox(MaxFrameSize, Bitrate, SampleRate, Channels, string.Empty);
             if (boxesds != null)
             {
                 List<Mp4Box> list = new List<Mp4Box>();

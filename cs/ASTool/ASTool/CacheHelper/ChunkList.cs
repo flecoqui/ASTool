@@ -87,6 +87,13 @@ namespace ASTool.CacheHelper
     [DataContract(Name = "TextChunkListConfiguration")]
     class TextChunkListConfiguration : ChunkListConfiguration
     {
+        public override byte[] GetMOOVData()
+        {
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateTextMOOVBox((Int16)TrackID, TimeScale,Duration,Language);
+            if (box != null)
+                return box.GetBoxBytes();
+            return null;
+        }
     }
     [DataContract(Name = "ChunkList")]
     class ChunkList : IDisposable

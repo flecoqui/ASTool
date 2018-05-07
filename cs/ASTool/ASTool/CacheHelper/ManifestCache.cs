@@ -929,7 +929,8 @@ namespace ASTool.CacheHelper
                                     configuration.Channels = (Int16)currentChannels;
                                     configuration.SamplingRate = (Int16) currentSamplingRate;
                                     configuration.CodecPrivateData = currentCodecPrivateData;
-                                    configuration.MaxFramesize = 1024;                                    
+                                    // Evaluation of the buffersize for audio decoding
+                                    configuration.MaxFramesize = (int) ((currentBitrate*16)/(10*currentBitsPerSample*2));                                    
                                     AddChunkList(audiostream, configuration);
                                 }
                             }
