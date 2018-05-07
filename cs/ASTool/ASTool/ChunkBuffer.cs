@@ -14,10 +14,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
-namespace ASTool.CacheHelper
+namespace ASTool
 {
-    [DataContract(Name = "ChunkCache")]
-     class ChunkCache : IDisposable
+    [DataContract(Name = "ChunkBuffer")]
+    public class ChunkBuffer : IDisposable
     {
 
 
@@ -49,9 +49,9 @@ namespace ASTool.CacheHelper
             return ((chunkBuffer != null) && (chunkBuffer.Length>0)) ? true : false;
         }
 
-        public ChunkCache() { }
+        public ChunkBuffer() { }
 
-        public ChunkCache(UInt64 time, ulong duration)
+        public ChunkBuffer(UInt64 time, ulong duration)
         {
             Time = time;
             Duration = duration;

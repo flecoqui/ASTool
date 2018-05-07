@@ -14,13 +14,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
-namespace ASTool.CacheHelper
+namespace ASTool
 {
 
 
 
     [DataContract(Name = "ChunkListConfiguration")]
-    class ChunkListConfiguration 
+    public class ChunkListConfiguration 
     {
         [DataMember]
         public int TrackID { get; set; }
@@ -36,6 +36,8 @@ namespace ASTool.CacheHelper
         public string Language { get; set; }
         [DataMember]
         public string TrackName { get; set; }
+        [DataMember]
+        public string Source { get; set; }
         public byte[] GetFTYPData()
         {
             ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateFTYPBox();
@@ -47,9 +49,13 @@ namespace ASTool.CacheHelper
         {
             return null;
         }
+        public virtual string GetSourceName()
+        {
+            return Source + "_" + Bitrate.ToString() + "_" + TrackName.ToString() + ".isma";
+        }
     }
     [DataContract(Name = "VideoChunkListConfiguration")]
-    class VideoChunkListConfiguration : ChunkListConfiguration
+    public class VideoChunkListConfiguration : ChunkListConfiguration
     {
         [DataMember]
         public int Width { get; set; }
@@ -66,7 +72,7 @@ namespace ASTool.CacheHelper
         }
     }
     [DataContract(Name = "AudioChunkListConfiguration")]
-    class AudioChunkListConfiguration : ChunkListConfiguration
+    public class AudioChunkListConfiguration : ChunkListConfiguration
     {
         [DataMember]
         public int BitsPerSample { get; set; }
@@ -94,7 +100,7 @@ namespace ASTool.CacheHelper
         }
     }
     [DataContract(Name = "TextChunkListConfiguration")]
-    class TextChunkListConfiguration : ChunkListConfiguration
+    public class TextChunkListConfiguration : ChunkListConfiguration
     {
         public override byte[] GetMOOVData()
         {
@@ -105,7 +111,7 @@ namespace ASTool.CacheHelper
         }
     }
     [DataContract(Name = "ChunkList")]
-    class ChunkList : IDisposable
+    public class ChunkList : IDisposable
     {
 
         /// <summary>
@@ -148,7 +154,7 @@ namespace ASTool.CacheHelper
         /// List of the chunks to download  
         /// </summary>
         [DataMember]
-        public List<ChunkCache> ChunksList { get; set; }
+        public List<ChunkBuffer> ChunksList { get; set; }
 
 
         /// <summary>
@@ -236,7 +242,7 @@ namespace ASTool.CacheHelper
         }
 
         public ChunkList() {
-            ChunksList = new List<ChunkCache>();
+            ChunksList = new List<ChunkBuffer>();
         }
 
 

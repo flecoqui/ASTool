@@ -149,6 +149,17 @@ namespace ASTool.ISMHelper
                 array[i] = buffer[offset + 8 + i];
             return array;
         }
+        static public byte[] ReadMp4BoxBytes(byte[] buffer, int offset, int Length)
+        {
+            if ((offset + Length) > buffer.Length)
+            {
+                return null;
+            }
+            byte[] array = new byte[Length];
+            for (int i = 0; i < Length; i++)
+                array[i] = buffer[offset  + i];
+            return array;
+        }
         static public bool WriteMp4BoxInt64(byte[] buffer, int offset, Int64 value)
         {
             if (buffer != null)

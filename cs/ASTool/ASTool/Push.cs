@@ -35,7 +35,7 @@ namespace ASTool
                             LiveManifest = ism.GetAudioManifest(ism.Tracks[i].TrackId, ism.Tracks[i].TrackName, ism.Tracks[i].Bitrate, ism.Tracks[i].Source, ismc);
                         if (ism.Tracks[i].MediaType == IsmTrackType.video)
                             LiveManifest = ism.GetVideoManifest(ism.Tracks[i].TrackId, ism.Tracks[i].TrackName, ism.Tracks[i].Bitrate, ism.Tracks[i].Source, ismc);
-                        Chunk[] ChunkArray = ism.GetChunkList(ism.Tracks[i].TrackName, ismc);
+                        ISMHelper.Chunk[] ChunkArray = ism.GetChunkList(ism.Tracks[i].TrackName, ismc);
                         encoder = new IsmPushEncoder(
                             server,
                             ism,

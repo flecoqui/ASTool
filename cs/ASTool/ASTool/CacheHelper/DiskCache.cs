@@ -18,7 +18,7 @@ using System.IO.IsolatedStorage;
 
 namespace ASTool.CacheHelper
 {
-     class DiskCache
+     class DiskCache: ManifestOutput
     {
         public DiskCache()
         {
@@ -98,9 +98,9 @@ namespace ASTool.CacheHelper
         /// <summary>
         /// Return a list of all urls in local storage
         /// </summary>
-        public async Task<List<ManifestCache>> RestoreAllAssets(string pattern)
+        public async Task<List<ManifestManager>> RestoreAllAssets(string pattern)
         {
-            List<ManifestCache> downloads = new List<ManifestCache>();
+            List<ManifestManager> downloads = new List<ManifestManager>();
             List<string> dirs = GetDirectoryNames(root);
             if (dirs != null)
             {
@@ -112,7 +112,7 @@ namespace ASTool.CacheHelper
                         string file = Path.Combine(path, manifestFileName);
                         if (!string.IsNullOrEmpty(file))
                         {
-                            ManifestCache de = await GetObjectByType(file, typeof(ManifestCache)) as ManifestCache;
+                            ManifestManager de = await GetObjectByType(file, typeof(ManifestManager)) as ManifestManager;
                             if (de != null)
                             {
                                 // Sanity check are the manifest file and chunk files consistent
@@ -135,7 +135,7 @@ namespace ASTool.CacheHelper
         /// <summary>
         /// Return a ManifestCache based on its Uri
         /// </summary>
-        public async Task<ManifestCache> RestoreAsset(Uri uri)
+        public async Task<ManifestManager> RestoreAsset(Uri uri)
         {
             List<string> dirs =  GetDirectoryNames(root);
             if (dirs != null)
@@ -149,7 +149,7 @@ namespace ASTool.CacheHelper
                         if (!string.IsNullOrEmpty(file))
                         {
 
-                            ManifestCache de = await GetObjectByType(file, typeof(ManifestCache)) as ManifestCache;
+                            ManifestManager de = await GetObjectByType(file, typeof(ManifestManager)) as ManifestManager;
                             if (de != null)
                             {
                                 if (de.ManifestUri == uri)
@@ -167,7 +167,15 @@ namespace ASTool.CacheHelper
         /// SaveManifest
         /// Save manifest on disk 
         /// </summary>
-        public async Task<bool> SaveManifest(ManifestCache cache)
+        public async Task<bool> ProcessManifest(ManifestManager cache)
+        {
+            return await SaveManifest(cache);
+        }
+        /// <summary>
+        /// SaveManifest
+        /// Save manifest on disk 
+        /// </summary>
+        public async Task<bool> SaveManifest(ManifestManager cache)
         {
             bool bResult = false;
             if (!DirectoryExists(Path.Combine(root, cache.StoragePath)))
@@ -182,7 +190,7 @@ namespace ASTool.CacheHelper
                     {
                         if (ms != null)
                         {
-                            System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(typeof(ManifestCache));
+                            System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(typeof(ManifestManager));
                             ser.WriteObject(ms, cache);
                             bResult = Save(Path.Combine(Path.Combine(root, cache.StoragePath), manifestFileName), ms.ToArray());
                         }
@@ -201,7 +209,7 @@ namespace ASTool.CacheHelper
         /// SaveAudioChunks
         /// Save audio chunks on disk 
         /// </summary>
-        public async Task<bool> SaveAudioChunks(ManifestCache cache)
+        public async Task<bool> SaveAudioChunks(ManifestManager cache)
         {
             bool bResult = false;
             // Saving Audio and Video chunks 
@@ -287,7 +295,7 @@ namespace ASTool.CacheHelper
         /// SaveTextChunks
         /// Save text chunks on disk 
         /// </summary>
-        public async Task<bool> SaveTextChunks(ManifestCache cache)
+        public async Task<bool> SaveTextChunks(ManifestManager cache)
         {
             bool bResult = false;
             // Saving Audio and Video chunks 
@@ -374,7 +382,7 @@ namespace ASTool.CacheHelper
         /// SaveVideoChunks
         /// Save video chunks on disk 
         /// </summary>
-        public async Task<bool> SaveVideoChunks(ManifestCache cache)
+        public async Task<bool> SaveVideoChunks(ManifestManager cache)
         {
             bool bResult = false;
             string VideoIndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), videoIndexFileName);
@@ -462,7 +470,7 @@ namespace ASTool.CacheHelper
         /// RemoveAudioChunks
         /// Remove audio chunks from disk 
         /// </summary>
-        public async Task<bool> RemoveAudioChunks(ManifestCache cache)
+        public async Task<bool> RemoveAudioChunks(ManifestManager cache)
         {
             bool bResult = false;
             string pathContent = Path.Combine(Path.Combine(root, cache.StoragePath), audioContentFileName);
@@ -491,7 +499,7 @@ namespace ASTool.CacheHelper
         /// RemoveTextChunks
         /// Remove text chunks from disk 
         /// </summary>
-        public async Task<bool> RemoveTextChunks(ManifestCache cache)
+        public async Task<bool> RemoveTextChunks(ManifestManager cache)
         {
             bool bResult = false;
             string pathContent = Path.Combine(Path.Combine(root, cache.StoragePath), textContentFileName);
@@ -520,7 +528,7 @@ namespace ASTool.CacheHelper
         /// RemoveVideoChunks
         /// Remove video chunks from disk 
         /// </summary>
-        public async Task<bool> RemoveVideoChunks(ManifestCache cache)
+        public async Task<bool> RemoveVideoChunks(ManifestManager cache)
         {
             bool bResult = false;
             string pathContent = Path.Combine(Path.Combine(root, cache.StoragePath), videoContentFileName);
@@ -549,7 +557,7 @@ namespace ASTool.CacheHelper
         /// RemoveManifest
         /// Remove manifest from disk 
         /// </summary>
-        public bool RemoveManifest(ManifestCache cache)
+        public bool RemoveManifest(ManifestManager cache)
         {
             bool bResult = false;
             string path = Path.Combine(Path.Combine(root, cache.StoragePath), manifestFileName);
@@ -579,7 +587,7 @@ namespace ASTool.CacheHelper
                         string file = Path.Combine(path, manifestFileName);
                         if (!string.IsNullOrEmpty(file))
                         {
-                            ManifestCache de = await GetObjectByType(file, typeof(ManifestCache)) as ManifestCache;
+                            ManifestManager de = await GetObjectByType(file, typeof(ManifestManager)) as ManifestManager;
                             if (de != null)
                             {
                                 Val += await GetAssetSize(de);
@@ -595,7 +603,7 @@ namespace ASTool.CacheHelper
         /// GetAssetSize
         /// Return the current asset size on disk: audio chunks, video chunks and manifest 
         /// </summary>
-        public async Task<ulong> GetAssetSize(ManifestCache cache)
+        public async Task<ulong> GetAssetSize(ManifestManager cache)
         {
             ulong val = 0;
             string path = string.Empty;
@@ -628,7 +636,7 @@ namespace ASTool.CacheHelper
         /// RemoveAsset
         /// Remove the asset on disk: audio chunks, video chunks and manifest 
         /// </summary>
-        public async Task<bool> RemoveAsset(ManifestCache cache)
+        public async Task<bool> RemoveAsset(ManifestManager cache)
         {
 
             bool bResult = false;
@@ -650,7 +658,7 @@ namespace ASTool.CacheHelper
         /// SaveAsset
         /// Save the asset on disk: audio chunks, video chunks and manifest 
         /// </summary>
-        public async Task<bool> SaveAsset(ManifestCache cache)
+        public async Task<bool> ProcessChunks(ManifestManager cache)
         {
             bool bResult = true;
             if (!(await SaveAudioChunks(cache)))

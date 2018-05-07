@@ -18,7 +18,7 @@ using System.IO;
 using System.Xml;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization;
-namespace ASTool.CacheHelper
+namespace ASTool
 {
     public enum AssetStatus
     {
@@ -68,8 +68,8 @@ namespace ASTool.CacheHelper
 
         public string CodecPrivateData { get; set; }
     }
-    [DataContract(Name ="ManifestCache")]
-     class ManifestCache : IDisposable
+    [DataContract(Name ="ManifestManager")]
+    public  class ManifestManager : IDisposable
     {
 
         public const ulong TimeUnit = 10000000;
@@ -377,7 +377,7 @@ namespace ASTool.CacheHelper
         private List<VideoTrack> ListVideoTracks;
         private List<TextTrack> ListTextTracks;
         private AssetStatus mStatus;
-        private DiskCache DiskCache = null;
+        private ManifestOutput OutputManager = null;
         private System.Threading.Tasks.Task downloadTask;
         private System.Threading.CancellationTokenSource downloadTaskCancellationtoken;
         private bool downloadTaskRunning = false;
@@ -420,18 +420,18 @@ namespace ASTool.CacheHelper
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestCache() {
+        public ManifestManager() {
             Initialize();
         }
         /// <summary>
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestCache(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string audioTrackName, string textTrackName, ulong maxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestManager(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string audioTrackName, string textTrackName, ulong maxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             Initialize();
             ManifestUri = manifestUri;
-            StoragePath = ComputeHash(ManifestUri.AbsoluteUri.ToLower());
+            StoragePath = ComputeManifest(ManifestUri.AbsoluteUri.ToLower());
             DownloadToGo = true;
             MinBitrate = minBitrate;
             MaxBitrate = maxBitrate;
@@ -446,11 +446,11 @@ namespace ASTool.CacheHelper
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestCache(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestManager(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             Initialize();
             ManifestUri = manifestUri;
-            StoragePath = ComputeHash(ManifestUri.AbsoluteUri.ToLower());
+            StoragePath = ComputeManifest(ManifestUri.AbsoluteUri.ToLower());
             DownloadToGo = true;
             MinBitrate = 0;
             MaxBitrate = 0;
@@ -750,7 +750,7 @@ namespace ASTool.CacheHelper
                                     if (chunk.Time != null)
                                         time = (UInt64)chunk.Time;
 
-                                    ChunkCache cc = new ChunkCache(time, duration);
+                                    ChunkBuffer cc = new ChunkBuffer(time, duration);
                                     time += (ulong)duration;
                                     if (cc != null)
                                     {
@@ -878,10 +878,11 @@ namespace ASTool.CacheHelper
                                         configuration.Language = Lang;
                                         configuration.TrackName = TrackName;
                                         configuration.TrackID = -1;
-                                        configuration.FourCC = FourCC;
-                                        configuration.Width = (Int16)currentWidth;
-                                        configuration.Height = (Int16)currentHeight;
+                                        configuration.FourCC = currentFourCC;
+                                        configuration.Width = (int)currentWidth;
+                                        configuration.Height = (int)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
+                                        configuration.Source = this.StoragePath;
                                         AddChunkList(videostream, configuration);
                                     }
                                 }
@@ -917,6 +918,10 @@ namespace ASTool.CacheHelper
                                         currentFourCC = string.Empty;
                                     if (!track.TryGetAttributeValueAsString("CodecPrivateData", out currentCodecPrivateData))
                                         currentCodecPrivateData = string.Empty;
+                                    string currentAudioTag = string.Empty;
+                                    track.TryGetAttributeValueAsString("AudioTag", out currentAudioTag);
+                                    ulong currentPacketSize = 0;
+                                    track.TryGetAttributeValueAsUlong("PacketSize", out currentPacketSize);
 
                                     ListAudioTracks.Add(new AudioTrack
                                     {
@@ -942,15 +947,17 @@ namespace ASTool.CacheHelper
                                         configuration.Language = Lang;
                                         configuration.TrackName = TrackName;
                                         configuration.TrackID = -1;
-                                        configuration.FourCC = FourCC;
-                                        configuration.BitsPerSample = (Int16)currentBitsPerSample;
-                                        configuration.Channels = (Int16)currentChannels;
-                                        configuration.SamplingRate = (Int16)currentSamplingRate;
+                                        configuration.FourCC = currentFourCC;
+                                        configuration.BitsPerSample = (int)currentBitsPerSample;
+                                        configuration.Channels = (int)currentChannels;
+                                        configuration.SamplingRate = (int) currentSamplingRate;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
-                                        configuration.AudioTag = AudioTag;
-                                        configuration.PacketSize = (int) PacketSize;
+                                        configuration.AudioTag = currentAudioTag;
+                                        configuration.PacketSize = (int) currentPacketSize;
                                         // Evaluation of the buffersize for audio decoding
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
+                                        configuration.Source = this.StoragePath;
+
                                         AddChunkList(audiostream, configuration);
                                     }
                                 }
@@ -989,6 +996,8 @@ namespace ASTool.CacheHelper
                                         configuration.TrackName = TrackName;
                                         configuration.TrackID = -1;
                                         configuration.FourCC = FourCC;
+                                        configuration.Source = this.StoragePath;
+
                                         AddChunkList(textstream, configuration);
                                     }
                                 }
@@ -1040,11 +1049,11 @@ namespace ASTool.CacheHelper
         /// </summary>
         /// <param name="cache">DiskCache</param>
         /// <returns>true if successful</returns>
-        public bool SetDiskCache(DiskCache cache)
+        public bool SetManifestOutput(ManifestOutput cache)
         {
             if (cache != null)
             {
-                DiskCache = cache;
+                OutputManager = cache;
                 return true;
             }
             return false;
@@ -1066,10 +1075,10 @@ namespace ASTool.CacheHelper
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestCache CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public static ManifestManager CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestCache mc = new ManifestCache(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestManager mc = new ManifestManager(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize, maxError, downloadMethod);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1091,10 +1100,10 @@ namespace ASTool.CacheHelper
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestCache CreateManifestCache(Uri manifestUri, bool downloadToGo, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public static ManifestManager CreateManifestCache(Uri manifestUri, bool downloadToGo, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestCache mc = new ManifestCache(manifestUri,  maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestManager mc = new ManifestManager(manifestUri,  maxMemoryBufferSize, maxError, downloadMethod);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1129,6 +1138,34 @@ namespace ASTool.CacheHelper
             return string.Concat(hex);
         }
         /// <summary>
+        /// ComputeManifest
+        /// Convert the manifest Uri into a unique string which will be the folder name where the asset will be stored.
+        /// </summary>
+        /// <param name="message">string to hash</param>
+        /// <returns>string</returns>
+        private string ComputeManifest(string message)
+        {
+            string result = "source";
+            string[] list = message.Split("/");
+            if((list!=null)&&(list.Length>1))
+            {
+                if(list[list.Length-1].ToLower()!="manifest")
+                {
+                    result = list[list.Length - 1];
+                }
+                else
+                {
+                    result = list[list.Length - 2];
+                    int pos = result.IndexOf(".");
+                    if(pos>0)
+                        result = result.Substring(0, pos);
+                }
+                if (string.IsNullOrEmpty(result))
+                    result = "source";
+            }
+            return result;
+        }
+        /// <summary>
         /// IsDownlaodTaskRunning
         /// return true if the download thread is still running.
         /// </summary>
@@ -1145,7 +1182,7 @@ namespace ASTool.CacheHelper
         public ulong GetExpectedSize()
         {
             //ulong expectedSize = ((this.AudioBitrate + this.VideoBitrate) * this.TimescaleToHNS(this.Duration)) / (8 * ManifestCache.TimeUnit);
-            ulong duration = this.TimescaleToHNS(this.Duration) / (ManifestCache.TimeUnit);
+            ulong duration = this.TimescaleToHNS(this.Duration) / (ManifestManager.TimeUnit);
             ulong expectedSize = ((this.AudioBitrate + this.VideoBitrate) * duration) / 8 ;
             return expectedSize;
         }
@@ -1508,8 +1545,8 @@ namespace ASTool.CacheHelper
                     System.Diagnostics.Debug.WriteLine("Download bitrate for the current session: " + bitrate.ToString() + " bps");
                     System.Diagnostics.Debug.WriteLine("Download Thread Saving Asset");
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
-                    if (DiskCache != null)
-                        await DiskCache.SaveAsset(this);
+                    if (OutputManager != null)
+                        await OutputManager.ProcessChunks(this);
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
                     ManifestStatus = AssetStatus.ChunksDownloaded;
                     downloadTaskRunning = false;
@@ -1526,8 +1563,8 @@ namespace ASTool.CacheHelper
                     System.Diagnostics.Debug.WriteLine("Download bitrate for the current session: " + bitrate.ToString() + " bps");
                     System.Diagnostics.Debug.WriteLine("Download Thread Saving Asset");
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
-                    if (DiskCache != null)
-                        await DiskCache.SaveAsset(this);
+                    if (OutputManager != null)
+                        await OutputManager.ProcessChunks(this);
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
                     ManifestStatus = AssetStatus.ChunksDownloaded;
                     downloadTaskRunning = false;
@@ -1537,8 +1574,8 @@ namespace ASTool.CacheHelper
                 if (s > MaxMemoryBufferSize)
                 {
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
-                    if (DiskCache != null)
-                      await DiskCache.SaveAsset(this);
+                    if (OutputManager != null)
+                        await OutputManager.ProcessChunks(this);
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
 
                 }
@@ -1581,8 +1618,8 @@ namespace ASTool.CacheHelper
             TextDownloadedChunks = 0;
             TextSavedBytes = 0;
 
-            if (DiskCache!=null)
-                await DiskCache.SaveManifest(this);
+            if (OutputManager!=null)
+                await OutputManager.ProcessManifest(this);
             return true;
         }
         /// <summary>
@@ -1696,7 +1733,7 @@ namespace ASTool.CacheHelper
         /// <param name="index"></param>
         /// <param name="time"></param>
         /// <returns>Return a ChunkCache </returns>
-        public ChunkCache GetTextChunkCache(int Index, ulong time)
+        public ChunkBuffer GetTextChunkCache(int Index, ulong time)
         {
             if (Index < TextChunkListList.Count)
             {
@@ -1715,7 +1752,7 @@ namespace ASTool.CacheHelper
         /// <param name="index"></param>
         /// <param name="time"></param>
         /// <returns>Return a ChunkCache </returns>
-        public ChunkCache GetAudioChunkCache(int Index, ulong time)
+        public ChunkBuffer GetAudioChunkCache(int Index, ulong time)
         {
             if (Index < AudioChunkListList.Count)
             {
@@ -1734,7 +1771,7 @@ namespace ASTool.CacheHelper
         /// <param name="index"></param>
         /// <param name="time"></param>
         /// <returns>Return a ChunkCache </returns>
-        public ChunkCache GetVideoChunkCache(int Index, ulong time)
+        public ChunkBuffer GetVideoChunkCache(int Index, ulong time)
         {
             if (Index < VideoChunkListList.Count)
             {
