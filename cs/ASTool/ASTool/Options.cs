@@ -31,10 +31,12 @@ namespace ASTool
         }
         private string ErrorMessagePrefix = "ASTool Error: \r\n";
         private string InformationMessage = "ASTool:\r\n" + "Version: {0} \r\n"  + "Syntax:\r\n"+
-            "ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  \r\n" + 
-            "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --duration <duration ms>]\r\n" +
+            "ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  \r\n" +
+            "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
+            "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
-            "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --duration <duration ms>]\r\n" +
+            "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
+            "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
             "ASTool --parse    --input <inputLocalISMFile|inputLocalISMCFile|inputLocalISMV|inputLocalISMA>  [--recursive]\r\n" +
@@ -45,6 +47,8 @@ namespace ASTool
         public int MinBitrate { get; set; }
         public int MaxBitrate { get; set; }
         public ulong Duration { get; set; }
+        public string AudioTrackName { get; set; }
+        public string TextTrackName { get; set; }
         public bool Recursive { get; set; }
         public int Loop { get; set; }
         public int BufferSize { get; set; }
@@ -64,6 +68,8 @@ namespace ASTool
                 options.MaxBitrate = 0;
                 options.MinBitrate = 0;
                 options.Duration = 0;
+                options.AudioTrackName = string.Empty;
+                options.TextTrackName = string.Empty;
                 options.BufferSize = 65536;
                 options.ASToolAction = Action.None;
                 if (args!=null)
@@ -113,7 +119,7 @@ namespace ASTool
                                 else
                                     options.ErrorMessage = "Loop not set";
                                 break;
-                            case "--duration":
+                            case "--maxduration":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                 {
                                     ulong duration = 0;
@@ -148,6 +154,18 @@ namespace ASTool
                                 }
                                 else
                                     options.ErrorMessage = "MaxBitrate not set";
+                                break;
+                            case "--audiotrackname":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.AudioTrackName = args[i++];
+                                else
+                                    options.ErrorMessage = "AudioTrackName not set";
+                                break;
+                            case "--texttrackname":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.TextTrackName = args[i++];
+                                else
+                                    options.ErrorMessage = "TextTrackName not set";
                                 break;
                             case "--buffersize":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))

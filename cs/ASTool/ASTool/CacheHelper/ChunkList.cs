@@ -25,6 +25,8 @@ namespace ASTool.CacheHelper
         [DataMember]
         public int TrackID { get; set; }
         [DataMember]
+        public string FourCC { get; set; }
+        [DataMember]
         public int TimeScale { get; set; }
         [DataMember]
         public long Duration { get; set; }
@@ -32,7 +34,8 @@ namespace ASTool.CacheHelper
         public int Bitrate { get; set; }
         [DataMember]
         public string Language { get; set; }
-
+        [DataMember]
+        public string TrackName { get; set; }
         public byte[] GetFTYPData()
         {
             ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateFTYPBox();
@@ -75,6 +78,12 @@ namespace ASTool.CacheHelper
         public string CodecPrivateData { get; set; }
         [DataMember]
         public int MaxFramesize { get; set; }
+
+        [DataMember]
+        public string AudioTag { get; set; }
+        [DataMember]
+        public int PacketSize { get; set; }
+
 
         public override byte[] GetMOOVData()
         {
@@ -169,7 +178,7 @@ namespace ASTool.CacheHelper
         /// Chunklist Configuration 
         /// Contains information to create moov and ftyp chunks
         /// </summary>
-        [DataMember]
+        
         public ChunkListConfiguration Configuration { get; set; }
 
 
@@ -177,14 +186,14 @@ namespace ASTool.CacheHelper
         /// moovData 
         /// Contains the moov box for this chunk list
         /// </summary>
-        [DataMember]
+        
         public byte[] moovData;
 
         /// <summary>
         /// moovData 
         /// Contains the ftyp box for this chunk list
         /// </summary>
-        [DataMember]
+       
         public byte[] ftypData;
 
 

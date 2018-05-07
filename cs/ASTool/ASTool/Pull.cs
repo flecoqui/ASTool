@@ -12,7 +12,7 @@ namespace ASTool
 
             DiskCache d = new DiskCache();
             d.Initialize(opt.OutputUri);
-            ManifestCache mc = ManifestCache.CreateManifestCache(new Uri(opt.InputUri), true, -1, -1, (ulong)opt.BufferSize, 40);
+            ManifestCache mc = ManifestCache.CreateManifestCache(new Uri(opt.InputUri), (ulong) opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.Duration,(ulong) opt.BufferSize, 20);
             mc.SetDiskCache(d);
             var t = d.RemoveAsset(mc);
             t.Wait();

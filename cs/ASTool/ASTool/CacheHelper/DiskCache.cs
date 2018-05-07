@@ -291,8 +291,8 @@ namespace ASTool.CacheHelper
         {
             bool bResult = false;
             // Saving Audio and Video chunks 
-            string TextIndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioIndexFileName);
-            string TextContentFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioContentFileName);
+            string TextIndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), textIndexFileName);
+            string TextContentFile = Path.Combine(Path.Combine(root, cache.StoragePath), textContentFileName);
             if ((!string.IsNullOrEmpty(TextIndexFile)) &&
                     (!string.IsNullOrEmpty(TextContentFile)))
             {

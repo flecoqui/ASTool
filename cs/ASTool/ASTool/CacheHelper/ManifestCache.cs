@@ -39,36 +39,7 @@ namespace ASTool.CacheHelper
         ErrorStorageLimit,
         ErrorParameters,
     }
-    //public sealed class TextTrack
-    //{
-    //    public int Index { get; set; }
-    //    public int Bitrate { get; set; }
-    //    public string FourCC { get; set; }
-    //    public string Language { get; set; }
-    //}
 
-    //public sealed class AudioTrack
-    //{
-    //    public int Index { get; set; }
-    //    public int Bitrate { get; set; }
-    //    public string FourCC { get; set; }
-    //    public int BitsPerSample { get; set; }
-    //    public int Channels { get; set; }
-    //    public int SamplingRate { get; set; }
-    //    public string CodecPrivateData { get; set; }
-    //    public string Language { get; set; }
-    //}
-    //public sealed class VideoTrack
-    //{
-    //    public int Index { get; set; }
-    //    public int Bitrate { get; set; }
-    //    public string FourCC { get; set; }
-    //    public int MaxHeight { get; set; }
-    //    public int MaxWidth { get; set; }
-
-    //    public string CodecPrivateData { get; set; }
-    //    public string Language { get; set; }
-    //}
     public  class Track
     {
         public int Index { get; set; }
@@ -368,6 +339,27 @@ namespace ASTool.CacheHelper
         public ulong MaxBitrate { get; set; }
 
         /// <summary>
+        /// AudioTrackName
+        /// Name of the Audio track to select
+        /// </summary>
+        [DataMember]
+        public string AudioTrackName  { get; set; }
+
+        /// <summary>
+        /// TextTrackName
+        /// Name of the Text track to select
+        /// </summary>
+        [DataMember]
+        public string TextTrackName { get; set; }
+
+        /// <summary>
+        /// MaxDuration 
+        /// Max duration of the capture in milliseconds.
+        /// </summary>
+        [DataMember]
+        public ulong MaxDuration { get; set; }
+
+        /// <summary>
         /// DownloadMethod 
         /// Downlaod Method for audio and video chunks 
         ///     0 Auto: The cache will create if necessary several threads to download audio and video chunks
@@ -403,6 +395,8 @@ namespace ASTool.CacheHelper
             StoragePath = string.Empty;
             MinBitrate = 0;
             MaxBitrate = 0;
+            AudioTrackName = string.Empty;
+            TextTrackName = string.Empty;
             MaxError = 20;
             DownloadMethod = 1;
             MaxMemoryBufferSize = 256000;
@@ -433,14 +427,17 @@ namespace ASTool.CacheHelper
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestCache(Uri manifestUri, bool downloaddToGo, ulong minBitrate, ulong maxBitrate, int AudioIndex, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestCache(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string audioTrackName, string textTrackName, ulong maxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             Initialize();
             ManifestUri = manifestUri;
             StoragePath = ComputeHash(ManifestUri.AbsoluteUri.ToLower());
-            DownloadToGo = downloaddToGo;
+            DownloadToGo = true;
             MinBitrate = minBitrate;
             MaxBitrate = maxBitrate;
+            AudioTrackName = audioTrackName;
+            TextTrackName = textTrackName;
+            MaxDuration = maxDuration;
             MaxMemoryBufferSize = maxMemoryBufferSize;
             MaxError = maxError;
             DownloadMethod = downloadMethod;
@@ -449,12 +446,12 @@ namespace ASTool.CacheHelper
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestCache(Uri manifestUri, bool downloaddToGo, int VideoIndex, int AudioIndex, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestCache(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             Initialize();
             ManifestUri = manifestUri;
             StoragePath = ComputeHash(ManifestUri.AbsoluteUri.ToLower());
-            DownloadToGo = downloaddToGo;
+            DownloadToGo = true;
             MinBitrate = 0;
             MaxBitrate = 0;
             MaxMemoryBufferSize = maxMemoryBufferSize;
@@ -838,6 +835,10 @@ namespace ASTool.CacheHelper
                             {
                                 string Lang = "und";
                                 stream.TryGetAttributeValueAsString("Language",out Lang);
+                                string TrackName = string.Empty;
+                                stream.TryGetAttributeValueAsString("Name", out TrackName);
+                                string FourCC = string.Empty;
+                                stream.TryGetAttributeValueAsString("FourCC", out FourCC);
 
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
@@ -875,7 +876,9 @@ namespace ASTool.CacheHelper
                                         configuration.Duration = (long) Duration;
                                         configuration.TimeScale = (int) TimeScale;
                                         configuration.Language = Lang;
+                                        configuration.TrackName = TrackName;
                                         configuration.TrackID = -1;
+                                        configuration.FourCC = FourCC;
                                         configuration.Width = (Int16)currentWidth;
                                         configuration.Height = (Int16)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
@@ -887,6 +890,16 @@ namespace ASTool.CacheHelper
                             {
                                 string Lang = "und";
                                 stream.TryGetAttributeValueAsString("Language", out Lang);
+                                string TrackName = string.Empty;
+                                stream.TryGetAttributeValueAsString("Name", out TrackName);
+                                string FourCC = string.Empty;
+                                stream.TryGetAttributeValueAsString("FourCC", out FourCC);
+                                string AudioTag = string.Empty;
+                                stream.TryGetAttributeValueAsString("AudioTag", out AudioTag);
+                                ulong PacketSize = 0;
+                                stream.TryGetAttributeValueAsUlong("PacketSize", out PacketSize);
+
+
 
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
@@ -916,29 +929,40 @@ namespace ASTool.CacheHelper
                                         CodecPrivateData = currentCodecPrivateData,
                                         Language = Lang,
                                     });
-                                    audioselected = track;
-                                    audiostream = stream;
 
-                                    AudioChunkListConfiguration configuration = new AudioChunkListConfiguration();
-                                    configuration.Bitrate = (int)currentBitrate;
-                                    configuration.Duration = (long)Duration;
-                                    configuration.TimeScale = (int)TimeScale;
-                                    configuration.Language = Lang;
-                                    configuration.TrackID = -1;
-                                    configuration.BitsPerSample = (Int16)currentBitsPerSample;
-                                    configuration.Channels = (Int16)currentChannels;
-                                    configuration.SamplingRate = (Int16) currentSamplingRate;
-                                    configuration.CodecPrivateData = currentCodecPrivateData;
-                                    // Evaluation of the buffersize for audio decoding
-                                    configuration.MaxFramesize = (int) ((currentBitrate*16)/(10*currentBitsPerSample*2));                                    
-                                    AddChunkList(audiostream, configuration);
+                                    if ((string.IsNullOrEmpty(AudioTrackName)) || (AudioTrackName == TrackName))
+                                    {
+                                        audioselected = track;
+                                        audiostream = stream;
+
+                                        AudioChunkListConfiguration configuration = new AudioChunkListConfiguration();
+                                        configuration.Bitrate = (int)currentBitrate;
+                                        configuration.Duration = (long)Duration;
+                                        configuration.TimeScale = (int)TimeScale;
+                                        configuration.Language = Lang;
+                                        configuration.TrackName = TrackName;
+                                        configuration.TrackID = -1;
+                                        configuration.FourCC = FourCC;
+                                        configuration.BitsPerSample = (Int16)currentBitsPerSample;
+                                        configuration.Channels = (Int16)currentChannels;
+                                        configuration.SamplingRate = (Int16)currentSamplingRate;
+                                        configuration.CodecPrivateData = currentCodecPrivateData;
+                                        configuration.AudioTag = AudioTag;
+                                        configuration.PacketSize = (int) PacketSize;
+                                        // Evaluation of the buffersize for audio decoding
+                                        configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
+                                        AddChunkList(audiostream, configuration);
+                                    }
                                 }
                             }
                             if (stream.StreamType.ToUpper() == "TEXT")
                             {
                                 string Lang = "und";
                                 stream.TryGetAttributeValueAsString("Language", out Lang);
-
+                                string TrackName = string.Empty;
+                                stream.TryGetAttributeValueAsString("Name", out TrackName);
+                                string FourCC = string.Empty;
+                                stream.TryGetAttributeValueAsString("FourCC", out FourCC);
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
                                     ulong currentBitrate = 0;
@@ -953,15 +977,20 @@ namespace ASTool.CacheHelper
                                         FourCC = currentFourCC,
                                         Language = Lang,
                                     });
-                                    textselected = track;
-                                    textstream = stream;
-                                    TextChunkListConfiguration configuration = new TextChunkListConfiguration();
-                                    configuration.Bitrate = (int)currentBitrate;
-                                    configuration.Duration = (long)Duration;
-                                    configuration.TimeScale = (int)TimeScale;
-                                    configuration.Language = Lang;
-                                    configuration.TrackID = -1;
-                                    AddChunkList(textstream, configuration);
+                                    if ((string.IsNullOrEmpty(TextTrackName)) || (TextTrackName == TrackName))
+                                    {
+                                        textselected = track;
+                                        textstream = stream;
+                                        TextChunkListConfiguration configuration = new TextChunkListConfiguration();
+                                        configuration.Bitrate = (int)currentBitrate;
+                                        configuration.Duration = (long)Duration;
+                                        configuration.TimeScale = (int)TimeScale;
+                                        configuration.Language = Lang;
+                                        configuration.TrackName = TrackName;
+                                        configuration.TrackID = -1;
+                                        configuration.FourCC = FourCC;
+                                        AddChunkList(textstream, configuration);
+                                    }
                                 }
                             }
                         }
@@ -1037,10 +1066,10 @@ namespace ASTool.CacheHelper
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestCache CreateManifestCache(Uri manifestUri, bool downloadToGo, ulong minBitrate, ulong maxBitrate, int audioIndex, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public static ManifestCache CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestCache mc = new ManifestCache(manifestUri, downloadToGo, minBitrate, maxBitrate, audioIndex, maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestCache mc = new ManifestCache(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize, maxError, downloadMethod);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1062,10 +1091,10 @@ namespace ASTool.CacheHelper
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestCache CreateManifestCache(Uri manifestUri, bool downloadToGo, int videoIndex, int audioIndex, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public static ManifestCache CreateManifestCache(Uri manifestUri, bool downloadToGo, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestCache mc = new ManifestCache(manifestUri, downloadToGo, videoIndex, audioIndex, maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestCache mc = new ManifestCache(manifestUri,  maxMemoryBufferSize, maxError, downloadMethod);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1474,6 +1503,24 @@ namespace ASTool.CacheHelper
                 {
                     DateTime time = DateTime.Now;
                     System.Diagnostics.Debug.WriteLine("Download done at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time));
+                    System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");
+                    double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
+                    System.Diagnostics.Debug.WriteLine("Download bitrate for the current session: " + bitrate.ToString() + " bps");
+                    System.Diagnostics.Debug.WriteLine("Download Thread Saving Asset");
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                    if (DiskCache != null)
+                        await DiskCache.SaveAsset(this);
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    ManifestStatus = AssetStatus.ChunksDownloaded;
+                    downloadTaskRunning = false;
+                    break;
+                }
+                DateTime currentTime = DateTime.Now;
+                if ((MaxDuration > 0) &&
+                 ((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration)) 
+                {
+                    DateTime time = DateTime.Now;
+                    System.Diagnostics.Debug.WriteLine("Download stopped at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time) + " at MaxDuration: " + MaxDuration.ToString());
                     System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");
                     double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
                     System.Diagnostics.Debug.WriteLine("Download bitrate for the current session: " + bitrate.ToString() + " bps");
