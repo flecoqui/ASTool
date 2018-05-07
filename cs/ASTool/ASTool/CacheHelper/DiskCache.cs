@@ -224,40 +224,53 @@ namespace ASTool.CacheHelper
                     int AudioTrack = 0;
                     foreach (var cl in cache.AudioChunkListList)
                     {
-
-                        ulong AudioOffset = GetFileSize(AudioContentFile);
-                        ulong InitialAudioOffset = AudioOffset;
-                        for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                        string FilePath = AudioContentFile + "_" + AudioTrack.ToString() + ".isma";
+                        ulong InitialAudioOffset = 0;
+                        ulong AudioOffset = GetFileSize(FilePath);
+                        if (AudioOffset == 0)
                         {
-                            var cc = cl.ChunksList[Index];
-                            if ((cc != null) && (cc.GetLength() > 0))
+                            if (cl.ftypData != null)
                             {
-                                IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
-                                if (ic != null)
+                                Append(FilePath, cl.ftypData);
+                                Append(FilePath, cl.moovData);
+                                AudioOffset = GetFileSize(FilePath);
+                            }
+                        }
+                        else
+                        {
+                            InitialAudioOffset = AudioOffset;
+                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                            {
+                                var cc = cl.ChunksList[Index];
+                                if ((cc != null) && (cc.GetLength() > 0))
                                 {
-                                    ulong res = Append(AudioContentFile + "_" + AudioTrack.ToString(), cc.chunkBuffer);
-                                    if (res == cc.GetLength())
+                                    IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
+                                    if (ic != null)
                                     {
-                                        AudioOffset += res;
-                                        ulong result = Append(AudioIndexFile + "_" + AudioTrack.ToString(), ic.GetByteData());
-                                        if (result == indexSize)
+                                        ulong res = Append(FilePath, cc.chunkBuffer);
+                                        if (res == cc.GetLength())
                                         {
-                                            cache.AudioSavedChunks++;
-                                            cache.AudioSavedBytes += res;
-                                            // Free buffer
-                                            cc.chunkBuffer = null;
-                                            cl.ArchivedBytes += res;
-                                            cl.ArchivedChunks++;
+                                            AudioOffset += res;
+                                            ulong result = Append(AudioIndexFile + "_" + AudioTrack.ToString(), ic.GetByteData());
+                                            if (result == indexSize)
+                                            {
+                                                cache.AudioSavedChunks++;
+                                                cache.AudioSavedBytes += res;
+                                                // Free buffer
+                                                cc.chunkBuffer = null;
+                                                cl.ArchivedBytes += res;
+                                                cl.ArchivedChunks++;
+                                            }
+                                            else
+                                                System.Diagnostics.Debug.WriteLine("Error while archiving audio");
                                         }
                                         else
                                             System.Diagnostics.Debug.WriteLine("Error while archiving audio");
                                     }
-                                    else
-                                        System.Diagnostics.Debug.WriteLine("Error while archiving audio");
                                 }
+                                else
+                                    break;
                             }
-                            else
-                                break;
                         }
                         if (InitialAudioOffset < AudioOffset)
                             bResult = true;
@@ -297,40 +310,53 @@ namespace ASTool.CacheHelper
                     int TextTrack = 0;
                     foreach (var cl in cache.TextChunkListList)
                     {
-
-                        ulong TextOffset = GetFileSize(TextContentFile + "_" + TextTrack.ToString());
-                        ulong InitialTextOffset = TextOffset;
-                        for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                        string FilePath = TextContentFile + "_" + TextTrack.ToString() + ".ismt";
+                        ulong InitialTextOffset = 0;
+                        ulong TextOffset = GetFileSize(FilePath);
+                        if (TextOffset == 0)
                         {
-                            var cc = cl.ChunksList[Index];
-                            if ((cc != null) && (cc.GetLength() > 0))
+                            if (cl.ftypData != null)
+                            { 
+                                Append(FilePath, cl.ftypData);
+                                Append(FilePath, cl.moovData);
+                                TextOffset = GetFileSize(FilePath);
+                            }
+                        }
+                        else
+                        {
+                            InitialTextOffset = TextOffset;
+                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
                             {
-                                IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
-                                if (ic != null)
+                                var cc = cl.ChunksList[Index];
+                                if ((cc != null) && (cc.GetLength() > 0))
                                 {
-                                    ulong res = Append(TextContentFile + "_" + TextTrack.ToString(), cc.chunkBuffer);
-                                    if (res == cc.GetLength())
+                                    IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
+                                    if (ic != null)
                                     {
-                                        TextOffset += res;
-                                        ulong result = Append(TextIndexFile + "_" + TextTrack.ToString(), ic.GetByteData());
-                                        if (result == indexSize)
+                                        ulong res = Append(FilePath, cc.chunkBuffer);
+                                        if (res == cc.GetLength())
                                         {
-                                            cache.TextSavedChunks++;
-                                            cache.TextSavedBytes += res;
-                                            // Free buffer
-                                            cc.chunkBuffer = null;
-                                            cl.ArchivedBytes += res;
-                                            cl.ArchivedChunks++;
+                                            TextOffset += res;
+                                            ulong result = Append(TextIndexFile + "_" + TextTrack.ToString(), ic.GetByteData());
+                                            if (result == indexSize)
+                                            {
+                                                cache.TextSavedChunks++;
+                                                cache.TextSavedBytes += res;
+                                                // Free buffer
+                                                cc.chunkBuffer = null;
+                                                cl.ArchivedBytes += res;
+                                                cl.ArchivedChunks++;
+                                            }
+                                            else
+                                                System.Diagnostics.Debug.WriteLine("Error while archiving video");
                                         }
                                         else
                                             System.Diagnostics.Debug.WriteLine("Error while archiving video");
                                     }
-                                    else
-                                        System.Diagnostics.Debug.WriteLine("Error while archiving video");
                                 }
+                                else
+                                    break;
                             }
-                            else
-                                break;
                         }
                         if (InitialTextOffset < TextOffset)
                             bResult = true;
@@ -371,40 +397,55 @@ namespace ASTool.CacheHelper
                     int VideoTrack = 0;
                     foreach (var cl in cache.VideoChunkListList)
                     {
-                        ulong VideoOffset = GetFileSize(VideoContentFile + "_" + VideoTrack.ToString());
-                        ulong InitialVideoOffset = VideoOffset;
-                        for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
-                        {
-                            var cc = cl.ChunksList[Index];
-                            if ((cc != null) && (cc.GetLength() > 0))
-                            {
-                                IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
-                                if (ic != null)
-                                {
-                                    ulong res = Append(VideoContentFile + "_" + VideoTrack.ToString(), cc.chunkBuffer);
-                                    if (res == cc.GetLength())
-                                    {
-                                        VideoOffset += res;
-                                        ulong result = Append(VideoIndexFile + "_" + VideoTrack.ToString(), ic.GetByteData());
-                                        if (result == indexSize)
-                                        {
-                                            cache.VideoSavedChunks++;
-                                            cache.VideoSavedBytes += res;
-                                            // free buffer
-                                            cc.chunkBuffer = null;
-                                            cl.ArchivedBytes += res;
-                                            cl.ArchivedChunks++;
+                        string FilePath = VideoContentFile + "_" + VideoTrack.ToString() + ".ismv";
+                        ulong InitialVideoOffset = 0;
+                        ulong VideoOffset = GetFileSize(FilePath);
 
+                        if (VideoOffset == 0)
+                        {
+                            if (cl.ftypData != null)
+                            { 
+                                Append(FilePath, cl.ftypData);
+                                Append(FilePath, cl.moovData);
+                                VideoOffset = GetFileSize(FilePath);
+                            }
+                        }
+                        else
+                        {
+                            InitialVideoOffset = VideoOffset;
+                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                            {
+                                var cc = cl.ChunksList[Index];
+                                if ((cc != null) && (cc.GetLength() > 0))
+                                {
+                                    IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
+                                    if (ic != null)
+                                    {
+                                        ulong res = Append(FilePath, cc.chunkBuffer);
+                                        if (res == cc.GetLength())
+                                        {
+                                            VideoOffset += res;
+                                            ulong result = Append(VideoIndexFile + "_" + VideoTrack.ToString(), ic.GetByteData());
+                                            if (result == indexSize)
+                                            {
+                                                cache.VideoSavedChunks++;
+                                                cache.VideoSavedBytes += res;
+                                                // free buffer
+                                                cc.chunkBuffer = null;
+                                                cl.ArchivedBytes += res;
+                                                cl.ArchivedChunks++;
+
+                                            }
+                                            else
+                                                System.Diagnostics.Debug.WriteLine("Error while archiving text");
                                         }
                                         else
                                             System.Diagnostics.Debug.WriteLine("Error while archiving text");
                                     }
-                                    else
-                                        System.Diagnostics.Debug.WriteLine("Error while archiving text");
                                 }
+                                else
+                                    break;
                             }
-                            else
-                                break;
                         }
                         VideoTrack++;
                         if (InitialVideoOffset < VideoOffset)
@@ -589,12 +630,20 @@ namespace ASTool.CacheHelper
         /// </summary>
         public async Task<bool> RemoveAsset(ManifestCache cache)
         {
+
             bool bResult = false;
-            await RemoveAudioChunks(cache);
-            await RemoveVideoChunks(cache);
-            await RemoveTextChunks(cache);
-            RemoveManifest(cache);
-            bResult = RemoveDirectory(Path.Combine(root, cache.StoragePath));
+            try
+            {
+                await RemoveAudioChunks(cache);
+                await RemoveVideoChunks(cache);
+                await RemoveTextChunks(cache);
+                RemoveManifest(cache);
+                bResult = RemoveDirectory(Path.Combine(root, cache.StoragePath));
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception while removing Asset: " + ex.Message);
+            }
             return bResult;
         }
         /// <summary>

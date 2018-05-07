@@ -16,8 +16,80 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 namespace ASTool.CacheHelper
 {
+
+
+
+    [DataContract(Name = "ChunkListConfiguration")]
+    class ChunkListConfiguration 
+    {
+        [DataMember]
+        public int TrackID { get; set; }
+        [DataMember]
+        public int TimeScale { get; set; }
+        [DataMember]
+        public long Duration { get; set; }
+        [DataMember]
+        public int Bitrate { get; set; }
+        [DataMember]
+        public string Language { get; set; }
+
+        public byte[] GetFTYPData()
+        {
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateFTYPBox();
+            if (box != null)
+                return box.GetBoxBytes();
+            return null;
+        }
+        public virtual byte[] GetMOOVData()
+        {
+            return null;
+        }
+    }
+    [DataContract(Name = "VideoChunkListConfiguration")]
+    class VideoChunkListConfiguration : ChunkListConfiguration
+    {
+        [DataMember]
+        public int Width { get; set; }
+        [DataMember]
+        public int Height { get; set; }
+        [DataMember]
+        public string CodecPrivateData { get; set; }
+        public override  byte[] GetMOOVData()
+        {
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateVideoMOOVBox((Int16) TrackID, (Int16)Width, (Int16)Height, TimeScale, Duration, Language, CodecPrivateData);
+            if (box != null)
+                return box.GetBoxBytes();
+            return null;
+        }
+    }
+    [DataContract(Name = "AudioChunkListConfiguration")]
+    class AudioChunkListConfiguration : ChunkListConfiguration
+    {
+        [DataMember]
+        public int BitsPerSample { get; set; }
+        [DataMember]
+        public int Channels { get; set; }
+        [DataMember]
+        public int SamplingRate { get; set; }
+        [DataMember]
+        public string CodecPrivateData { get; set; }
+        [DataMember]
+        public int MaxFramesize { get; set; }
+
+        public override byte[] GetMOOVData()
+        {
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateAudioMOOVBox((Int16)TrackID,MaxFramesize,Bitrate,BitsPerSample,SamplingRate,Channels, TimeScale, Duration, Language, CodecPrivateData);
+            if (box != null)
+                return box.GetBoxBytes();
+            return null;
+        }
+    }
+    [DataContract(Name = "TextChunkListConfiguration")]
+    class TextChunkListConfiguration : ChunkListConfiguration
+    {
+    }
     [DataContract(Name = "ChunkList")]
-     class ChunkList : IDisposable
+    class ChunkList : IDisposable
     {
 
         /// <summary>
@@ -82,7 +154,32 @@ namespace ASTool.CacheHelper
         /// Bitrate of the track  
         /// </summary>
         [DataMember]
-        public ulong Bitrate { get; set; }
+        public int Bitrate { get; set; }
+
+
+
+        /// <summary>
+        /// Chunklist Configuration 
+        /// Contains information to create moov and ftyp chunks
+        /// </summary>
+        [DataMember]
+        public ChunkListConfiguration Configuration { get; set; }
+
+
+        /// <summary>
+        /// moovData 
+        /// Contains the moov box for this chunk list
+        /// </summary>
+        [DataMember]
+        public byte[] moovData;
+
+        /// <summary>
+        /// moovData 
+        /// Contains the ftyp box for this chunk list
+        /// </summary>
+        [DataMember]
+        public byte[] ftypData;
+
 
         /// <summary>
         /// GetType

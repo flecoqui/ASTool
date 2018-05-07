@@ -114,6 +114,16 @@ namespace ASTool.ISMHelper
             mp4BoxLen |= (int)(buffer[offset + 3] << 0);
             return mp4BoxLen;
         }
+        static public int ReadMp4BoxInt32(byte[] buffer, int offset)
+        {
+            int Len = 0;
+            Len |= (int)(buffer[offset + 0] << 24);
+            Len |= (int)(buffer[offset + 1] << 16);
+            Len |= (int)(buffer[offset + 2] << 8);
+            Len |= (int)(buffer[offset + 3] << 0);
+            return Len;
+        }
+
         static public string ReadMp4BoxType(byte[] buffer, int offset)
         {
             string s = string.Empty;
@@ -121,10 +131,10 @@ namespace ASTool.ISMHelper
             {
                 return s;
             }
-            char[] array = new char[5];
+            char[] array = new char[4];
             for (int i = 0; i < 4; i++)
                 array[0 + i] = (char)buffer[offset + 4 + i];
-            array[4] = (char)0;
+            
             s = new string(array);
             return s;
         }
@@ -365,5 +375,345 @@ namespace ASTool.ISMHelper
             }
             return result;
         }
+        public static byte[] HexStringToByteArray(string str)
+        {
+            Dictionary<string, byte> hexindex = new Dictionary<string, byte>();
+            for (int i = 0; i <= 255; i++)
+                hexindex.Add(i.ToString("X2"), (byte)i);
+
+            List<byte> hexres = new List<byte>();
+            for (int i = 0; i < str.Length; i += 2)
+                hexres.Add(hexindex[str.Substring(i, 2)]);
+
+            return hexres.ToArray();
+        }
+        public static byte[] GetSPSNALUContent(string HexString)
+        {
+            // Hack to be confirmed
+            if(!string.IsNullOrEmpty(HexString))
+            {
+                string[] value = HexString.Split("00000001");
+                if((value!=null)&&(value.Length == 3))
+                {
+                    return HexStringToByteArray(value[1]);
+                }
+            }
+            return null;
+        }
+        public static byte[] GetPPSNALUContent(string HexString)
+        {
+            // Hack to be confirmed
+            if (!string.IsNullOrEmpty(HexString))
+            {
+                string[] value = HexString.Split("00000001");
+                if ((value != null) && (value.Length == 3))
+                {
+                    return HexStringToByteArray(value[2]);
+                }
+            }
+            return null;
+        }
+        public static Mp4BoxFTYP CreateFTYPBox()
+        {
+            List<string> list = new List<string>();
+            if (list != null)
+            {
+                list.Add("piff");
+                list.Add("iso2");
+                return Mp4BoxFTYP.CreateFTYPBox("isml", 1, list);
+            }
+            return null;
+        }
+        public static Mp4BoxMOOV CreateVideoMOOVBox(Int16 TrackID, 
+            Int16 Width, Int16 Height, Int32 TimeScale, Int64 Duration, string LanguageCode,
+            string CodecPrivateData)
+        {
+            Byte ConfigurationVersion = 0x01;
+            Byte AVCProfileIndication = 0x64;
+            Byte ProfileCompatibility = 0x40;
+            Byte AVCLevelIndication = 0x1F;
+            Int16 RefIndex = 1;
+            Int16 HorizontalRes = 72;
+            Int16 VerticalRes = 72;
+            Int16 FrameCount = 1;
+            Int16 Depth = 24;
+
+            string handler_type = "vide";
+            string handler_name = "Video Media Handler\0";
+            DateTime CreationTime = DateTime.Now;
+            DateTime UpdateTime = DateTime.Now;
+            Int32 Flags = 7;
+            Byte[] SPSNALUContent = GetSPSNALUContent(CodecPrivateData);
+            Byte[] PPSNALUContent = GetPPSNALUContent(CodecPrivateData);
+            if (string.IsNullOrEmpty(LanguageCode))
+                LanguageCode = "und";
+
+            Mp4BoxAVCC avccbox = Mp4BoxAVCC.CreateAVCCBox(ConfigurationVersion, AVCProfileIndication, ProfileCompatibility, AVCLevelIndication, SPSNALUContent, PPSNALUContent);
+            // Mp4BoxBTRT btrtbox = Mp4BoxBTRT.CreateBTRTBox(BufferSize, MaxBitrate, AvgBitrate);
+            if (avccbox != null)
+            //&& (btrtbox != null))
+            {
+                List<Mp4Box> list = new List<Mp4Box>();
+                if (list != null)
+                {
+                    list.Add(avccbox);
+                    //                    list.Add(btrtbox);
+                    Mp4BoxAVC1 boxavc1 = Mp4BoxAVC1.CreateAVC1Box(RefIndex, Width, Height, HorizontalRes, VerticalRes, FrameCount, Depth, list);
+                    if (boxavc1 != null)
+                    {
+                        list.Clear();
+                        list.Add(boxavc1);
+                        Mp4BoxSTSD boxstsd = Mp4BoxSTSD.CreateSTSDBox(1, list);
+                        Mp4BoxSTTS boxstts = Mp4BoxSTTS.CreateSTTSBox(0);
+                        Mp4BoxCTTS boxctts = Mp4BoxCTTS.CreateCTTSBox(0);
+                        Mp4BoxSTSC boxstsc = Mp4BoxSTSC.CreateSTSCBox(0);
+                        Mp4BoxSTCO boxstco = Mp4BoxSTCO.CreateSTCOBox(0);
+                        Mp4BoxSTSZ boxstsz = Mp4BoxSTSZ.CreateSTSZBox(0, 0);
+                        if ((boxstsd != null) &&
+                            (boxstts != null) &&
+                            (boxctts != null) &&
+                            (boxstsc != null) &&
+                            (boxstco != null) &&
+                            (boxstsz != null)
+                            )
+                        {
+                            list.Clear();
+                            list.Add(boxstts);
+                            list.Add(boxctts);
+                            list.Add(boxstsc);
+                            list.Add(boxstco);
+                            list.Add(boxstsz);
+                            list.Add(boxstsd);
+                            Mp4BoxSTBL boxstbl = Mp4BoxSTBL.CreateSTBLBox(list);
+                            if (boxstbl != null)
+                            {
+                                string url = string.Empty;
+                                Mp4BoxURL boxurl = Mp4BoxURL.CreateURLBox(url);
+                                if (boxurl != null)
+                                {
+                                    list.Clear();
+                                    list.Add(boxurl);
+                                    Mp4BoxDREF boxdref = Mp4BoxDREF.CreateDREFBox((Int32)list.Count, list);
+                                    if (boxdref != null)
+                                    {
+                                        list.Clear();
+
+                                        list.Add(boxdref);
+                                        Mp4BoxDINF boxdinf = Mp4BoxDINF.CreateDINFBox(list);
+                                        if (boxdinf != null)
+                                        {
+                                            Mp4BoxVMHD boxvmhd = Mp4BoxVMHD.CreateVMHDBox();
+                                            if (boxvmhd != null)
+                                            {
+                                                list.Clear();
+                                                list.Add(boxvmhd);
+                                                list.Add(boxdinf);
+                                                list.Add(boxstbl);
+
+                                                Mp4BoxMINF boxminf = Mp4BoxMINF.CreateMINFBox(list);
+                                                if (boxminf != null)
+                                                {
+                                                    Mp4BoxHDLR boxhdlr = Mp4BoxHDLR.CreateHDLRBox(handler_type, handler_name);
+                                                    if (boxhdlr != null)
+                                                    {
+                                                        Mp4BoxMDHD boxmdhd = Mp4BoxMDHD.CreateMDHDBox(CreationTime, UpdateTime, TimeScale, Duration, LanguageCode);
+                                                        if (boxmdhd != null)
+                                                        {
+
+                                                            list.Clear();
+                                                            list.Add(boxmdhd);
+                                                            list.Add(boxhdlr);
+                                                            list.Add(boxminf);
+                                                            Mp4BoxMDIA boxmdia = Mp4BoxMDIA.CreateMDIABox(list);
+                                                            if (boxmdia != null)
+                                                            {
+                                                                Mp4BoxTKHD boxtkhd = Mp4BoxTKHD.CreateTKHDBox(Flags, CreationTime, UpdateTime, TrackID, Duration, false, Width, Height);
+                                                                if (boxtkhd != null)
+                                                                {
+                                                                    list.Clear();
+                                                                    list.Add(boxtkhd);
+                                                                    list.Add(boxmdia);
+                                                                    Mp4BoxTRAK boxtrak = Mp4BoxTRAK.CreateTRAKBox(list);
+                                                                    if (boxtrak != null)
+                                                                    {
+                                                                        Mp4BoxMVHD boxmvhd = Mp4BoxMVHD.CreateMVHDBox(CreationTime, UpdateTime, TimeScale, Duration, TrackID + 1);
+                                                                        if (boxmvhd != null)
+                                                                        {
+                                                                            Mp4BoxMEHD boxmehd = Mp4BoxMEHD.CreateMEHDBox(Duration);
+                                                                            Mp4BoxTREX boxtrex = Mp4BoxTREX.CreateTREXBox(TrackID);
+                                                                            if ((boxmehd != null) &&
+                                                                                (boxtrex != null))
+                                                                            {
+
+                                                                                list.Clear();
+                                                                                list.Add(boxmehd);
+                                                                                list.Add(boxtrex);
+                                                                                Mp4BoxMVEX boxmvex = Mp4BoxMVEX.CreateMVEXBox(list);
+                                                                                if (boxmvex != null)
+                                                                                {
+                                                                                    list.Clear();
+                                                                                    list.Add(boxmvhd);
+                                                                                    list.Add(boxtrak);
+                                                                                    list.Add(boxmvex);
+                                                                                    return Mp4BoxMOOV.CreateMOOVBox(list);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        public static Mp4BoxMOOV CreateAudioMOOVBox(Int16 TrackID, int MaxFrameSize, int Bitrate, int SampleSize, int SampleRate, int Channels, Int32 TimeScale, Int64 Duration, string LanguageCode, string CodecPrivateData)
+
+        {
+            Int16 RefIndex = 1;
+
+
+            string handler_type = "soun";
+            string handler_name = "Audio\0";
+            DateTime CreationTime = DateTime.Now;
+            DateTime UpdateTime = DateTime.Now;
+            Int32 Flags = 7;
+            if (string.IsNullOrEmpty(LanguageCode))
+                LanguageCode = "und";
+            Mp4BoxESDS boxesds = Mp4BoxESDS.CreateESDSBox(MaxFrameSize, Bitrate, SampleRate, Channels);
+            if (boxesds != null)
+            {
+                List<Mp4Box> list = new List<Mp4Box>();
+                if (list != null)
+                {
+                    list.Add(boxesds);
+                    Mp4BoxMP4A boxmp4a = Mp4BoxMP4A.CreateMP4ABox(RefIndex, (Int16)Channels, (Int16)SampleSize, SampleRate, list);
+                    if (boxmp4a != null)
+                    {
+                        list.Clear();
+                        list.Add(boxmp4a);
+                        Mp4BoxSTSD boxstsd = Mp4BoxSTSD.CreateSTSDBox(1, list);
+                        Mp4BoxSTTS boxstts = Mp4BoxSTTS.CreateSTTSBox(0);
+                        Mp4BoxCTTS boxctts = Mp4BoxCTTS.CreateCTTSBox(0);
+                        Mp4BoxSTSC boxstsc = Mp4BoxSTSC.CreateSTSCBox(0);
+                        Mp4BoxSTCO boxstco = Mp4BoxSTCO.CreateSTCOBox(0);
+                        Mp4BoxSTSZ boxstsz = Mp4BoxSTSZ.CreateSTSZBox(0, 0);
+                        if ((boxstsd != null) &&
+                            (boxstts != null) &&
+                            (boxctts != null) &&
+                            (boxstsc != null) &&
+                            (boxstco != null) &&
+                            (boxstsz != null)
+                            )
+                        {
+                            list.Clear();
+                            list.Add(boxstts);
+                            list.Add(boxctts);
+                            list.Add(boxstsc);
+                            list.Add(boxstco);
+                            list.Add(boxstsz);
+                            list.Add(boxstsd);
+                            Mp4BoxSTBL boxstbl = Mp4BoxSTBL.CreateSTBLBox(list);
+                            if (boxstbl != null)
+                            {
+                                string url = string.Empty;
+                                Mp4BoxURL boxurl = Mp4BoxURL.CreateURLBox(url);
+                                if (boxurl != null)
+                                {
+                                    list.Clear();
+                                    list.Add(boxurl);
+                                    Mp4BoxDREF boxdref = Mp4BoxDREF.CreateDREFBox((Int32)list.Count, list);
+                                    if (boxdref != null)
+                                    {
+                                        list.Clear();
+
+                                        list.Add(boxdref);
+                                        Mp4BoxDINF boxdinf = Mp4BoxDINF.CreateDINFBox(list);
+                                        if (boxdinf != null)
+                                        {
+                                            Mp4BoxSMHD boxsmhd = Mp4BoxSMHD.CreateSMHDBox();
+                                            if (boxsmhd != null)
+                                            {
+                                                list.Clear();
+                                                list.Add(boxsmhd);
+                                                list.Add(boxdinf);
+                                                list.Add(boxstbl);
+
+                                                Mp4BoxMINF boxminf = Mp4BoxMINF.CreateMINFBox(list);
+                                                if (boxminf != null)
+                                                {
+                                                    Mp4BoxHDLR boxhdlr = Mp4BoxHDLR.CreateHDLRBox(handler_type, handler_name);
+                                                    if (boxhdlr != null)
+                                                    {
+                                                        Mp4BoxMDHD boxmdhd = Mp4BoxMDHD.CreateMDHDBox(CreationTime, UpdateTime, TimeScale, Duration, LanguageCode);
+                                                        if (boxmdhd != null)
+                                                        {
+
+                                                            list.Clear();
+                                                            list.Add(boxmdhd);
+                                                            list.Add(boxhdlr);
+                                                            list.Add(boxminf);
+                                                            Mp4BoxMDIA boxmdia = Mp4BoxMDIA.CreateMDIABox(list);
+                                                            if (boxmdia != null)
+                                                            {
+                                                                Mp4BoxTKHD boxtkhd = Mp4BoxTKHD.CreateTKHDBox(Flags, CreationTime, UpdateTime, TrackID, Duration, true, 0, 0);
+                                                                if (boxtkhd != null)
+                                                                {
+                                                                    list.Clear();
+                                                                    list.Add(boxtkhd);
+                                                                    list.Add(boxmdia);
+                                                                    Mp4BoxTRAK boxtrak = Mp4BoxTRAK.CreateTRAKBox(list);
+                                                                    if (boxtrak != null)
+                                                                    {
+                                                                        Mp4BoxMVHD boxmvhd = Mp4BoxMVHD.CreateMVHDBox(CreationTime, UpdateTime, TimeScale, Duration, TrackID + 1);
+                                                                        if (boxmvhd != null)
+                                                                        {
+                                                                            Mp4BoxMEHD boxmehd = Mp4BoxMEHD.CreateMEHDBox(Duration);
+                                                                            Mp4BoxTREX boxtrex = Mp4BoxTREX.CreateTREXBox(TrackID);
+                                                                            if ((boxmehd != null) &&
+                                                                                (boxtrex != null))
+                                                                            {
+
+                                                                                list.Clear();
+                                                                                list.Add(boxmehd);
+                                                                                list.Add(boxtrex);
+                                                                                Mp4BoxMVEX boxmvex = Mp4BoxMVEX.CreateMVEXBox(list);
+                                                                                if (boxmvex != null)
+                                                                                {
+                                                                                    list.Clear();
+                                                                                    list.Add(boxmvhd);
+                                                                                    list.Add(boxtrak);
+                                                                                    list.Add(boxmvex);
+                                                                                    return Mp4BoxMOOV.CreateMOOVBox(list);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 }

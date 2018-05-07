@@ -39,27 +39,64 @@ namespace ASTool.CacheHelper
         ErrorStorageLimit,
         ErrorParameters,
     }
-    public sealed class TextTrack
+    //public sealed class TextTrack
+    //{
+    //    public int Index { get; set; }
+    //    public int Bitrate { get; set; }
+    //    public string FourCC { get; set; }
+    //    public string Language { get; set; }
+    //}
+
+    //public sealed class AudioTrack
+    //{
+    //    public int Index { get; set; }
+    //    public int Bitrate { get; set; }
+    //    public string FourCC { get; set; }
+    //    public int BitsPerSample { get; set; }
+    //    public int Channels { get; set; }
+    //    public int SamplingRate { get; set; }
+    //    public string CodecPrivateData { get; set; }
+    //    public string Language { get; set; }
+    //}
+    //public sealed class VideoTrack
+    //{
+    //    public int Index { get; set; }
+    //    public int Bitrate { get; set; }
+    //    public string FourCC { get; set; }
+    //    public int MaxHeight { get; set; }
+    //    public int MaxWidth { get; set; }
+
+    //    public string CodecPrivateData { get; set; }
+    //    public string Language { get; set; }
+    //}
+    public  class Track
     {
         public int Index { get; set; }
         public int Bitrate { get; set; }
         public string FourCC { get; set; }
-    }
-    public sealed class AudioTrack
-    {
-        public int Index { get; set; }
-        public int Bitrate { get; set; }
-        public string FourCC { get; set; }
-    }
-    public sealed class VideoTrack
-    {
-        public int Index { get; set; }
-        public int Bitrate { get; set; }
-        public string FourCC { get; set; }
-        public int MaxHeight { get; set; }
-        public int MaxWidth { get; set; }
+        public string Language { get; set; }
     }
 
+    public sealed class TextTrack : Track
+    {
+
+    }
+
+    public sealed class AudioTrack : Track
+    {
+
+        public int BitsPerSample { get; set; }
+        public int Channels { get; set; }
+        public int SamplingRate { get; set; }
+        public string CodecPrivateData { get; set; }
+    }
+    public sealed class VideoTrack :Track
+    {
+        public int MaxHeight { get; set; }
+        public int MaxWidth { get; set; }
+
+        public string CodecPrivateData { get; set; }
+    }
     [DataContract(Name ="ManifestCache")]
      class ManifestCache : IDisposable
     {
@@ -681,15 +718,15 @@ namespace ASTool.CacheHelper
         /// Add the chunks list in the list of chunks to download.
         /// </summary>
         /// <param name="stream"></param>
-        /// <param name="selected"></param>
+        /// <param name="configuration"></param>
         /// <returns>true if success</returns>
-        bool AddChunkList(StreamInfo stream, QualityLevel selected)
+        bool AddChunkList(StreamInfo stream, ChunkListConfiguration Configuration)
         {
-            ulong Bitrate = 0;
+            int Bitrate = 0;
             string UrlTemplate = string.Empty;
-            if ((selected != null) && (stream != null))
+            if ((Configuration != null) && (stream != null))
             {
-                selected.TryGetAttributeValueAsUlong("Bitrate", out Bitrate);
+                Bitrate = Configuration.Bitrate;
                 if (Bitrate > 0)
                 {
                     if (stream.TryGetAttributeValueAsString("Url", out UrlTemplate))
@@ -706,6 +743,7 @@ namespace ASTool.CacheHelper
                             ChunkList l = new ChunkList();
                             if (l != null)
                             {
+                                l.Configuration = Configuration;
                                 foreach (var chunk in stream.Chunks)
                                 {
                                     if (chunk.Duration != null)
@@ -798,18 +836,23 @@ namespace ASTool.CacheHelper
                         {
                             if (stream.StreamType.ToUpper() == "VIDEO")
                             {
+                                string Lang = "und";
+                                stream.TryGetAttributeValueAsString("Language",out Lang);
 
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
                                     ulong currentBitrate = 0;
                                     ulong currentIndex = 0;
                                     string currentFourCC = string.Empty;
+                                    string currentCodecPrivateData = string.Empty;
                                     ulong currentWidth = 0;
                                     ulong currentHeight = 0;
                                     track.TryGetAttributeValueAsUlong("Index", out currentIndex);
                                     track.TryGetAttributeValueAsUlong("Bitrate", out currentBitrate);
                                     if (!track.TryGetAttributeValueAsString("FourCC", out currentFourCC))
                                         currentFourCC = string.Empty;
+                                    if (!track.TryGetAttributeValueAsString("CodecPrivateData", out currentCodecPrivateData))
+                                        currentCodecPrivateData = string.Empty;
                                     track.TryGetAttributeValueAsUlong("MaxWidth", out currentWidth);
                                     track.TryGetAttributeValueAsUlong("MaxHeight", out currentHeight);
                                     ListVideoTracks.Add(new VideoTrack
@@ -818,45 +861,83 @@ namespace ASTool.CacheHelper
                                         Bitrate = (int)currentBitrate,
                                         FourCC = currentFourCC,
                                         MaxHeight = (int)currentHeight,
-                                        MaxWidth = (int)currentWidth
+                                        MaxWidth = (int)currentWidth,
+                                        CodecPrivateData = currentCodecPrivateData,
+                                        Language = Lang,
                                     });
                                     if (((this.MinBitrate == 0) || (currentBitrate >= (ulong)this.MinBitrate)) &&
                                         ((this.MaxBitrate == 0) || (currentBitrate <= (ulong)this.MaxBitrate)))
                                     {
                                         videoselected = track;
                                         videostream = stream;
-                                        AddChunkList(videostream, videoselected);
+                                        VideoChunkListConfiguration configuration = new VideoChunkListConfiguration();
+                                        configuration.Bitrate = (int) currentBitrate;
+                                        configuration.Duration = (long) Duration;
+                                        configuration.TimeScale = (int) TimeScale;
+                                        configuration.Language = Lang;
+                                        configuration.TrackID = -1;
+                                        configuration.Width = (Int16)currentWidth;
+                                        configuration.Height = (Int16)currentHeight;
+                                        configuration.CodecPrivateData = currentCodecPrivateData;
+                                        AddChunkList(videostream, configuration);
                                     }
-                                }
-                                if (videoselected == null)
-                                {
-                                    videoselected = stream.QualityLevels.First();
-                                    videostream = stream;
-                                    AddChunkList(videostream, videoselected);
                                 }
                             }
                             if (stream.StreamType.ToUpper() == "AUDIO")
                             {
+                                string Lang = "und";
+                                stream.TryGetAttributeValueAsString("Language", out Lang);
+
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
                                     ulong currentBitrate = 0;
+                                    ulong currentBitsPerSample = 16;
+                                    ulong currentChannels = 2;
+                                    ulong currentSamplingRate = 0;
                                     string currentFourCC = string.Empty;
+                                    string currentCodecPrivateData = string.Empty;
                                     track.TryGetAttributeValueAsUlong("Bitrate", out currentBitrate);
+                                    track.TryGetAttributeValueAsUlong("BitsPerSample", out currentBitsPerSample);
+                                    track.TryGetAttributeValueAsUlong("Channels", out currentChannels);
+                                    track.TryGetAttributeValueAsUlong("SamplingRate", out currentSamplingRate);
                                     if (!track.TryGetAttributeValueAsString("FourCC", out currentFourCC))
                                         currentFourCC = string.Empty;
+                                    if (!track.TryGetAttributeValueAsString("CodecPrivateData", out currentCodecPrivateData))
+                                        currentCodecPrivateData = string.Empty;
+
                                     ListAudioTracks.Add(new AudioTrack
                                     {
                                         Index = (int)audioIndex,
                                         Bitrate = (int)currentBitrate,
                                         FourCC = currentFourCC,
+                                        BitsPerSample = (int) currentBitsPerSample,
+                                        Channels = (int) currentChannels,
+                                        SamplingRate = (int) currentSamplingRate,
+                                        CodecPrivateData = currentCodecPrivateData,
+                                        Language = Lang,
                                     });
                                     audioselected = track;
                                     audiostream = stream;
-                                    AddChunkList(audiostream, audioselected);
+
+                                    AudioChunkListConfiguration configuration = new AudioChunkListConfiguration();
+                                    configuration.Bitrate = (int)currentBitrate;
+                                    configuration.Duration = (long)Duration;
+                                    configuration.TimeScale = (int)TimeScale;
+                                    configuration.Language = Lang;
+                                    configuration.TrackID = -1;
+                                    configuration.BitsPerSample = (Int16)currentBitsPerSample;
+                                    configuration.Channels = (Int16)currentChannels;
+                                    configuration.SamplingRate = (Int16) currentSamplingRate;
+                                    configuration.CodecPrivateData = currentCodecPrivateData;
+                                    configuration.MaxFramesize = 1024;                                    
+                                    AddChunkList(audiostream, configuration);
                                 }
                             }
                             if (stream.StreamType.ToUpper() == "TEXT")
                             {
+                                string Lang = "und";
+                                stream.TryGetAttributeValueAsString("Language", out Lang);
+
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
                                     ulong currentBitrate = 0;
@@ -869,10 +950,17 @@ namespace ASTool.CacheHelper
                                         Index = (int)textIndex,
                                         Bitrate = (int)currentBitrate,
                                         FourCC = currentFourCC,
+                                        Language = Lang,
                                     });
                                     textselected = track;
                                     textstream = stream;
-                                    AddChunkList(textstream, textselected);
+                                    TextChunkListConfiguration configuration = new TextChunkListConfiguration();
+                                    configuration.Bitrate = (int)currentBitrate;
+                                    configuration.Duration = (long)Duration;
+                                    configuration.TimeScale = (int)TimeScale;
+                                    configuration.Language = Lang;
+                                    configuration.TrackID = -1;
+                                    AddChunkList(textstream, configuration);
                                 }
                             }
                         }
@@ -1142,6 +1230,55 @@ namespace ASTool.CacheHelper
             }
             return listSize;
         }
+        /// <summary>
+        /// GetTrackID
+        /// Get the trackID from moof in data buffer
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>return the TrackID</returns>
+        int GetTrackID(byte[] data)
+        {
+            int result = -1;
+            try
+            {
+
+                ISMHelper.Mp4Box box  = ISMHelper.Mp4Box.CreateMp4Box(data, 0);
+                if(box.GetBoxType()== "moof")
+                {
+                    List<ISMHelper.Mp4Box> listmoof =  box.GetChildren();
+                    if(listmoof!=null)
+                    {
+                        foreach(var boxinmoof in listmoof)
+                        {
+                            if(boxinmoof.GetBoxType()=="traf")
+                            {
+                                List<ISMHelper.Mp4Box> listtraf = boxinmoof.GetChildren();
+                                if (listtraf != null)
+                                {
+                                    foreach (var boxintraf in listtraf)
+                                    {
+                                        if (boxintraf.GetBoxType() == "tfhd")
+                                        {
+                                            byte[] buffer =  boxintraf.GetBoxData();
+                                            if(buffer!=null)
+                                            {
+                                                return ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 4);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception)
+            {
+
+            }
+            return result;
+        }
 
         /// <summary>
         /// DownloadCurrentChunks
@@ -1159,6 +1296,18 @@ namespace ASTool.CacheHelper
                 {
                     string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cl.ChunksList[(int)i].Time.ToString());
                     cl.ChunksList[(int)i].chunkBuffer = await DownloadChunkAsync(new Uri(url));
+                    if((cl.Configuration!=null) && (cl.Configuration.TrackID == -1))
+                    {
+                        cl.Configuration.TrackID = GetTrackID(cl.ChunksList[(int)i].chunkBuffer);
+
+                        if (cl.Configuration.TrackID != -1)
+                        {
+                            // Now the TrackID is available, we can build ftyp and moov boxes
+                            cl.ftypData = cl.Configuration.GetFTYPData();
+                            cl.moovData = cl.Configuration.GetMOOVData();
+                        }
+
+                    }
                     if (cl.ChunksList[(int)i].IsChunkDownloaded())
                     {
                         ulong l = cl.ChunksList[(int)i].GetLength();
@@ -1380,7 +1529,11 @@ namespace ASTool.CacheHelper
             VideoDownloadedBytes = 0;
             VideoDownloadedChunks = 0;
             VideoSavedBytes = 0;
-            if(DiskCache!=null)
+            TextDownloadedBytes = 0;
+            TextDownloadedChunks = 0;
+            TextSavedBytes = 0;
+
+            if (DiskCache!=null)
                 await DiskCache.SaveManifest(this);
             return true;
         }

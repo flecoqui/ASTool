@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --parse --input C:\\temp\\ASTool\\test1\\3F964D3E0D836A2D06E6C9C1E648D6F9C248382F\\Video_3.ismv"
+      "commandLineArgs": "dotnet ASTool.dll --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\\\temp\\\\astool\\\\test4"
     }
   }
 }
