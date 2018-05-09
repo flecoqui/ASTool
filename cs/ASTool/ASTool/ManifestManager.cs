@@ -360,6 +360,13 @@ namespace ASTool
         public ulong MaxDuration { get; set; }
 
         /// <summary>
+        /// LiveOffset 
+        /// LiveOffset used when capturing Live services in seconds.
+        /// </summary>
+        [DataMember]
+        public int LiveOffset { get; set; }
+
+        /// <summary>
         /// DownloadMethod 
         /// Downlaod Method for audio and video chunks 
         ///     0 Auto: The cache will create if necessary several threads to download audio and video chunks
@@ -429,7 +436,7 @@ namespace ASTool
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestManager(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string audioTrackName, string textTrackName, ulong maxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestManager(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string audioTrackName, string textTrackName, ulong maxDuration, ulong maxMemoryBufferSize, int liveOffset)
         {
             Initialize();
             ManifestUri = manifestUri;
@@ -441,14 +448,15 @@ namespace ASTool
             TextTrackName = textTrackName;
             MaxDuration = maxDuration;
             MaxMemoryBufferSize = maxMemoryBufferSize;
-            MaxError = maxError;
-            DownloadMethod = downloadMethod;
+            MaxError = 20;
+            DownloadMethod = 1;
+            LiveOffset = liveOffset;
         }
         /// <summary>
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestManager(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public ManifestManager(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1, int liveOffset = 0)
         {
             Initialize();
             ManifestUri = manifestUri;
@@ -459,6 +467,7 @@ namespace ASTool
             MaxMemoryBufferSize = maxMemoryBufferSize;
             MaxError = maxError;
             DownloadMethod = downloadMethod;
+            LiveOffset = liveOffset;
         }
         /// <summary>
         /// Convert manifest timescale times to HNS for reporting
@@ -878,7 +887,26 @@ namespace ASTool
                 System.Diagnostics.Debug.WriteLine("Updating ChunkList " + org.Configuration.GetSourceName() + " Add " + NewChunk.ToString() + " from " + org.TotalChunks.ToString() + "  chunks in the chunklist " +  org.Configuration.GetSourceName() );
             return bResult;
         }
+        int GetNumberOfChunks(IList<Chunk> list, int TimeScale, int LiveOffset)
+        {
+            if((list!=null)&& (LiveOffset > 0))
+            {
+                int i = 1;
+                float d = 0;
+                while ((list.Count - i)>=0)
+                {
+                    d += (float) list[list.Count - i].Duration / (float) TimeScale;
+                    if(d>LiveOffset)
+                    {
+                        return i;
+                    }
+                    i++;
 
+                }
+
+            }
+            return 0;
+        }
         /// <summary>
         /// AddChunkList
         /// Add the chunks list in the list of chunks to download.
@@ -886,9 +914,10 @@ namespace ASTool
         /// <param name="stream"></param>
         /// <param name="configuration"></param>
         /// <returns>true if success</returns>
-        bool AddChunkList(StreamInfo stream, ChunkListConfiguration Configuration, int NumberOfLiveChunks = 0)
+        bool AddChunkList(StreamInfo stream, ChunkListConfiguration Configuration, int LiveOffset = 0)
         {
             int Bitrate = 0;
+            int NumberOfLiveChunks = 0;
             string UrlTemplate = string.Empty;
             if ((Configuration != null) && (stream != null))
             {
@@ -906,6 +935,7 @@ namespace ASTool
                         {
                             UInt64 time = 0;
                             ulong duration = 0;
+                            NumberOfLiveChunks = GetNumberOfChunks(stream.Chunks, Configuration.TimeScale, LiveOffset);
                             ChunkList l = new ChunkList();
                             if (l != null)
                             {
@@ -1273,7 +1303,7 @@ namespace ASTool
                                         configuration.Height = (int)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
                                         configuration.Source = this.StoragePath;
-                                        AddChunkList(videostream, configuration,this.IsLive==true? 10:0);
+                                        AddChunkList(videostream, configuration,LiveOffset);
                                     }
                                 }
                             }
@@ -1348,7 +1378,7 @@ namespace ASTool
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
                                         configuration.Source = this.StoragePath;
 
-                                        AddChunkList(audiostream, configuration, this.IsLive == true ? 10 : 0);
+                                        AddChunkList(audiostream, configuration, LiveOffset);
                                     }
                                 }
                             }
@@ -1388,7 +1418,7 @@ namespace ASTool
                                         configuration.FourCC = currentFourCC;
                                         configuration.Source = this.StoragePath;
 
-                                        AddChunkList(textstream, configuration, this.IsLive == true ? 10 : 0);
+                                        AddChunkList(textstream, configuration, LiveOffset);
                                     }
                                 }
                             }
@@ -1529,10 +1559,10 @@ namespace ASTool
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestManager CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
+        public static ManifestManager CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, int liveOffset)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestManager mc = new ManifestManager(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestManager mc = new ManifestManager(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize,  liveOffset);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;

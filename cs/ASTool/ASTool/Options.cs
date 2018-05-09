@@ -33,10 +33,12 @@ namespace ASTool
         private string InformationMessage = "ASTool:\r\n" + "Version: {0} \r\n"  + "Syntax:\r\n"+
             "ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
-            "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
+            "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
+            "                 [--liveoffset <value in seconds>]\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
+            "                 [--liveoffset <value in seconds>]\r\n" +
             "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
             "ASTool --parse    --input <inputLocalISMFile|inputLocalISMCFile|inputLocalISMV|inputLocalISMA>  [--recursive]\r\n" +
@@ -52,6 +54,7 @@ namespace ASTool
         public bool Recursive { get; set; }
         public int Loop { get; set; }
         public int BufferSize { get; set; }
+        public int LiveOffset { get; set; }
         public Action ASToolAction { get; set; }
         public Int32 version { get; set; }
         public static Options InitializeOptions(string[] args)
@@ -71,6 +74,7 @@ namespace ASTool
                 options.AudioTrackName = string.Empty;
                 options.TextTrackName = string.Empty;
                 options.BufferSize = 0;
+                options.LiveOffset = 0;
                 options.ASToolAction = Action.None;
                 if (args!=null)
                 {
@@ -156,6 +160,18 @@ namespace ASTool
                                 }
                                 else
                                     options.ErrorMessage = "MaxBitrate not set";
+                                break;
+                            case "--liveoffset":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                {
+                                    int offset = 0;
+                                    if (int.TryParse(args[i++], out offset))
+                                        options.LiveOffset = offset;
+                                    else
+                                        options.ErrorMessage = "Live Offset value incorrect";
+                                }
+                                else
+                                    options.ErrorMessage = "Live Offset not set";
                                 break;
                             case "--audiotrackname":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))

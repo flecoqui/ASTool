@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname \"toto\""
+      "commandLineArgs": "dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname toto "
     }
   }
 }

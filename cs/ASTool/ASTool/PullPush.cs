@@ -18,7 +18,7 @@ namespace ASTool
                 t.Wait();
                 if(t.Result == true)
                 {
-                    ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.Duration, (ulong)opt.BufferSize, 20);
+                    ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.Duration, (ulong)opt.BufferSize, opt.LiveOffset);
                     if (mc != null)
                     {
                         if (mc.SetManifestOutput(d) == true)
