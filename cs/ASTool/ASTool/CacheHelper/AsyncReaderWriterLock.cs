@@ -21,7 +21,7 @@ namespace ASTool.CacheHelper
     // This class AsyncReaderWriterLock is used by the class DiskCache to manage concurrent read/write access on disk 
     // and lock asynchronous read/write access to save/restore manifest, audio chunks and video chunks
     // Thank you Stephen Toub
-    class AsyncReaderWriterLock
+    public class AsyncReaderWriterLock
     {
         public AsyncReaderWriterLock()
         {

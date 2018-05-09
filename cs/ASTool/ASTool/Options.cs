@@ -70,7 +70,7 @@ namespace ASTool
                 options.Duration = 0;
                 options.AudioTrackName = string.Empty;
                 options.TextTrackName = string.Empty;
-                options.BufferSize = 65536;
+                options.BufferSize = 0;
                 options.ASToolAction = Action.None;
                 if (args!=null)
                 {
@@ -84,9 +84,11 @@ namespace ASTool
                                 options.ASToolAction = Action.Help;
                                 break;
                             case "--pullpush":
+                                options.BufferSize = 0;
                                 options.ASToolAction = Action.PullPush;
                                 break;
                             case "--pull":
+                                options.BufferSize = 65535;
                                 options.ASToolAction = Action.Pull;
                                 break;
                             case "--push":

@@ -211,7 +211,7 @@ namespace ASTool.CacheHelper
         /// </summary>
         public async Task<bool> SaveAudioChunks(ManifestManager cache)
         {
-            bool bResult = false;
+            bool bResult = true;
             // Saving Audio and Video chunks 
             string AudioIndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioIndexFileName);
             string AudioContentFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioContentFileName);
@@ -247,9 +247,9 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialAudioOffset = AudioOffset;
-                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
                             {
-                                var cc = cl.ChunksList[Index];
+                                var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
@@ -266,11 +266,14 @@ namespace ASTool.CacheHelper
                                                 cache.AudioSavedBytes += res;
                                                 // Free buffer
                                                 cc.chunkBuffer = null;
-                                                cl.ArchivedBytes += res;
-                                                cl.ArchivedChunks++;
+                                                cl.OutputBytes += res;
+                                                cl.OutputChunks++;
                                             }
                                             else
+                                            {
+                                                bResult = false;
                                                 System.Diagnostics.Debug.WriteLine("Error while archiving audio");
+                                            }
                                         }
                                         else
                                             System.Diagnostics.Debug.WriteLine("Error while archiving audio");
@@ -297,7 +300,7 @@ namespace ASTool.CacheHelper
         /// </summary>
         public async Task<bool> SaveTextChunks(ManifestManager cache)
         {
-            bool bResult = false;
+            bool bResult = true;
             // Saving Audio and Video chunks 
             string TextIndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), textIndexFileName);
             string TextContentFile = Path.Combine(Path.Combine(root, cache.StoragePath), textContentFileName);
@@ -333,9 +336,9 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialTextOffset = TextOffset;
-                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
                             {
-                                var cc = cl.ChunksList[Index];
+                                var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
@@ -352,11 +355,14 @@ namespace ASTool.CacheHelper
                                                 cache.TextSavedBytes += res;
                                                 // Free buffer
                                                 cc.chunkBuffer = null;
-                                                cl.ArchivedBytes += res;
-                                                cl.ArchivedChunks++;
+                                                cl.OutputBytes += res;
+                                                cl.OutputChunks++;
                                             }
                                             else
+                                            {
+                                                bResult = false;
                                                 System.Diagnostics.Debug.WriteLine("Error while archiving video");
+                                            }
                                         }
                                         else
                                             System.Diagnostics.Debug.WriteLine("Error while archiving video");
@@ -421,9 +427,9 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialVideoOffset = VideoOffset;
-                            for (int Index = (int)cl.ArchivedChunks; Index < (int)cl.DownloadedChunks; Index++)
+                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
                             {
-                                var cc = cl.ChunksList[Index];
+                                var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
@@ -440,15 +446,18 @@ namespace ASTool.CacheHelper
                                                 cache.VideoSavedBytes += res;
                                                 // free buffer
                                                 cc.chunkBuffer = null;
-                                                cl.ArchivedBytes += res;
-                                                cl.ArchivedChunks++;
+                                                cl.OutputBytes += res;
+                                                cl.OutputChunks++;
 
                                             }
                                             else
-                                                System.Diagnostics.Debug.WriteLine("Error while archiving text");
+                                            {
+                                                bResult = false;
+                                                System.Diagnostics.Debug.WriteLine("Error while archiving video");
+                                            }
                                         }
                                         else
-                                            System.Diagnostics.Debug.WriteLine("Error while archiving text");
+                                            System.Diagnostics.Debug.WriteLine("Error while archiving video");
                                     }
                                 }
                                 else

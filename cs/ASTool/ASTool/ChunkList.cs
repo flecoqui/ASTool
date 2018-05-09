@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
+using System.Collections.Concurrent;
 namespace ASTool
 {
 
@@ -51,7 +52,7 @@ namespace ASTool
         }
         public virtual string GetSourceName()
         {
-            return Source + "_" + Bitrate.ToString() + "_" + TrackName.ToString() + ".isma";
+            return Source + "_" + Bitrate.ToString() + "_" + TrackName.ToString() ;
         }
     }
     [DataContract(Name = "VideoChunkListConfiguration")]
@@ -113,48 +114,49 @@ namespace ASTool
     [DataContract(Name = "ChunkList")]
     public class ChunkList : IDisposable
     {
+        public object ListLock;
 
         /// <summary>
         /// Chunks 
         /// The number of chunks for this asset
         /// </summary>
         [DataMember]
-        public ulong Chunks { get; set; }
+        public ulong TotalChunks { get; set; }
 
         /// <summary>
-        /// DownloadedChunks 
+        /// InputChunks 
         /// The number of chunks downloaded
         /// </summary>
         [DataMember]
-        public ulong DownloadedChunks { get; set; }
+        public ulong InputChunks { get; set; }
 
         /// <summary>
-        /// ArchivedChunks 
+        /// OutputChunks 
         /// The number of chunks in the archive
         /// </summary>
         [DataMember]
-        public ulong ArchivedChunks { get; set; }
+        public ulong OutputChunks { get; set; }
 
         /// <summary>
-        /// DownloadedChunks 
+        /// InputChunks 
         /// The number of bytes downloaded
         /// </summary>
         [DataMember]
-        public ulong DownloadedBytes { get; set; }
+        public ulong InputBytes { get; set; }
 
         /// <summary>
-        /// ArchivedChunks 
+        /// OutputChunks 
         /// The number of bytes in the archive
         /// </summary>
         [DataMember]
-        public ulong ArchivedBytes { get; set; }
+        public ulong OutputBytes { get; set; }
 
         /// <summary>
         /// ChunksList 
         /// List of the chunks to download  
         /// </summary>
         [DataMember]
-        public List<ChunkBuffer> ChunksList { get; set; }
+        public SortedList<UInt64,ChunkBuffer> ChunksList { get; set; }
 
 
         /// <summary>
@@ -234,15 +236,16 @@ namespace ASTool
 
         public bool AreChunksDownloaded()
         {
-            return (Chunks == DownloadedChunks);
+            return (TotalChunks == InputChunks);
         }
         public bool AreChunksArchived()
         {
-            return (Chunks == ArchivedChunks);
+            return (TotalChunks == OutputChunks);
         }
 
         public ChunkList() {
-            ChunksList = new List<ChunkBuffer>();
+            ChunksList = new SortedList<UInt64,ChunkBuffer>();
+            ListLock = new object();
         }
 
 
@@ -252,7 +255,7 @@ namespace ASTool
             {
                 foreach(var c  in ChunksList)
                 {
-                    c.Dispose();
+                    c.Value.Dispose();
                 }
                 ChunksList.Clear();
             }
