@@ -886,7 +886,7 @@ namespace ASTool
         /// <param name="stream"></param>
         /// <param name="configuration"></param>
         /// <returns>true if success</returns>
-        bool AddChunkList(StreamInfo stream, ChunkListConfiguration Configuration)
+        bool AddChunkList(StreamInfo stream, ChunkListConfiguration Configuration, int NumberOfLiveChunks = 0)
         {
             int Bitrate = 0;
             string UrlTemplate = string.Empty;
@@ -910,6 +910,18 @@ namespace ASTool
                             if (l != null)
                             {
                                 l.Configuration = Configuration;
+                                int Count = stream.Chunks.Count;
+                                int Threshold = 0;
+                                if (NumberOfLiveChunks == 0)
+                                    Threshold = 0;
+                                else
+                                {
+                                    if ((Count - NumberOfLiveChunks) > 0)
+                                        Threshold = Count - NumberOfLiveChunks;
+                                    else
+                                        Threshold = 0;
+                                }
+                                int index = 0;
                                 foreach (var chunk in stream.Chunks)
                                 {
                                     if (chunk.Duration != null)
@@ -919,12 +931,15 @@ namespace ASTool
                                     if (chunk.Time != null)
                                         time = (UInt64)chunk.Time;
 
-
-                                    ChunkBuffer cc = new ChunkBuffer(time, duration);
-                                    
-                                    if (cc != null)
+                                    if (index++ >= Threshold)
                                     {
-                                        l.ChunksList.TryAdd(time,cc);
+
+                                        ChunkBuffer cc = new ChunkBuffer(time, duration);
+
+                                        if (cc != null)
+                                        {
+                                            l.ChunksList.TryAdd(time, cc);
+                                        }
                                     }
                                     time += (ulong)duration;
                                 }
@@ -1258,7 +1273,7 @@ namespace ASTool
                                         configuration.Height = (int)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
                                         configuration.Source = this.StoragePath;
-                                        AddChunkList(videostream, configuration);
+                                        AddChunkList(videostream, configuration,this.IsLive==true? 10:0);
                                     }
                                 }
                             }
@@ -1333,7 +1348,7 @@ namespace ASTool
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
                                         configuration.Source = this.StoragePath;
 
-                                        AddChunkList(audiostream, configuration);
+                                        AddChunkList(audiostream, configuration, this.IsLive == true ? 10 : 0);
                                     }
                                 }
                             }
@@ -1373,7 +1388,7 @@ namespace ASTool
                                         configuration.FourCC = currentFourCC;
                                         configuration.Source = this.StoragePath;
 
-                                        AddChunkList(textstream, configuration);
+                                        AddChunkList(textstream, configuration, this.IsLive == true ? 10 : 0);
                                     }
                                 }
                             }
