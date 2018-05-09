@@ -39,7 +39,7 @@ namespace ASTool
         static Guid LiveServerManBoxGuid = new Guid("{A5D40B30-E814-11DD-BA2F-0800200C9A66}");
         static string VideoLiveManifestTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\r\n  <head>\r\n    <meta name=\"creator\" content=\"pushEncoder\" />\r\n  </head>\r\n  <body>\r\n    <switch>\r\n      <video src=\"<ismvfile>\" systemBitrate=\"<bitrate>\">\r\n        <param name=\"trackID\" value=\"<trackid>\" valuetype=\"data\" />\r\n        <param name=\"trackName\" value=\"<trackname>\" valuetype=\"data\" />\r\n        <param name=\"timescale\" value=\"<timescale>\" valuetype=\"data\" />\r\n        <param name=\"FourCC\" value=\"<fourcc>\" valuetype=\"data\" />\r\n        <param name=\"CodecPrivateData\" value=\"<codecprivatedata>\" valuetype=\"data\" />\r\n        <param name=\"MaxWidth\" value=\"<width>\" valuetype=\"data\" />\r\n        <param name=\"MaxHeight\" value=\"<height>\" valuetype=\"data\" />\r\n        <param name=\"DisplayWidth\" value=\"<width>\" valuetype=\"data\" />\r\n        <param name=\"DisplayHeight\" value=\"<height>\" valuetype=\"data\" />\r\n        <param name=\"Subtype\" value=\"\" valuetype=\"data\" />\r\n      </video>\r\n    </switch>\r\n  </body>\r\n</smil>\r\n";
         static string AudioLiveManifestTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\r\n  <head>\r\n    <meta name=\"creator\" content=\"pushEncoder\" />\r\n  </head>\r\n  <body>\r\n    <switch>\r\n      <audio src=\"<ismafile>\" systemBitrate=\"<bitrate>\" systemLanguage=\"<lang>\">\r\n        <param name=\"trackID\" value=\"<trackid>\" valuetype=\"data\" />\r\n        <param name=\"trackName\" value=\"<trackname>\" valuetype=\"data\" />\r\n        <param name=\"timescale\" value=\"<timescale>\" valuetype=\"data\" />\r\n        <param name=\"FourCC\" value=\"<fourcc>\" valuetype=\"data\" />\r\n        <param name=\"CodecPrivateData\" value=\"<codecprivatedata>\" valuetype=\"data\" />\r\n        <param name=\"AudioTag\" value=\"<audiotag>\" valuetype=\"data\" />\r\n        <param name=\"Channels\" value=\"<channels>\" valuetype=\"data\" />\r\n        <param name=\"SamplingRate\" value=\"<samplingrate>\" valuetype=\"data\" />\r\n        <param name=\"BitsPerSample\" value=\"<bitpersample>\" valuetype=\"data\" />\r\n        <param name=\"PacketSize\" value=\"<packetsize>\" valuetype=\"data\" />\r\n        <param name=\"Subtype\" value=\"\" valuetype=\"data\" />\r\n      </audio>\r\n    </switch>\r\n  </body>\r\n</smil>\r\n";
-        static string TextLiveManifestTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\r\n  <head>\r\n    <meta name=\"creator\" content=\"pushEncoder\" />\r\n  </head>\r\n  <body>\r\n    <switch>\r\n      <text src=\"<ismafile>\" systemBitrate=\"<bitrate>\" systemLanguage=\"<lang>\">\r\n        <param name=\"trackID\" value=\"<trackid>\" valuetype=\"data\" />\r\n        <param name=\"trackName\" value=\"<trackname>\" valuetype=\"data\" />\r\n        <param name=\"timescale\" value=\"<timescale>\" valuetype=\"data\" />\r\n        <param name=\"FourCC\" value=\"<fourcc>\" valuetype=\"data\" />\r\n        <param name=\"Subtype\" value=\"\" valuetype=\"data\" />\r\n      </text>\r\n    </switch>\r\n  </body>\r\n</smil>\r\n";
+        static string TextLiveManifestTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\r\n  <head>\r\n    <meta name=\"creator\" content=\"pushEncoder\" />\r\n  </head>\r\n  <body>\r\n    <switch>\r\n      <text src=\"<ismtfile>\" systemBitrate=\"<bitrate>\" systemLanguage=\"<lang>\">\r\n        <param name=\"trackID\" value=\"<trackid>\" valuetype=\"data\" />\r\n        <param name=\"trackName\" value=\"<trackname>\" valuetype=\"data\" />\r\n        <param name=\"timescale\" value=\"<timescale>\" valuetype=\"data\" />\r\n        <param name=\"FourCC\" value=\"<fourcc>\" valuetype=\"data\" />\r\n        <param name=\"Subtype\" value=\"\" valuetype=\"data\" />\r\n      </text>\r\n    </switch>\r\n  </body>\r\n</smil>\r\n";
 
         public string GetTextManifest(int TrackID, string TrackName, int Bitrate, string source, string Lang, int TimeScale, string FourCC)
         {
@@ -165,17 +165,17 @@ namespace ASTool
             if (!(SendAudioChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving audio chunks for url: " + cache.ManifestUri.ToString());
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending audio chunks for url: " + cache.ManifestUri.ToString());
             }
             if (!(SendVideoChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving video chunks for url: " + cache.ManifestUri.ToString());
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending video chunks for url: " + cache.ManifestUri.ToString());
             }
             if (!(SendTextChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving text chunks for url: " + cache.ManifestUri.ToString());
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending text chunks for url: " + cache.ManifestUri.ToString());
             }
             return bResult;
 
@@ -189,11 +189,16 @@ namespace ASTool
             {
                 int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, offset);
                 string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, offset);
-                Console.WriteLine("Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                 if (SendBox(stm, ISMHelper.Mp4Box.ReadMp4BoxBytes(buffer, offset, BoxLen)) == true)
+                {
+                   // Console.WriteLine("Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                     offset += BoxLen;
+                }
                 else
+                {
+                    Console.WriteLine("Error while sending to Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                     return false;
+                }
 
             }
             if (offset == buffer.Length)
@@ -393,6 +398,7 @@ namespace ASTool
                             Uri u = new Uri(pushurl);
                             spm.NetworkClient.NoDelay = true;
                             spm.NetworkClient.Connect(u.Host, 80);
+                            
                             if (spm.NetworkClient.Connected == true)
                             {
                                 string FirstPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nContent-Length: 0\r\nHost: " + u.Host + "\r\n\r\n";
