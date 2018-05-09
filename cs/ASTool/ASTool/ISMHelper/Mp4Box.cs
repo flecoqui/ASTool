@@ -354,7 +354,7 @@ namespace ASTool.ISMHelper
 
         public static string ParseFile(string Path)
         {
-            string result = string.Empty;
+            string result = "\r\n";
             try
             {
                 FileStream fs = new FileStream(Path, FileMode.Open, FileAccess.Read);
@@ -370,6 +370,44 @@ namespace ASTool.ISMHelper
                             result += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
                             if(box.Type!="mdat\0")
                                 result += GetBoxChildrenString(0,box);
+
+                            
+                            offset += box.Length;
+                        }
+                        else
+                            break;
+                    }
+                    fs.Close();
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result += "ERROR: Exception while parsing the file: " + ex.Message;
+            }
+            return result;
+        }
+
+        public static string ParseFileVerbose(string Path)
+        {
+            string result = "\r\n";
+            try
+            {
+                FileStream fs = new FileStream(Path, FileMode.Open, FileAccess.Read);
+                if (fs != null)
+                {
+                    long offset = 0;
+                    fs.Seek((long)offset, SeekOrigin.Begin);
+                    while (offset < fs.Length)
+                    {
+                        Mp4Box box = ReadMp4Box(fs);
+                        if (box != null)
+                        {
+                            result += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
+                            if (box.Type != "mdat\0")
+                                result += GetBoxChildrenString(0, box);
+                            result += Options.DumpHex(box.GetBoxBytes());
                             offset += box.Length;
                         }
                         else
@@ -768,7 +806,6 @@ namespace ASTool.ISMHelper
                     {
                         list.Clear();
                         list.Add(boxstts);
-                        list.Add(boxctts);
                         list.Add(boxstsc);
                         list.Add(boxstco);
                         list.Add(boxstsz);
@@ -791,11 +828,11 @@ namespace ASTool.ISMHelper
                                     Mp4BoxDINF boxdinf = Mp4BoxDINF.CreateDINFBox(list);
                                     if (boxdinf != null)
                                     {
-                                        Mp4BoxVMHD boxvmhd = Mp4BoxVMHD.CreateVMHDBox();
-                                        if (boxvmhd != null)
+                                        Mp4BoxNMHD boxnmhd = Mp4BoxNMHD.CreateNMHDBox();
+                                        if (boxnmhd != null)
                                         {
                                             list.Clear();
-                                            list.Add(boxvmhd);
+                                            list.Add(boxnmhd);
                                             list.Add(boxdinf);
                                             list.Add(boxstbl);
 

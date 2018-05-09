@@ -8,7 +8,9 @@ namespace ASTool.ISMHelper
     public enum IsmTrackType
     {
         audio,
-        video
+        video,
+        text,
+        textstream
     }
     public class QualityLevel
     {
@@ -20,7 +22,10 @@ namespace ASTool.ISMHelper
                 Index = 0;
             Bitrate = int.Parse(n.Attributes["Bitrate"].Value);
             FourCC = n.Attributes["FourCC"].Value;
-            CodecPrivateData = n.Attributes["CodecPrivateData"].Value;
+            if(n.Attributes["CodecPrivateData"] != null)
+                CodecPrivateData = n.Attributes["CodecPrivateData"].Value;
+            else
+                CodecPrivateData = string.Empty;
 
         }
         public int Index;
@@ -58,6 +63,15 @@ namespace ASTool.ISMHelper
         public int PacketSize;
         public string AudioTag;
     }
+    public class TextQualityLevel : QualityLevel
+    {
+
+        public TextQualityLevel(XmlNode n) : base(n)
+        {
+        }
+        //text
+
+    }
     public class Chunk
     {
         public Chunk(XmlNode n, int Ind = 0)
@@ -84,7 +98,11 @@ namespace ASTool.ISMHelper
             else
                 TimeScale = 10000000;
             Chunks = long.Parse(n.Attributes["Chunks"].Value);
-            QualityLevelCount = int.Parse(n.Attributes["QualityLevels"].Value);
+            var Val = n.Attributes["QualityLevels"];
+            if(Val != null)
+                QualityLevelCount = int.Parse(n.Attributes["QualityLevels"].Value);
+            else
+                QualityLevelCount = 1;
             Name = n.Attributes["Name"].Value;
             if(n.Attributes["Language"]!=null)
                 Lang = n.Attributes["Language"].Value;
@@ -107,6 +125,14 @@ namespace ASTool.ISMHelper
                     VideoLevel[i] = new VideoQualityLevel(QualityLevels[i]);
                 }
             }
+            if (MediaType == IsmTrackType.text)
+            {
+                TextLevel = new TextQualityLevel[QualityLevels.Count];
+                for (int i = 0; i < QualityLevels.Count; i++)
+                {
+                    TextLevel[i] = new TextQualityLevel(QualityLevels[i]);
+                }
+            }
         }
 
         public IsmTrackType MediaType;
@@ -114,6 +140,7 @@ namespace ASTool.ISMHelper
         public long Chunks;
         public AudioQualityLevel[] AudioLevel;
         public VideoQualityLevel[] VideoLevel;
+        public TextQualityLevel[] TextLevel;
         public string Name;
         public int QualityLevelCount;
         public string Lang;
@@ -195,7 +222,8 @@ namespace ASTool.ISMHelper
         {
             XmlNodeList videoTracks = SelectNodes("smil:smil/smil:body/smil:switch/smil:video");
             XmlNodeList audioTracks = SelectNodes("smil:smil/smil:body/smil:switch/smil:audio");
-            Tracks = new IsmFileTrack[videoTracks.Count + audioTracks.Count];
+            XmlNodeList textTracks = SelectNodes("smil:smil/smil:body/smil:switch/smil:textstream");
+            Tracks = new IsmFileTrack[videoTracks.Count + audioTracks.Count +  textTracks.Count];
             for (int i = 0; i < videoTracks.Count; i++)
             {
                 Tracks[i] = new IsmFileTrack(videoTracks[i]);
@@ -203,6 +231,10 @@ namespace ASTool.ISMHelper
             for (int i = 0; i < audioTracks.Count; i++)
             {
                 Tracks[i + videoTracks.Count] = new IsmFileTrack(audioTracks[i]);
+            }
+            for (int i = 0; i < textTracks.Count; i++)
+            {
+                Tracks[i + videoTracks.Count + audioTracks.Count] = new IsmFileTrack(textTracks[i]);
             }
             IsmcFilePath = string.Empty; 
             XmlNodeList metas = SelectNodes("smil:smil/smil:head/smil:meta");
@@ -260,6 +292,45 @@ namespace ASTool.ISMHelper
             return manifest;
 
         }
+        static string TextLiveManifestTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\">\r\n  <head>\r\n    <meta name=\"creator\" content=\"pushEncoder\" />\r\n  </head>\r\n  <body>\r\n    <switch>\r\n      <textstream src=\"<ismtfile>\" systemBitrate=\"<bitrate>\" systemLanguage=\"<lang>\">\r\n        <param name=\"trackID\" value=\"<trackid>\" valuetype=\"data\" />\r\n        <param name=\"trackName\" value=\"<trackname>\" valuetype=\"data\" />\r\n        <param name=\"timescale\" value=\"<timescale>\" valuetype=\"data\" />\r\n         </textstream>\r\n    </switch>\r\n  </body>\r\n</smil>\r\n";
+        public string GetTextManifest(int TrackID, string TrackName, int Bitrate, string source, IsmcFile ismc)
+        {
+            string manifest = string.Empty;
+            if (ismc.StreamIndexs != null)
+            {
+                for (int i = 0; i < ismc.StreamIndexs.Length; i++)
+                {
+                    if ((ismc.StreamIndexs[i].Name == TrackName) && (ismc.StreamIndexs[i].MediaType == IsmTrackType.text))
+                    {
+                        if (ismc.StreamIndexs[i].TextLevel != null)
+                        {
+                            if (ismc.StreamIndexs[i].TextLevel.Length > 0)
+                            {
+                                for (int j = 0; j < ismc.StreamIndexs[i].TextLevel.Length; j++)
+                                {
+                                    if (ismc.StreamIndexs[i].TextLevel[j].Bitrate == Bitrate)
+                                    {
+                                        manifest = TextLiveManifestTemplate;
+                                        manifest = manifest.Replace("<ismtfile>", source);
+                                        manifest = manifest.Replace("<bitrate>", Bitrate.ToString());
+                                        manifest = manifest.Replace("<lang>", ismc.StreamIndexs[i].Lang);
+                                        manifest = manifest.Replace("<trackid>", TrackID.ToString());
+                                        manifest = manifest.Replace("<trackname>", TrackName.ToString());
+                                        manifest = manifest.Replace("<timescale>", ismc.StreamIndexs[i].TimeScale.ToString());
+                                        manifest = manifest.Replace("<fourcc>", ismc.StreamIndexs[i].TextLevel[j].FourCC.ToString());
+                                        return manifest;
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            return manifest;
+
+        }
+
         public Chunk[] GetChunkList(string TrackName, IsmcFile ismc)
         {
             string manifest = string.Empty;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ASTool
@@ -16,6 +17,14 @@ namespace ASTool
             Push,
             PullPush,
             Parse
+        }
+        public enum LogLevel
+        {
+            None = 0,
+            Information,
+            Error,
+            Warning,
+            Verbose
         }
         public string GetErrorMessage()
         {
@@ -35,12 +44,18 @@ namespace ASTool
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
+            "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
+            "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
+            "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
+            "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
+            "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
+            "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --parse    --input <inputLocalISMFile|inputLocalISMCFile|inputLocalISMV|inputLocalISMA>  [--recursive]\r\n" +
             "ASTool --help";
         private string ErrorMessage = string.Empty;
@@ -57,6 +72,128 @@ namespace ASTool
         public int LiveOffset { get; set; }
         public Action ASToolAction { get; set; }
         public Int32 version { get; set; }
+
+        public LogLevel TraceLevel { get; set; }
+
+        public string TraceFile { get; set; }
+
+        public int TraceSize { get; set; }
+
+        public LogLevel ConsoleLevel { get; set; }
+        void LogMessage(LogLevel level, string Message)
+        {
+            string Text = string.Empty;
+            if (level <= TraceLevel)
+            {
+                Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
+                LogTrace(this.TraceFile, this.TraceSize, Text);
+            }
+            if (level <= ConsoleLevel)
+            {
+                if(string.IsNullOrEmpty(Text))
+                    Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
+                Console.WriteLine(Text);
+            }
+        }
+        public void LogVerbose(string Message)
+        {
+            LogMessage(LogLevel.Verbose, Message);
+        }
+        public void LogInformation(string Message)
+        {
+            LogMessage(LogLevel.Information, Message);
+        }
+        public void LogWarning(string Message)
+        {
+            LogMessage(LogLevel.Warning, Message);
+        }
+        public void LogError(string Message)
+        {
+            LogMessage(LogLevel.Error, Message);
+        }
+        static public char GetChar(byte b)
+        {
+            if ((b >= 32) && (b < 127))
+                return (char)b;
+            return '.';
+        }
+        static public string DumpHex(byte[] data)
+        {
+            string result = string.Empty;
+            string resultHex = " ";
+            string resultASCII = " ";
+            int Len = ((data.Length % 16 == 0) ? (data.Length / 16) : (data.Length / 16) + 1) * 16;
+            for (int i = 0; i < Len; i++)
+            {
+                if (i < data.Length)
+                {
+                    resultASCII += string.Format("{0}", GetChar(data[i]));
+                    resultHex += string.Format("{0:X2} ", data[i]);
+                }
+                else
+                {
+                    resultASCII += " ";
+                    resultHex += "   ";
+                }
+                if (i % 16 == 15)
+                {
+                    result += string.Format("{0:X8} ", i - 15) + resultHex + resultASCII + "\r\n";
+                    resultHex = " ";
+                    resultASCII = " ";
+                }
+            }
+            return result;
+        }
+        public ulong LogTrace(string fullPath, long Tracefile, string Message)
+        {
+            ulong retVal = 0;
+
+            try
+            {
+                FileStream fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                if (fs != null)
+                {
+                    long pos = fs.Seek(0, SeekOrigin.End);
+                    byte[] data = UTF8Encoding.UTF8.GetBytes(Message);
+                    if (data != null)
+                    {
+                        if (pos + data.Length > Tracefile)
+                            fs.SetLength(0);
+                        fs.Write(data, 0, data.Length);
+                        retVal = (ulong)data.Length;
+                    }
+                    fs.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception while append in file:" + fullPath + " Exception: " + ex.Message);
+            }
+            return retVal;
+        }
+        static public LogLevel GetLogLevel(string text)
+        {
+            LogLevel level = LogLevel.None;
+            switch(text)
+            {
+                case "none":
+                    level = LogLevel.None;
+                    break;
+                case "error":
+                    level = LogLevel.Error;
+                    break;
+                case "warning":
+                    level = LogLevel.Warning;
+                    break;
+                case "verbose":
+                    level = LogLevel.Verbose;
+                    break;
+                default:
+                    break;
+            }
+            return level;
+        }
+
         public static Options InitializeOptions(string[] args)
         { 
             Options options = new Options();
@@ -67,6 +204,10 @@ namespace ASTool
             try
             {
                 options.Loop = 0;
+                options.TraceFile = "ASTOOL.log";
+                options.TraceSize = 524280;
+                options.TraceLevel = LogLevel.Information;
+                options.ConsoleLevel = LogLevel.Information;
                 options.Recursive = false;
                 options.MaxBitrate = 0;
                 options.MinBitrate = 0;
@@ -199,6 +340,36 @@ namespace ASTool
                                 break;
                             case "--recursive":
                                 options.Recursive = true;
+                                break;
+                            case "--tracefile":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.TraceFile = args[i++];
+                                else
+                                    options.ErrorMessage = "TraceFile not set";
+                                break;
+                            case "--tracesize":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                {
+                                    int tracesize = 0;
+                                    if (int.TryParse(args[i++], out tracesize))
+                                        options.TraceSize = tracesize;
+                                    else
+                                        options.ErrorMessage = "TraceSize value incorrect";
+                                }
+                                else
+                                    options.ErrorMessage = "TraceSize not set";
+                                break;
+                            case "--tracelevel":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.TraceLevel = GetLogLevel(args[i++]);
+                                else
+                                    options.ErrorMessage = "TraceLevel not set";
+                                break;
+                            case "--consolelevel":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.ConsoleLevel = GetLogLevel(args[i++]);
+                                else
+                                    options.ErrorMessage = "ConsoleLevel not set";
                                 break;
                             default:
                                 if(options.ASToolAction != Action.None)

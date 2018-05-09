@@ -18,18 +18,18 @@ namespace ASTool
             Options opt = Options.InitializeOptions(args);
             if (opt == null)
             {
-                Console.WriteLine("ASTool: Internal Error");
+                opt.LogInformation("ASTool: Internal Error");
                 return;
             }
             if(!string.IsNullOrEmpty(opt.GetErrorMessage()))
             {
-                Console.WriteLine(opt.GetErrorMessagePrefix() + opt.GetErrorMessage());
-                Console.WriteLine(opt.GetInformationMessage(Version));
+                opt.LogInformation(opt.GetErrorMessagePrefix() + opt.GetErrorMessage());
+                opt.LogInformation(opt.GetInformationMessage(Version));
                 return;
             }
             if(opt.ASToolAction == Options.Action.Help)
             {
-                Console.WriteLine(opt.GetInformationMessage(Version));
+                opt.LogInformation(opt.GetInformationMessage(Version));
                 return;
             }
             if (opt.ASToolAction == Options.Action.PullPush)
