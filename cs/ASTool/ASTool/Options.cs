@@ -229,10 +229,12 @@ namespace ASTool
                                 options.ASToolAction = Action.Help;
                                 break;
                             case "--pullpush":
+                                options.LiveOffset = 10;
                                 options.BufferSize = 0;
                                 options.ASToolAction = Action.PullPush;
                                 break;
                             case "--pull":
+                                options.LiveOffset = 0;
                                 options.BufferSize = 65535;
                                 options.ASToolAction = Action.Pull;
                                 break;

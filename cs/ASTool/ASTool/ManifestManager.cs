@@ -831,7 +831,7 @@ namespace ASTool
                                 }
                                 if (stream.StreamType.ToLower() == "text")
                                 {
-                                    foreach (var vl in this.AudioChunkListList)
+                                    foreach (var vl in this.TextChunkListList)
                                     {
                                         if (vl.Configuration.GetSourceName() ==
                                             l.Configuration.GetSourceName())
