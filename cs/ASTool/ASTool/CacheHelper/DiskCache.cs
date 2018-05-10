@@ -95,43 +95,7 @@ namespace ASTool.CacheHelper
             return retVal;
         }
 
-        /// <summary>
-        /// Return a list of all urls in local storage
-        /// </summary>
-        public async Task<List<ManifestManager>> RestoreAllAssets(string pattern)
-        {
-            List<ManifestManager> downloads = new List<ManifestManager>();
-            List<string> dirs = GetDirectoryNames(root);
-            if (dirs != null)
-            {
-                for (int i = 0; i < dirs.Count; i++)
-                {
-                    string path = Path.Combine(root, dirs[i]);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        string file = Path.Combine(path, manifestFileName);
-                        if (!string.IsNullOrEmpty(file))
-                        {
-                            ManifestManager de = await GetObjectByType(file, typeof(ManifestManager)) as ManifestManager;
-                            if (de != null)
-                            {
-                                // Sanity check are the manifest file and chunk files consistent
-                                if ((de.AudioSavedChunks == (ulong)( GetFileSize(Path.Combine(path, audioIndexFileName)) / indexSize)) &&
-                                    (de.VideoSavedChunks == (ulong)( GetFileSize(Path.Combine(path, videoIndexFileName)) / indexSize)))
-                                {
-                                    downloads.Add(de);
-                                }
-                                else
-                                {
-                                    System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DiskCache - RestoreAllAssets - Manifest and Chunk file not consistent for path: " + path.ToString());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return downloads;
-        }
+
         /// <summary>
         /// Return a ManifestCache based on its Uri
         /// </summary>
@@ -247,9 +211,12 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialAudioOffset = AudioOffset;
-                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+                            ChunkBuffer cc;
+                            while (cl.ChunksQueue.TryDequeue(out cc) == true)
+                            //                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+                            //    foreach ( var cc in cl.ChunksQueue)
                             {
-                                var cc = cl.ChunksList.Values.ElementAt(Index);
+                                //var cc = cl.ChunksQueue.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
@@ -262,8 +229,7 @@ namespace ASTool.CacheHelper
                                             ulong result = Append(AudioIndexFile + "_" + AudioTrack.ToString(), ic.GetByteData());
                                             if (result == indexSize)
                                             {
-                                                cache.AudioSavedChunks++;
-                                                cache.AudioSavedBytes += res;
+
                                                 // Free buffer
                                                 cc.chunkBuffer = null;
                                                 cl.OutputBytes += res;
@@ -285,7 +251,7 @@ namespace ASTool.CacheHelper
                         }
                         if (InitialAudioOffset < AudioOffset)
                             bResult = true;
-                        if (cache.AudioSavedChunks == cache.AudioDownloadedChunks)
+                        if (cache.GetOutputAudioSize() == cache.GetInputAudioSize())
                             bResult = true;
                         AudioTrack++;
                     }
@@ -336,9 +302,13 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialTextOffset = TextOffset;
-                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+                            ChunkBuffer cc;
+                            while (cl.ChunksQueue.TryDequeue(out cc) == true)
+
+                            //foreach ( var cc in cl.ChunksQueue)
+                            //for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
                             {
-                                var cc = cl.ChunksList.Values.ElementAt(Index);
+                              //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
@@ -351,8 +321,7 @@ namespace ASTool.CacheHelper
                                             ulong result = Append(TextIndexFile + "_" + TextTrack.ToString(), ic.GetByteData());
                                             if (result == indexSize)
                                             {
-                                                cache.TextSavedChunks++;
-                                                cache.TextSavedBytes += res;
+
                                                 // Free buffer
                                                 cc.chunkBuffer = null;
                                                 cl.OutputBytes += res;
@@ -374,7 +343,7 @@ namespace ASTool.CacheHelper
                         }
                         if (InitialTextOffset < TextOffset)
                             bResult = true;
-                        if (cache.TextSavedChunks == cache.TextDownloadedChunks)
+                        if (cache.GetOutputTextSize() == cache.GetInputTextSize())
                             bResult = true;
                         TextTrack++;
                     }
@@ -427,9 +396,12 @@ namespace ASTool.CacheHelper
                         else
                         {
                             InitialVideoOffset = VideoOffset;
-                            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+                            ChunkBuffer cc;
+                            while (cl.ChunksQueue.TryDequeue(out cc) == true)
+                            //    foreach (var cc in cl.ChunksQueue)
+                            //for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
                             {
-                                var cc = cl.ChunksList.Values.ElementAt(Index);
+                              //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
@@ -441,14 +413,11 @@ namespace ASTool.CacheHelper
                                             VideoOffset += res;
                                             ulong result = Append(VideoIndexFile + "_" + VideoTrack.ToString(), ic.GetByteData());
                                             if (result == indexSize)
-                                            {
-                                                cache.VideoSavedChunks++;
-                                                cache.VideoSavedBytes += res;
+                                            {                                       
                                                 // free buffer
                                                 cc.chunkBuffer = null;
                                                 cl.OutputBytes += res;
                                                 cl.OutputChunks++;
-
                                             }
                                             else
                                             {
@@ -467,7 +436,7 @@ namespace ASTool.CacheHelper
                         VideoTrack++;
                         if (InitialVideoOffset < VideoOffset)
                             bResult = true;
-                        if (cache.VideoSavedChunks == cache.VideoDownloadedChunks)
+                        if (cache.GetOutputVideoSize() == cache.GetInputVideoSize())
                             bResult = true;
                     }
                 }

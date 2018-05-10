@@ -13,3 +13,20 @@ http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/preview.ism
 AppID: 95bf4b5b-7b88-4472-b7c1-7debd9695931
 
 Key: K/JMFYjBxaFdDgyLrDo8+toRMvHnd5vhWqJsLrPbFXA=
+http://localhost/VideoApp/MOVIE_Ondine/165258.ism/manifest
+http://localhost/VideoApp/metisser/metisser.ism/manifest
+http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest
+
+dotnet ASTool.dll --pullpush  --input http://localhost/VideoApp/Live/_live2.isml/manifest  --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml
+dotnet ASTool.dll --pullpush  --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml
+
+http://localhost/VideoApp/Live/_live1.isml/manifest
+
+dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname toto 
+
+dotnet ASTool.dll --parse  --input  C:\temp\ASTool\test4\metisser\Audio_0.isma
+
+pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\metisser\metisser.ism 
+pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\AudioSubtitle\HD_h264_AAC_2levels_2xsubtitles_7min.ism 
+
+pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\AudioSubtitle\HD_h264_AAC_2levels_2xsubtitles_7min.ism

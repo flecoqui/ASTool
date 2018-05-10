@@ -9,7 +9,10 @@ namespace ASTool
         static bool PullPush(Options opt)
         {
             bool result = false;
-
+            opt.LogInformation("ASTool starting...");
+            opt.LogInformation("PullPush");
+            opt.LogInformation("Pulling from : " + opt.InputUri);
+            opt.LogInformation("Pushing to : " + opt.OutputUri);
 
             SmoothLiveOutput d = new SmoothLiveOutput();
             if (d != null)
@@ -34,31 +37,70 @@ namespace ASTool
                                 while (mc.GetAssetStatus() != AssetStatus.ChunksDownloaded)
                                 {
                                     System.Threading.Tasks.Task.Delay(10000).Wait();
+                                    UInt64 InputChunks = 0;
+                                    UInt64 OutputChunks = 0;
+                                    UInt64 InputBytes = 0;
+                                    UInt64 OutputBytes = 0;
 
-                                    foreach(ChunkList cl in mc.AudioChunkListList)
+
+                                    foreach (ChunkList cl in mc.AudioChunkListList)
                                     {
                                         string source = cl.Configuration.GetSourceName();
-                                        ulong numberofchunks = (ulong)cl.ChunksList.Count;
-                                        ulong TotalChunks = cl.TotalChunks;
-                                        Console.WriteLine("Audio source: " + source  + "\r\n  Number of chunks: " + numberofchunks.ToString() + "\r\n  TotalChunks: " + TotalChunks.ToString() +
-                                            "\r\n  InputChunks: " + cl.InputChunks.ToString() + "\r\n  Outputchunks:  " + cl.OutputChunks.ToString());
+                                        opt.LogInformation("\r\nSource: " + source + 
+                                            "\r\n  Number of chunks in InputQueue:  " + cl.ChunksToReadQueue.Count.ToString() + 
+                                            "\r\n  Number of chunks in OutputQueue: " + cl.ChunksQueue.Count.ToString() + 
+                                            "\r\n  Number of chunks to process:     " + cl.TotalChunks.ToString() +
+                                            "\r\n  Input Chunks:  " + cl.InputChunks.ToString() +
+                                            "\r\n  Input Bytes:   " + cl.InputBytes.ToString() +
+                                            "\r\n  Output Chunks: " + cl.OutputChunks.ToString() +
+                                            "\r\n  Output Bytes:  " + cl.OutputBytes.ToString()
+                                            );
+                                        InputChunks += cl.InputChunks;
+                                        OutputChunks += cl.OutputChunks;
+                                        InputBytes += cl.InputBytes;
+                                        OutputBytes += cl.OutputBytes;
+
                                     }
                                     foreach (ChunkList cl in mc.VideoChunkListList)
                                     {
                                         string source = cl.Configuration.GetSourceName();
-                                        ulong numberofchunks = (ulong)cl.ChunksList.Count;
-                                        ulong TotalChunks = cl.TotalChunks;
-                                        Console.WriteLine("Video source: " + source + "\r\n  Number of chunks: " + numberofchunks.ToString() + "\r\n  TotalChunks: " + TotalChunks.ToString() +
-                                            "\r\n  InputChunks: " + cl.InputChunks.ToString() + "\r\n  Outputchunks:  " + cl.OutputChunks.ToString());
+                                        opt.LogInformation("\r\nSource: " + source +
+                                            "\r\n  Number of chunks in InputQueue:  " + cl.ChunksToReadQueue.Count.ToString() +
+                                            "\r\n  Number of chunks in OutputQueue: " + cl.ChunksQueue.Count.ToString() +
+                                            "\r\n  Number of chunks to process:     " + cl.TotalChunks.ToString() +
+                                            "\r\n  Input Chunks:  " + cl.InputChunks.ToString() +
+                                            "\r\n  Input Bytes:   " + cl.InputBytes.ToString() +
+                                            "\r\n  Output Chunks: " + cl.OutputChunks.ToString() +
+                                            "\r\n  Output Bytes:  " + cl.OutputBytes.ToString()
+                                            );
+                                        InputChunks += cl.InputChunks;
+                                        OutputChunks += cl.OutputChunks;
+                                        InputBytes += cl.InputBytes;
+                                        OutputBytes += cl.OutputBytes;
                                     }
                                     foreach (ChunkList cl in mc.TextChunkListList)
                                     {
                                         string source = cl.Configuration.GetSourceName();
-                                        ulong numberofchunks = (ulong)cl.ChunksList.Count;
-                                        ulong TotalChunks = cl.TotalChunks;
-                                        Console.WriteLine("Text source: " + source + "\r\n  Number of chunks: " + numberofchunks.ToString() + "\r\n  TotalChunks: " + TotalChunks.ToString() +
-                                            "\r\n  InputChunks: " + cl.InputChunks.ToString() + "\r\n  Outputchunks:  " + cl.OutputChunks.ToString());
+                                        opt.LogInformation("\r\nSource: " + source +
+                                            "\r\n  Number of chunks in InputQueue:  " + cl.ChunksToReadQueue.Count.ToString() +
+                                            "\r\n  Number of chunks in OutputQueue: " + cl.ChunksQueue.Count.ToString() +
+                                            "\r\n  Number of chunks to process:     " + cl.TotalChunks.ToString() +
+                                            "\r\n  Input Chunks:  " + cl.InputChunks.ToString() +
+                                            "\r\n  Input Bytes:   " + cl.InputBytes.ToString() +
+                                            "\r\n  Output Chunks: " + cl.OutputChunks.ToString() +
+                                            "\r\n  Output Bytes:  " + cl.OutputBytes.ToString()
+                                            );
+                                        InputChunks += cl.InputChunks;
+                                        OutputChunks += cl.OutputChunks;
+                                        InputBytes += cl.InputBytes;
+                                        OutputBytes += cl.OutputBytes;
                                     }
+                                    opt.LogInformation("\r\nTotal: " + 
+                                        "\r\n  Input Chunks:  " + InputChunks.ToString() +
+                                        "\r\n  Input Bytes:   " + InputBytes.ToString() +
+                                        "\r\n  Output Chunks: " + OutputChunks.ToString() +
+                                        "\r\n  Output Bytes:  " + OutputBytes.ToString()
+                                        );
                                 }
                             }
                         }
@@ -66,7 +108,7 @@ namespace ASTool
                 }
             }
 
-
+            opt.LogInformation("PullPush done");
             return result;
         }
     }

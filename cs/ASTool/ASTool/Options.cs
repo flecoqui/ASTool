@@ -92,7 +92,7 @@ namespace ASTool
             {
                 if(string.IsNullOrEmpty(Text))
                     Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
-                Console.WriteLine(Text);
+                Console.Write(Text);
             }
         }
         public void LogVerbose(string Message)

@@ -155,8 +155,24 @@ namespace ASTool
         /// ChunksList 
         /// List of the chunks to download  
         /// </summary>
-        [DataMember]
-        public SortedList<UInt64,ChunkBuffer> ChunksList { get; set; }
+        //[DataMember]
+        //public SortedList<UInt64,ChunkBuffer> ChunksList { get; set; }
+
+
+        /// <summary>
+        /// ChunksToReadQueue 
+        /// List of the chunks to read  
+        /// </summary>
+        
+        public ConcurrentQueue<ChunkBuffer> ChunksToReadQueue { get; set; }
+
+        public ulong LastTimeChunksToRead { get; set; }
+        /// <summary>
+        /// ChunksQueue 
+        /// List of the chunks read  
+        /// </summary>
+
+        public ConcurrentQueue<ChunkBuffer> ChunksQueue { get; set; }
 
 
         /// <summary>
@@ -244,20 +260,31 @@ namespace ASTool
         }
 
         public ChunkList() {
-            ChunksList = new SortedList<UInt64,ChunkBuffer>();
+            ChunksToReadQueue = new ConcurrentQueue<ChunkBuffer>();
+            LastTimeChunksToRead = 0;
+            ChunksQueue = new ConcurrentQueue<ChunkBuffer>();
             ListLock = new object();
         }
 
 
         public void Dispose()
         {
-            if(ChunksList!=null)
+
+            if(ChunksToReadQueue != null)
             {
-                foreach(var c  in ChunksList)
+                foreach(var c  in ChunksToReadQueue)
                 {
-                    c.Value.Dispose();
+                    c.Dispose();
                 }
-                ChunksList.Clear();
+                ChunksToReadQueue.Clear();
+            }
+            if (ChunksQueue != null)
+            {
+                foreach (var c in ChunksQueue)
+                {
+                    c.Dispose();
+                }
+                ChunksQueue.Clear();
             }
         }
     }

@@ -135,10 +135,11 @@ namespace ASTool
         {
             bool result = true;
             ListPushManager = new Dictionary<string, SmoothPushManager>();
+            // Cotes D'Armor
             AssetID = 22;
             StreamID = 0;
             pushurl = uri;
-            System.Threading.Tasks.Task.Delay(1).Wait();
+            await System.Threading.Tasks.Task.Delay(1);
             return result;
         }
         /// <summary>
@@ -188,7 +189,7 @@ namespace ASTool
             {
                 int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, offset);
                 string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, offset);
-                if (SendBox(stm, ISMHelper.Mp4Box.ReadMp4BoxBytes(buffer, offset, BoxLen)) == true)
+                if (SendBoxFromBuffer(stm, buffer,offset, BoxLen) == true)
                 {
                    // Console.WriteLine("Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                     offset += BoxLen;
@@ -207,9 +208,12 @@ namespace ASTool
         bool SendTextLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
-            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+            ChunkBuffer cc;
+            while (cl.ChunksQueue.TryDequeue(out cc) == true)
+//                foreach (var cc in cl.ChunksQueue)
+            //for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-                var cc = cl.ChunksList.Values.ElementAt(Index);
+              //  var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
@@ -218,8 +222,7 @@ namespace ASTool
                     {
                         if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
-                            cache.TextSavedChunks++;
-                            cache.TextSavedBytes += res;
+
                             // Free buffer
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
@@ -245,9 +248,13 @@ namespace ASTool
         bool SendAudioLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
-            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+
+            ChunkBuffer cc;
+            while (cl.ChunksQueue.TryDequeue(out cc)==true)
+            //foreach (var cc in cl.ChunksQueue)
+//                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-                var cc = cl.ChunksList.Values.ElementAt(Index);
+  //              var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
@@ -256,8 +263,7 @@ namespace ASTool
                     {
                         if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
-                            cache.AudioSavedChunks++;
-                            cache.AudioSavedBytes += res;
+
                             // Free buffer
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
@@ -283,9 +289,12 @@ namespace ASTool
         bool SendVideoLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
-            for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+            ChunkBuffer cc;
+            while (cl.ChunksQueue.TryDequeue(out cc) == true)
+//                foreach (var cc in cl.ChunksQueue)
+//                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-                var cc = cl.ChunksList.Values.ElementAt(Index);
+  //              var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
@@ -294,8 +303,7 @@ namespace ASTool
                     {
                         if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
-                            cache.VideoSavedChunks++;
-                            cache.VideoSavedBytes += res;
+
                             // Free buffer
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
@@ -341,6 +349,37 @@ namespace ASTool
                     System.Threading.Thread.Sleep(0);
                 }
                 catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Exception while sending box: " + ex.Message);
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        bool SendBoxFromBuffer(Stream stm, byte[] buffer, int offset, int len)
+        {
+            if ((buffer != null) && (buffer.Length >= (offset + len)))
+            {
+                try
+                {
+                    string StringLength = String.Format("{0:X}", len) + "\r\n";
+                    byte[] sb = UTF8Encoding.UTF8.GetBytes(StringLength);
+                    stm.Write(sb, 0, sb.Length);
+                    stm.Flush();
+                    System.Threading.Thread.Sleep(0);
+
+                    stm.Write(buffer, offset, len);
+                    stm.Flush();
+                    System.Threading.Thread.Sleep(0);
+
+                    StringLength = "\r\n";
+                    sb = UTF8Encoding.UTF8.GetBytes(StringLength);
+                    stm.Write(sb, 0, sb.Length);
+                    stm.Flush();
+                    System.Threading.Thread.Sleep(0);
+                }
+                catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("Exception while sending box: " + ex.Message);
                     return false;

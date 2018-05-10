@@ -9,6 +9,10 @@ namespace ASTool
         static bool Push(Options opt)
         {
             bool result = false;
+            opt.LogInformation("ASTool starting...");
+            opt.LogInformation("Push");
+            opt.LogInformation("Pushing from : " + opt.InputUri);
+            opt.LogInformation("Pushing to   : " + opt.OutputUri);
 
             int AssetId = 4516;
             int streamId = 0;
@@ -17,7 +21,6 @@ namespace ASTool
 
             FakeLOTTServer server = new FakeLOTTServer(opt.OutputUri);
 
-            Console.WriteLine("Pubpoint url is {0} ", opt.OutputUri);
             if (!string.IsNullOrEmpty(opt.InputUri))
             {
                 IsmFile ism = new IsmFile(File.OpenRead(opt.InputUri));
@@ -26,7 +29,6 @@ namespace ASTool
                     string ismcFilePath = Path.Combine(Path.GetDirectoryName(opt.InputUri), ism.IsmcFilePath);
                     IsmcFile ismc = new IsmcFile(File.OpenRead(ismcFilePath));
 
-                    Console.WriteLine("Pushing multiple streams from manifest file: {0} ", opt.InputUri);
                     for (int i = 0/*ism.Tracks.Length -2*/; i < ism.Tracks.Length; i++)
                     {
                         string ismvFile = Path.Combine(Path.GetDirectoryName(opt.InputUri), ism.Tracks[i].Source);
@@ -65,7 +67,7 @@ namespace ASTool
             {
                 pusher.WaitForCompletion();
             }
-
+            opt.LogInformation("Push done");
             return result;
         }
     }
