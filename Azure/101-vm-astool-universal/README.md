@@ -1,4 +1,4 @@
-# Deployment of a VM (Linux or Windows) running Apache or IIS (port 80) and iperf3 (port 5201)
+# Deployment of a VM (Linux or Windows) running .Net Core and ASTool 
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FASTool%2Fmaster%2FAzure%2F101-vm-astool-universal%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
@@ -17,7 +17,7 @@ This template allows you to deploy a simple VM running: </p>
 This will VM will be deployed in the region associated with Resource Group and the VM Size is one of the parameter.
 With Azure CLI you can deploy this VM with 2 command lines:
 
-![](https://raw.githubusercontent.com/flecoqui/ASTool/blob/master/Azure/101-vm-astool-universal/Docs/1-architecture.png)
+![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/Docs/1-architecture.png)
 
 ## CREATE RESOURCE GROUP:
 azure group create "ResourceGroupName" "DataCenterName"
