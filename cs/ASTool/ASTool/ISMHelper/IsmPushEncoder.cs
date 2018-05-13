@@ -34,8 +34,12 @@ namespace ASTool.ISMHelper
         public bool Loop = false;
         private bool _seenMoov;
         private IsmFile _ismFile;
-        private int _trackID;
 
+        private int _trackID;
+        public UInt64 OutputChunks { get; set; }
+        public UInt64 OutputBytes { get; set; }
+        public string GetSourceName() { return _ismvFile; }
+        private Options options;
         public IsmPushEncoder(
             FakeLOTTServer server,
             string ismvFile,
@@ -45,9 +49,12 @@ namespace ASTool.ISMHelper
             int bitrate,
             string manifest,
             Chunk[] ChunkArray,
-            int trackID)
-            : this(server, null, ismvFile, pushUrl, AssetId, StreamId, bitrate,manifest,ChunkArray,trackID)
+            int trackID,
+            Options opt)
+            : this(server, null, ismvFile, pushUrl, AssetId, StreamId, bitrate,manifest,ChunkArray,trackID,opt)
         {
+            OutputBytes = 0;
+            OutputChunks = 0;
         }
         public IsmPushEncoder(
             FakeLOTTServer server,
@@ -59,11 +66,15 @@ namespace ASTool.ISMHelper
             int bitrate,
             string LiveManifest,
             Chunk[] ChunkArray,
-            int trackID)
+            int trackID,
+            Options opt)
         {
+            OutputBytes = 0;
+            OutputChunks = 0;
             _ismFile = ismFile;
             _server = server;
             _ismvStream = File.OpenRead(ismvFile);
+            _ismvFile = ismvFile;
             _bitrate = bitrate;
             _liveManifest = LiveManifest;
             //PushEncoder.exe uses this format - note '?' and lower case 's' in streams
@@ -72,14 +83,16 @@ namespace ASTool.ISMHelper
 // flecoqui            _url = string.Format("{0}?Streams({1}-stream{2})", pushUrl, AssetId, StreamId);
             _url = string.Format("{0}/Streams({1}-stream{2})", pushUrl, AssetId, StreamId);
 
-            Console.WriteLine("Pushing to url: {0} source: {1} manifest: ", _url, ismvFile);
-            Console.WriteLine(_liveManifest);
+            if (this.options != null)
+                this.options.LogInformation("Pushing to url: " + _url + " source: " + ismvFile + " manifest: \r\n" + _liveManifest);
             
             _thread = new Thread(new ThreadStart(Worker));
             _ismvFile = ismvFile;
             _streamID = StreamId;
             _ChunkArray = ChunkArray;
             _trackID = trackID;
+            options = opt;
+
         }
 
         public void Start()
@@ -189,9 +202,10 @@ namespace ASTool.ISMHelper
 
                 restURL.AppendFormat(_pushurl);
 
-            // use the static Create method of the WebRequest object 
-            // casting the returned WebRequest to an HttpWebRequest
-                Console.WriteLine("File " + _ismvFile + "Create");
+                // use the static Create method of the WebRequest object 
+                // casting the returned WebRequest to an HttpWebRequest
+
+             if(this.options != null)this.options.LogVerbose("File " + _ismvFile + " Create");
             Uri u = new Uri(_pushurl);
             TcpClient tc = new TcpClient();
             tc.NoDelay = true;
@@ -236,7 +250,7 @@ namespace ASTool.ISMHelper
                         long AbsoluteTime = 0;
 
                         int i;
-                        long sent = 0;
+                       // long sent = 0;
 
                         int loopIndex = 0;
                         do
@@ -288,8 +302,8 @@ namespace ASTool.ISMHelper
                                             int Len = Mp4BoxHelper.ReadMp4BoxLength(buffer, 0);
                                             string Title = Mp4BoxHelper.ReadMp4BoxTitle(buffer, 0);
                                             {
-
-                                                Console.WriteLine("File " + _ismvFile + " Streaming MP4 Box " + Title + " " + Len.ToString() + " Bytes");
+                                                if(this.options!=null)
+                                                    this.options.LogVerbose("File " + _ismvFile + " Streaming MP4 Box " + Title + " " + Len.ToString() + " Bytes");
                                                 //i = GetData(buffer, length);
                                                 if (Mp4BoxHelper.IsBoxType(buffer, 0, "moof"))
                                                 {
@@ -378,7 +392,8 @@ namespace ASTool.ISMHelper
                                                 Thread.Sleep(0);
 
                                                 // while (tc.Available > 0) stm.Read(rb, 0, rb.Length);
-                                                sent += i;
+                                                this.OutputBytes += (ulong) i;
+                                                this.OutputChunks++;
 
                                                 if (null != _ismFile && Mp4BoxHelper.IsBoxType(buffer, 0, "ftyp"))
                                                 {
@@ -402,7 +417,8 @@ namespace ASTool.ISMHelper
                                                     {
                                                         Len = Mp4BoxHelper.ReadMp4BoxLength(buffer, 0);
                                                         Title = Mp4BoxHelper.ReadMp4BoxTitle(buffer, 0);
-                                                        Console.WriteLine("File " + _ismvFile + "Streaming Manifest at " + _bitrate.ToString() + " b/s MP4 Box " + Title + " " + Len.ToString() + " Bytes");
+                                                        if (this.options != null)
+                                                            this.options.LogVerbose("File " + _ismvFile + " Streaming Manifest at " + _bitrate.ToString() + " b/s MP4 Box " + Title + " " + Len.ToString() + " Bytes");
                                                         //i = GetData(buffer, length);
 
                                                         StringLength = String.Format("{0:X}", i) + "\r\n";
@@ -421,7 +437,9 @@ namespace ASTool.ISMHelper
                                                         stm.Flush();
                                                         Thread.Sleep(0);
                                                         //       while (tc.Available > 0) stm.Read(rb, 0, rb.Length);
-                                                        sent += i;
+                                                        this.OutputBytes += (ulong)i;
+                                                        this.OutputChunks++;
+
                                                     }
 
                                                 }
@@ -826,6 +844,17 @@ namespace ASTool.ISMHelper
         public void WaitForCompletion()
         {
             _thread.Join();
+
+        }
+        public bool IsRunning()
+        {
+            System.Diagnostics.Debug.WriteLine("Status: " + _thread.ThreadState.ToString());
+            if ((_thread.ThreadState == System.Threading.ThreadState.Running)||
+                (_thread.ThreadState == System.Threading.ThreadState.WaitSleepJoin))
+
+                return true;
+            else
+                return false;
         }
     }
 }

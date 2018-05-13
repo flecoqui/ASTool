@@ -120,6 +120,7 @@ namespace ASTool
         private string pushurl;
         private int AssetID;
         private int StreamID;
+        private Options options;
         public SmoothLiveOutput()
         {
             ListPushManager = new Dictionary<string, SmoothPushManager>();
@@ -131,14 +132,19 @@ namespace ASTool
         /// Initialize
         /// Initialize the output uri
         /// </summary>
-        public  async  Task<bool> Initialize(string uri)
+        public  async  Task<bool> Initialize(Options opt)
         {
-            bool result = true;
-            ListPushManager = new Dictionary<string, SmoothPushManager>();
-            // Cotes D'Armor
-            AssetID = 22;
-            StreamID = 0;
-            pushurl = uri;
+            bool result = false;
+            if (opt != null)
+            {
+                ListPushManager = new Dictionary<string, SmoothPushManager>();
+                // Cotes D'Armor
+                AssetID = 22;
+                StreamID = 0;
+                pushurl = opt.OutputUri;
+                options = opt;
+                result = true;
+            }
             await System.Threading.Tasks.Task.Delay(1);
             return result;
         }
@@ -466,7 +472,8 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            
+                                            if(options!=null)options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
                                             // Sending Live Manifest
@@ -495,7 +502,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -505,7 +512,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
@@ -593,7 +600,7 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
@@ -629,7 +636,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -639,7 +646,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
@@ -728,7 +735,7 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
@@ -760,7 +767,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -770,7 +777,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            Console.WriteLine("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
 

@@ -6,24 +6,62 @@ namespace ASTool
 {
     public partial class Program
     {
+        static void CreatePushCounters(Options opt, List<IsmPushEncoder> pushers, string source)
+        {
+            UInt64 OutputChunks = 0;
+            UInt64 OutputBytes = 0;
+
+            foreach (IsmPushEncoder cl in pushers)
+            {
+                opt.SetCounter(cl.GetSourceName() + "_Source", "Counters for source", cl.GetSourceName(), string.Empty, "Counters for source");
+                opt.SetCounter(cl.GetSourceName() + "_OutputChunks", "Number of Output Chunks", cl.OutputChunks, string.Empty, "Number of Output Chunks");
+                opt.SetCounter(cl.GetSourceName() + "_OutputBytes", "Number of Output Bytes", cl.OutputBytes, string.Empty, "Number of Output Bytes");
+                OutputChunks += cl.OutputChunks;
+                OutputBytes += cl.OutputBytes;
+            }
+            
+            opt.SetCounter(source + "_Source", "Total Counters for source", opt.InputUri, string.Empty, "Total Counters for source");
+            opt.SetCounter(source + "_OutputChunks", "Total Number of Output Chunks", OutputChunks, string.Empty, "Total Number of Output Chunks");
+            opt.SetCounter(source + "_OutputBytes", "Total Number of Output Bytes", OutputBytes, string.Empty, "Total Number of Output Bytes");
+            opt.SetCounter(source + "_Bitrate", "Current input bitrate", (int)(OutputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds), "b/s", "Current input bitrate");
+
+        }
+        static void UpdatePushCounters(Options opt, List<IsmPushEncoder> pushers, string source)
+        {
+            UInt64 OutputChunks = 0;
+            UInt64 OutputBytes = 0;
+
+            foreach (IsmPushEncoder cl in pushers)
+            {
+                opt.SetCounter(cl.GetSourceName() + "_OutputChunks", cl.OutputChunks);
+                opt.SetCounter(cl.GetSourceName() + "_OutputBytes", cl.OutputBytes);
+                OutputChunks += cl.OutputChunks;
+                OutputBytes += cl.OutputBytes;
+            }
+            opt.SetCounter(source + "_Source", opt.InputUri);
+            opt.SetCounter(source + "_OutputChunks", OutputChunks);
+            opt.SetCounter(source + "_OutputBytes", OutputBytes);
+            opt.SetCounter(source  + "_Bitrate", (int)(OutputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds));
+
+        }
+
         static bool Push(Options opt)
         {
             bool result = false;
-            opt.LogInformation("ASTool starting...");
-            opt.LogInformation("Push");
-            opt.LogInformation("Pushing from : " + opt.InputUri);
-            opt.LogInformation("Pushing to   : " + opt.OutputUri);
+            opt.Status = Options.TheadStatus.Running;
+            opt.ThreadStartTime = DateTime.Now;
+
+            opt.LogInformation("\r\nPush " + opt.Name + "\r\n Pushing from : " + opt.InputUri + "\r\n Pushing to   : " + opt.OutputUri);
 
             int AssetId = 4516;
             int streamId = 0;
-            List<IsmPushEncoder> pushers = new List<IsmPushEncoder>();
             IsmPushEncoder encoder;
-
+            List<IsmPushEncoder> pushers = new List<IsmPushEncoder>();
             FakeLOTTServer server = new FakeLOTTServer(opt.OutputUri);
-
+            IsmFile ism = null;
             if (!string.IsNullOrEmpty(opt.InputUri))
             {
-                IsmFile ism = new IsmFile(File.OpenRead(opt.InputUri));
+                ism = new IsmFile(File.OpenRead(opt.InputUri));
                 if (ism.Tracks.Length > 0)
                 {
                     string ismcFilePath = Path.Combine(Path.GetDirectoryName(opt.InputUri), ism.IsmcFilePath);
@@ -50,7 +88,8 @@ namespace ASTool
                             ism.Tracks[i].Bitrate,
                             LiveManifest,
                             ChunkArray,
-                            ism.Tracks[i].TrackId);
+                            ism.Tracks[i].TrackId,
+                            opt);
                         encoder.InsertNtp = true;
                         encoder.InsertBoxes = true;
                         encoder.Loop = (opt.Loop == 0);
@@ -63,11 +102,27 @@ namespace ASTool
             {
                 pusher.Start();
             }
-            foreach (IsmPushEncoder pusher in pushers)
+            bool IsRunning = true;
+            while (IsRunning)
             {
-                pusher.WaitForCompletion();
+                System.Threading.Tasks.Task.Delay(5000).Wait();
+                if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
+                    CreatePushCounters(opt,pushers, ism.IsmcFilePath);
+                else
+                    UpdatePushCounters(opt,pushers, ism.IsmcFilePath);
+                IsRunning = false;
+                foreach (IsmPushEncoder pusher in pushers)
+                {
+                    if (pusher.IsRunning() == true)
+                    { 
+                        IsRunning = true;
+                        break;
+                    }
+                }
+
             }
-            opt.LogInformation("Push done");
+            opt.LogInformation("Push " + opt.Name + " done");
+            opt.Status = Options.TheadStatus.Stopped;
             return result;
         }
     }

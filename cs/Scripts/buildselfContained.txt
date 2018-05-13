@@ -24,9 +24,22 @@ http://localhost/VideoApp/Live/_live1.isml/manifest
 
 dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname toto 
 
+
+
+dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
 dotnet ASTool.dll --parse  --input  C:\temp\ASTool\test4\metisser\Audio_0.isma
 
 pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\metisser\metisser.ism 
 pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\AudioSubtitle\HD_h264_AAC_2levels_2xsubtitles_7min.ism 
 
 pushencoder /loop http://localhost/VideoApp/Live/_live1.isml  C:\projects\VideoApp\AudioSubtitle\HD_h264_AAC_2levels_2xsubtitles_7min.ism
+
+dotnet ASTool.dll --pullpush  --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml
+
+dotnet ASTool.dll --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\temp\\astool\\testvod
+dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --output C:\\temp\\astool\\testdvr
+dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\\temp\\astool\\testdvr1
+dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml  --loop 0
+
+
+dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0

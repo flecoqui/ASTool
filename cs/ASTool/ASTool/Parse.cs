@@ -477,7 +477,8 @@ namespace ASTool
         static bool Parse(Options opt)
         {
             bool result = true;
-            opt.LogInformation("ASTool starting...");
+            opt.Status = Options.TheadStatus.Running;
+            opt.ThreadStartTime = DateTime.Now;
             opt.LogInformation("Parsing file: " + opt.InputUri);
 
             if(opt.TraceLevel>= Options.LogLevel.Verbose)
@@ -485,6 +486,7 @@ namespace ASTool
             else
                 opt.LogInformation(Mp4Box.ParseFile(opt.InputUri));
             opt.LogInformation("Parsing file: " + opt.InputUri + " done");
+            opt.Status = Options.TheadStatus.Stopped;
             return result;
         }
     }

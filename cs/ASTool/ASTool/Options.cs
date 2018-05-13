@@ -2,30 +2,177 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace ASTool
 {
+    [DataContract(Name = "Options")]
     /// <summary>
     /// Options that control the behavior of the program
     /// </summary>
     public class Options
     {
+        [DataContract(Name = "Action")]
         public enum Action {
+            [EnumMember]
             None = 0,
+            [EnumMember]
             Help,
+            [EnumMember]
             Pull,
+            [EnumMember]
             Push,
+            [EnumMember]
             PullPush,
-            Parse
+            [EnumMember]
+            Parse,
+            [EnumMember]
+            Import,
+            [EnumMember]
+            Export
         }
+        [DataContract(Name = "LogLevel")]
         public enum LogLevel
         {
+            [EnumMember]
             None = 0,
-            Information,
+
+            [EnumMember]
             Error,
+            [EnumMember]
+            Information,
+            [EnumMember]
             Warning,
+            [EnumMember]
             Verbose
         }
+        [DataContract(Name = "TheadStatus")]
+        public enum TheadStatus
+        {
+            [EnumMember]
+            Initializing = 0,
+            [EnumMember]
+            Running,
+            [EnumMember]
+            Stopping,
+            [EnumMember]
+            Stopped
+        }
+        [DataMember]
+        public Action ASToolAction { get; set; }
+        [DataMember]
+        public string Name { get; set; }
+
+        [DataMember]
+        public string InputUri { get; set; }
+        [DataMember]
+        public string OutputUri { get; set; }
+        [DataMember]
+        public int MinBitrate { get; set; }
+        [DataMember]
+        public int MaxBitrate { get; set; }
+        [DataMember]
+        public ulong MaxDuration { get; set; }
+        [DataMember]
+        public string AudioTrackName { get; set; }
+        [DataMember]
+        public string TextTrackName { get; set; }
+        [DataMember]
+        public int Loop { get; set; }
+        [DataMember]
+        public int BufferSize { get; set; }
+        [DataMember]
+        public int LiveOffset { get; set; }
+        [DataMember]
+        public int CounterPeriod { get; set; }
+        [DataMember]
+        public LogLevel ConsoleLevel { get; set; }
+        [DataMember]
+        public LogLevel TraceLevel { get; set; }
+        [DataMember]
+        public string TraceFile { get; set; }
+        [DataMember]
+        public int TraceSize { get; set; }
+        [DataMember]
+        public string ConfigFile { get; set; }
+
+        public TheadStatus Status { get; set; }
+        public DateTime ThreadStartTime { get; set; }
+
+        public Dictionary<string, CounterDescription> ListCounters { get; set; }
+        public string GetCountersInformation()
+        {
+            string result = string.Empty;
+
+            if((ListCounters!=null)&& (ListCounters.Count>0))
+            {
+                foreach(var c in ListCounters)
+                {
+                    result += c.Value.Name + ": " + c.Value.value.ToString() + " " + c.Value.UnitString + "\r\n"; 
+                }
+            }
+            return result;
+        }
+        public bool SetCounter(string key, string name, object value, string unit, string description )
+        {
+            bool result = false;
+            if (ListCounters == null)
+                ListCounters = new Dictionary<string, CounterDescription>();
+
+            if(ListCounters!=null)
+            {
+                try
+                {
+                    if (ListCounters.ContainsKey(key))
+                    {
+                        ListCounters[key].Name = name;
+                        ListCounters[key].value = value;
+                        ListCounters[key].UnitString = unit;
+                        ListCounters[key].Description = description;
+                    }
+                    else
+                    {
+                        CounterDescription c = new CounterDescription();
+                        if (c != null)
+                        {
+                            c.Key = key;
+                            c.Name = name;
+                            c.value = value;
+                            c.UnitString = unit;
+                            c.Description = description;
+                            ListCounters.Add(key, c);
+                        }
+                    }
+                    result = true;
+                }
+                catch(Exception)
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
+        public bool SetCounter(string key, object value)
+        {
+            bool result = false;
+            if (ListCounters != null)
+            {
+                try
+                {
+                    if (ListCounters.ContainsKey(key))
+                    {
+                        ListCounters[key].value = value;
+                        result = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
+
         public string GetErrorMessage()
         {
             return ErrorMessage;
@@ -44,42 +191,28 @@ namespace ASTool
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
+            "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
+            "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
+            "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --parse    --input <inputLocalISMFile|inputLocalISMCFile|inputLocalISMV|inputLocalISMA>  [--recursive]\r\n" +
+            "ASTool --import   --configfile <configFile> \r\n" +
+            "ASTool --export   --configfile <configFile> \r\n" +
             "ASTool --help";
         private string ErrorMessage = string.Empty;
-        public string InputUri { get; set; }        
-        public string OutputUri { get; set; }
-        public int MinBitrate { get; set; }
-        public int MaxBitrate { get; set; }
-        public ulong Duration { get; set; }
-        public string AudioTrackName { get; set; }
-        public string TextTrackName { get; set; }
-        public bool Recursive { get; set; }
-        public int Loop { get; set; }
-        public int BufferSize { get; set; }
-        public int LiveOffset { get; set; }
-        public Action ASToolAction { get; set; }
-        public Int32 version { get; set; }
 
-        public LogLevel TraceLevel { get; set; }
 
-        public string TraceFile { get; set; }
-
-        public int TraceSize { get; set; }
-
-        public LogLevel ConsoleLevel { get; set; }
         void LogMessage(LogLevel level, string Message)
         {
             string Text = string.Empty;
@@ -150,19 +283,22 @@ namespace ASTool
 
             try
             {
-                FileStream fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                if (fs != null)
+                lock (this)
                 {
-                    long pos = fs.Seek(0, SeekOrigin.End);
-                    byte[] data = UTF8Encoding.UTF8.GetBytes(Message);
-                    if (data != null)
+                    FileStream fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                    if (fs != null)
                     {
-                        if (pos + data.Length > Tracefile)
-                            fs.SetLength(0);
-                        fs.Write(data, 0, data.Length);
-                        retVal = (ulong)data.Length;
+                        long pos = fs.Seek(0, SeekOrigin.End);
+                        byte[] data = UTF8Encoding.UTF8.GetBytes(Message);
+                        if (data != null)
+                        {
+                            if (pos + data.Length > Tracefile)
+                                fs.SetLength(0);
+                            fs.Write(data, 0, data.Length);
+                            retVal = (ulong)data.Length;
+                        }
+                        fs.Close();
                     }
-                    fs.Close();
                 }
             }
             catch (Exception ex)
@@ -174,10 +310,13 @@ namespace ASTool
         static public LogLevel GetLogLevel(string text)
         {
             LogLevel level = LogLevel.None;
-            switch(text)
+            switch(text.ToLower())
             {
                 case "none":
                     level = LogLevel.None;
+                    break;
+                case "information":
+                    level = LogLevel.Information;
                     break;
                 case "error":
                     level = LogLevel.Error;
@@ -193,34 +332,235 @@ namespace ASTool
             }
             return level;
         }
+        public static  object ReadObjectByType(string filepath, Type type)
+        {
+            object retVal = null;
+            try
+            {
+                FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                if (fs != null)
+                {
+                    System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(type);
+                    retVal = ser.ReadObject(fs);
+                    fs.Close();                        
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception while reading config file: " + ex.Message);
 
+            }
+            return retVal;
+        }
+        public static bool WriteObjectByType(string filepath, Type type, object obj)
+        {
+            bool retVal = false;
+            try
+            {
+                FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                if (fs != null)
+                {
+                    System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(type);
+                    ser.WriteObject(fs,obj);
+                    fs.Close();
+                    retVal = true;
+                }
+                    
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception while writing config file: " + ex.Message);
+
+            }
+            return retVal;
+        }
+        public static List<Options> ReadConfigFile(string ConfigFile)
+        {
+            List<Options> list = ReadObjectByType(ConfigFile, typeof(List<Options>)) as List<Options>;
+            return list;
+        }
+        public static bool WriteConfigFile(string ConfigFile, List<Options> obj)
+        {
+            return WriteObjectByType(ConfigFile, typeof(List<Options>), obj);
+        }
+        public Options()
+        {
+            this.Loop = 0;
+            this.Name = string.Empty;
+            this.ConfigFile = string.Empty;
+            this.TraceFile = string.Empty;
+            this.TraceSize = 524280;
+            this.TraceLevel = LogLevel.Information;
+            this.ConsoleLevel = LogLevel.Information;
+            this.MaxBitrate = 0;
+            this.MinBitrate = 0;
+            this.MaxDuration = 0;
+            this.InputUri = string.Empty;
+            this.OutputUri = string.Empty;
+            this.AudioTrackName = string.Empty;
+            this.TextTrackName = string.Empty;
+            this.BufferSize = 0;
+            this.LiveOffset = 10;
+            this.ASToolAction = Action.None;
+            this.CounterPeriod = 20;
+            this.ListCounters = new Dictionary<string, CounterDescription>();
+        }
+        public static Options CheckOptions(Options options)
+        {
+            if (options.ASToolAction == Action.Help)
+            {
+                return options;
+            }
+            else if (options.ASToolAction == Action.Pull)
+            {
+                if ((!string.IsNullOrEmpty(options.InputUri)) &&
+                    (!string.IsNullOrEmpty(options.OutputUri))
+                    )
+                {
+                    try
+                    {
+                        Uri uri = new Uri(options.InputUri);
+                    }
+                    catch (Exception)
+                    {
+                        options.ErrorMessage = "Bad format Input Uri:" + options.InputUri;
+                    }
+                    bool bDirExists = false;
+                    try
+                    {
+                        bDirExists = System.IO.Directory.Exists(options.OutputUri);
+                    }
+                    catch (Exception)
+                    {
+                        bDirExists = false;
+                    }
+                    if (bDirExists == false)
+                        options.ErrorMessage = "Output directory doesn't exist:" + options.OutputUri;
+                    return options;
+                }
+                else
+                    options.ErrorMessage = "Missing paramters for Pull feature";
+            }
+            else if (options.ASToolAction == Action.PullPush)
+            {
+                if ((!string.IsNullOrEmpty(options.InputUri)) &&
+                    (!string.IsNullOrEmpty(options.OutputUri))
+                    )
+                {
+                    try
+                    {
+                        Uri uri = new Uri(options.InputUri);
+                    }
+                    catch (Exception)
+                    {
+                        options.ErrorMessage = "Bad format Input Uri:" + options.InputUri;
+                    }
+                    try
+                    {
+                        Uri uri = new Uri(options.OutputUri);
+                    }
+                    catch (Exception)
+                    {
+                        options.ErrorMessage = "Bad format Output Uri:" + options.OutputUri;
+                    }
+                    return options;
+                }
+                else
+                    options.ErrorMessage = "Missing paramters for PullPush feature";
+            }
+            else if (options.ASToolAction == Action.Push)
+            {
+                if ((!string.IsNullOrEmpty(options.InputUri)) &&
+                    (!string.IsNullOrEmpty(options.OutputUri))
+                    )
+                {
+
+                    bool bFileExists = false;
+                    try
+                    {
+                        bFileExists = System.IO.File.Exists(options.InputUri);
+                    }
+                    catch (Exception)
+                    {
+                        bFileExists = false;
+                    }
+                    if (bFileExists == false)
+                        options.ErrorMessage = "Input ISM file doesn't exist:" + options.InputUri;
+                    try
+                    {
+                        Uri uri = new Uri(options.OutputUri);
+                    }
+                    catch (Exception)
+                    {
+                        options.ErrorMessage = "Bad format Output Uri:" + options.OutputUri;
+                    }
+                    return options;
+                }
+                else
+                    options.ErrorMessage = "Missing paramters for Push feature";
+            }
+            else if (options.ASToolAction == Action.Parse)
+            {
+                if (!string.IsNullOrEmpty(options.InputUri))
+                {
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for Parse feature";
+                    return options;
+                }
+            }
+            else if (options.ASToolAction == Action.Import)
+            {
+                if (!string.IsNullOrEmpty(options.ConfigFile))
+                {
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for Import feature";
+                    return options;
+                }
+            }
+            else if (options.ASToolAction == Action.Export)
+            {
+                if (!string.IsNullOrEmpty(options.ConfigFile))
+                {
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for Export feature";
+                    return options;
+                }
+            }
+            return null;
+        }
         public static Options InitializeOptions(string[] args)
-        { 
+        {
+            List<Options> list = new List<Options>();
             Options options = new Options();
-            if (options == null)
+
+            if ((options == null)||(list == null))
             {
                 return null;
             }
             try
             {
-                options.Loop = 0;
+                
                 options.TraceFile = "ASTOOL.log";
-                options.TraceSize = 524280;
-                options.TraceLevel = LogLevel.Information;
-                options.ConsoleLevel = LogLevel.Information;
-                options.Recursive = false;
-                options.MaxBitrate = 0;
-                options.MinBitrate = 0;
-                options.Duration = 0;
-                options.AudioTrackName = string.Empty;
-                options.TextTrackName = string.Empty;
-                options.BufferSize = 0;
-                options.LiveOffset = 0;
-                options.ASToolAction = Action.None;
                 if (args!=null)
                 {
+
                     int i = 0;
-                    while((i < args.Length)&&(string.IsNullOrEmpty(options.ErrorMessage)))
+                    if(args.Length == 0)
+                    {
+                        options.ErrorMessage = "No parameter in the command line" ;
+                        return options;
+                    }
+                    while ((i < args.Length)&&(string.IsNullOrEmpty(options.ErrorMessage)))
                     {
                         switch(args[i++])
                         {
@@ -244,17 +584,38 @@ namespace ASTool
                             case "--parse":
                                 options.ASToolAction = Action.Parse;
                                 break;
-                            case "--input":
-                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
-                                    options.InputUri = args[i++];
-                                else
-                                    options.ErrorMessage = "Input URI not set";
+                            case "--import":
+                                options.ASToolAction = Action.Import;
+                                break;
+
+                            case "--export":
+                                options.ASToolAction = Action.Export;
                                 break;
                             case "--output":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                     options.OutputUri = args[i++];
                                 else
                                     options.ErrorMessage = "Output URI not set";
+                                break;
+                            case "--input":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.InputUri = args[i++];
+                                else
+                                    options.ErrorMessage = "Input URI not set";
+                                break;
+                            case "--name":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                    options.Name = args[i++];
+                                else
+                                    options.ErrorMessage = "Name not set";
+                                break;
+
+                            case "--configfile":
+                                if ((i < args.Length) &&
+                                    (!string.IsNullOrEmpty(args[i])))
+                                    options.ConfigFile = args[i++];
+                                else
+                                    options.ErrorMessage = "ConfigFile not set";
                                 break;
                             case "--loop":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
@@ -273,7 +634,7 @@ namespace ASTool
                                 {
                                     ulong duration = 0;
                                     if (ulong.TryParse(args[i++], out duration))
-                                        options.Duration = duration;
+                                        options.MaxDuration = duration;
                                     else
                                         options.ErrorMessage = "Duration value incorrect";
                                 }
@@ -340,9 +701,7 @@ namespace ASTool
                                 else
                                     options.ErrorMessage = "BufferSize not set";
                                 break;
-                            case "--recursive":
-                                options.Recursive = true;
-                                break;
+
                             case "--tracefile":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                     options.TraceFile = args[i++];
@@ -373,12 +732,14 @@ namespace ASTool
                                 else
                                     options.ErrorMessage = "ConsoleLevel not set";
                                 break;
+
                             default:
-                                if(options.ASToolAction != Action.None)
-                                {
-                                    options.ErrorMessage = "wrong parameter: " + args[i-1];
-                                }
-                                break;
+                                if ((args[i - 1].ToLower() == "dotnet") ||
+                                    (args[i - 1].ToLower() == "astool.dll") ||
+                                    (args[i - 1].ToLower() == "astool.exe"))
+                                    break;
+                                options.ErrorMessage = "wrong parameter: " + args[i-1];
+                                return options;
                         }
                     }
                 }
@@ -389,115 +750,12 @@ namespace ASTool
                 return options;
             }
 
-            if(!string.IsNullOrEmpty(options.ErrorMessage))
-            {
-                return options;
-            }
-
-            if (options.ASToolAction == Action.Help)
-                return options;
-            else if (options.ASToolAction == Action.Pull)
-            {
-                if ((!string.IsNullOrEmpty(options.InputUri)) &&
-                    (!string.IsNullOrEmpty(options.OutputUri)) 
-                    )
-                {
-                    try
-                    {
-                        Uri uri = new Uri(options.InputUri);
-                    }
-                    catch(Exception)
-                    {
-                        options.ErrorMessage = "Bad format Input Uri:" + options.InputUri;
-                    }
-                    bool bDirExists = false;
-                    try
-                    {
-                        bDirExists = System.IO.Directory.Exists(options.OutputUri);
-                    }
-                    catch (Exception)
-                    {
-                        bDirExists = false;
-                    }
-                    if(bDirExists==false)
-                        options.ErrorMessage = "Output directory doesn't exist:" + options.OutputUri;
-                    return options;
-                }
-                else
-                    options.ErrorMessage = "Missing paramters for Pull feature";
-            }
-            else if (options.ASToolAction == Action.PullPush)
-            {
-                if ((!string.IsNullOrEmpty(options.InputUri)) &&
-                    (!string.IsNullOrEmpty(options.OutputUri))
-                    )
-                {
-                    try
-                    {
-                        Uri uri = new Uri(options.InputUri);
-                    }
-                    catch (Exception)
-                    {
-                        options.ErrorMessage = "Bad format Input Uri:" + options.InputUri;
-                    }
-                    try
-                    {
-                        Uri uri = new Uri(options.OutputUri);
-                    }
-                    catch (Exception)
-                    {
-                        options.ErrorMessage = "Bad format Output Uri:" + options.OutputUri;
-                    }
-                    return options;
-                }
-                else
-                    options.ErrorMessage = "Missing paramters for PullPush feature";
-            }
-            else if (options.ASToolAction == Action.Push)
-            {
-                if ((!string.IsNullOrEmpty(options.InputUri)) &&
-                    (!string.IsNullOrEmpty(options.OutputUri))
-                    )
-                {
-
-                    bool bFileExists = false;
-                    try
-                    {
-                        bFileExists = System.IO.File.Exists(options.InputUri);
-                    }
-                    catch (Exception)
-                    {
-                        bFileExists = false;
-                    }
-                    if (bFileExists == false)
-                        options.ErrorMessage = "Input ISM file doesn't exist:" + options.OutputUri;
-                    try
-                    {
-                        Uri uri = new Uri(options.OutputUri);
-                    }
-                    catch (Exception)
-                    {
-                        options.ErrorMessage = "Bad format Output Uri:" + options.OutputUri;
-                    }
-                    return options;
-                }
-                else
-                    options.ErrorMessage = "Missing paramters for Push feature";
-            }
-            else if (options.ASToolAction == Action.Parse)
-            {
-                if (!string.IsNullOrEmpty(options.InputUri))
-                {
-                    return options;
-                }
-                else
-                    options.ErrorMessage = "Missing paramters for Parse feature";
-            }
             if (!string.IsNullOrEmpty(options.ErrorMessage))
             {
                 return options;
             }
-            return null;
+            return CheckOptions(options);
+
         }
 
 

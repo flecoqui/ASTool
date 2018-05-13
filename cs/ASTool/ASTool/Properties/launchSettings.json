@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ASTool": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "dotnet ASTool.dll --push --input C:\\projects\\VideoApp\\metisser\\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0"
     }
   }
 }
