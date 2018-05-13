@@ -1,27 +1,23 @@
 # Deployment of a VM (Linux or Windows) running Apache or IIS (port 80) and iperf3 (port 5201)
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fazure%2Fmaster%2Fazure-quickstart-templates%2F101-vm-simple-universal%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FASTool%2Fmaster%2FAzure%2F101-vm-astool-universal%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fazure%2Fmaster%2Fazure-quickstart-templates%2F101-vm-simple-universal%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FASTool%2Fmaster%2FAzure%2F101-vm-astool-universal%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
 
 This template allows you to deploy a simple VM running: </p>
-#### Debian: Apache and Iperf3 ,
-#### Ubuntu: Apache and Iperf3, 
-#### Centos: Apache and Iperf3, 
-#### Red Hat: Apache and Iperf3,
-#### Windows Server 2016: IIS and Iperf3,
-#### Nano Server 2016: IIS and Iperf3
-This will deploy in the region associated with Resource Group and the VM Size is one of the parameter.
+#### Debian: .Net Core and ASTOOL,
+#### Ubuntu: .Net Core and ASTOOL, 
+#### Centos: .Net Core and ASTOOL, 
+#### Red Hat: .Net Core and ASTOOL,
+#### Windows Server 2016: .Net Core and ASTOOL,
+This will VM will be deployed in the region associated with Resource Group and the VM Size is one of the parameter.
 With Azure CLI you can deploy this VM with 2 command lines:
 
-
-![](https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/Docs/1-architecture.png)
-
-
+![](https://raw.githubusercontent.com/flecoqui/ASTool/blob/master/Azure/101-vm-astool-universal/Docs/1-architecture.png)
 
 ## CREATE RESOURCE GROUP:
 azure group create "ResourceGroupName" "DataCenterName"
