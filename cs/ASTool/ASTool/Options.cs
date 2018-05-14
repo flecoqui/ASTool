@@ -216,7 +216,7 @@ namespace ASTool
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
-            "ASTool --parse    --input <inputLocalISMFile|inputLocalISMCFile|inputLocalISMV|inputLocalISMA>  [--recursive]\r\n" +
+            "ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  \r\n" +
             "ASTool --import   --configfile <configFile> \r\n" +
             "ASTool --export   --configfile <configFile> \r\n" +
             "ASTool --help";
