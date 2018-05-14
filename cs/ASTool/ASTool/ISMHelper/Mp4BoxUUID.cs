@@ -45,7 +45,7 @@ namespace ASTool.ISMHelper
                         System.Buffer.BlockCopy(GuidToNetworkOrderArray(ExtendedGuid), 0, Buffer, 0, 16);
                         WriteMp4BoxByte(Buffer, 16, version);
                         WriteMp4BoxInt24(Buffer, 17, flag);
-                        System.Buffer.BlockCopy(GuidToNetworkOrderArray(ExtendedGuid), 0, Buffer, 20, 16);
+                        System.Buffer.BlockCopy(GuidToNetworkOrderArray(ProtectedGuid), 0, Buffer, 20, 16);
 
                         WriteMp4BoxInt32(Buffer, 36, base64EncodedBytes.Length);
                         WriteMp4BoxData(Buffer, 40, base64EncodedBytes);
