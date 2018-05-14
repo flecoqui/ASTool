@@ -24,14 +24,14 @@ azure group create "ResourceGroupName" "DataCenterName"
 
 For instance:
 
-    azure group create iperfgrpeu2 eastus2
+    azure group create astoolgrpeu2 eastus2
 
 ## DEPLOY THE VM:
 azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json
 
 For instance:
 
-    azure group deployment create iperfgrpeu2 depiperftest -f azuredeploy.json -e azuredeploy.parameters.json -vv
+    azure group deployment create astoolgrpeu2 depastooltest -f azuredeploy.json -e azuredeploy.parameters.json -vv
 
 Beyond login/password, the input parameters are :</p>
 configurationSize (Small: F1 and 128 GB data disk, Medium: F2 and 256 GB data disk, Large: F4 and 512 GB data disk, XLarge: F4 and 1024 GB data disk) : 
@@ -71,23 +71,7 @@ configurationOS (debian, ubuntu, centos, redhat, nano server 2016, windows serve
 
 
 ## TEST THE VM:
-Once the VM has been deployed, you can open the Web page hosted on the VM.
-For instance for Linux VM:
-
-     http://vmubus001.eastus2.cloudapp.azure.com/index.php 
-
-for Windows VM:
-
-     http://vmnanos001.eastus2.cloudapp.azure.com/index.html 
-
-</p>
-You can also use Iperf3 to test the ingress/egress between the VM and an Iperf3 client.
-For instance for Linux VM:
-
-     iperf3 -c vmubus001.eastus2.cloudapp.azure.com -p 5201
-
-</p>
-Finally, you can open a remote session with the VM.
+Once the VM has been deployed, you can open a remote session with the VM.
 
 For instance for Linux VM:
 
@@ -103,9 +87,66 @@ For Nano Server VM:
      Enter-PSSession -ComputerName vmnanos001.eastus2.cloudapp.azure.com </p>
 
 
+Once connected, you can use ASTOOL to test the following features:</p>
+### Push: Push a Smooth Streaming asset towards a Live ingestion point to emulate a Live TV channel
+
+            ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> 
+                             [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+                             [--name <service name>]
+                             [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]
+                             [--consolelevel <none|error|warning|verbose>]
+
+
+For instance:
+
+     ASTool --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
+
+
+### Pull: Pull a Smooth Streaming asset (VOD or Live) and store the video, audio and text chunks on the local disk
+
+            ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> 
+			                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]
+                             [--audiotrackname <name>  --texttrackname <name>]
+                             [--name <service name>]
+                             [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]
+                             [--consolelevel <none|error|warning|verbose>]
+
+For instance:
+
+     ASTool --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\temp\astool\testvod
+     ASTool --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\temp\astool\testdvr
+
+
+
+### PullPush: Pull a Smooth Streaming asset (Live only) and push the video, audio and text chunks towards a Live ingestion point to emulate a Live TV channel 
+
+            ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  
+                             [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]
+                             [--audiotrackname <name>  --texttrackname <name>]
+                             [--liveoffset <value in seconds>]
+                             [--name <service name>]
+                             [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]
+                             [--consolelevel <none|error|warning|verbose>]
+For instance:
+
+     ASTool --input http://localhost/VideoApp/Live/_live2.isml/manifest  --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml
+
+
+### Parse: Parse an isma or ismv file on disk 
+
+            ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  
+
+For instance:
+
+     ASTool --input  C:\temp\ASTool\test4\metisser\Audio_0.isma
+
+
+
+</p>
+
 ## DELETE THE RESOURCE GROUP:
 azure group delete "ResourceGroupName" "DataCenterName"
 
 For instance:
 
-    azure group delete iperfgrpeu2 eastus2
+    azure group delete astoolgrpeu2 eastus2
