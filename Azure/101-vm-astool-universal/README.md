@@ -114,7 +114,7 @@ For instance:
 For instance:
 
      ASTool --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\temp\astool\testvod
-     ASTool --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\temp\astool\testdvr
+     ASTool --pull --input http://localhost/VideoApp/Live/_live2.isml/manifest  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\temp\astool\testdvr
 
 
 

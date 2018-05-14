@@ -23,7 +23,7 @@ dotnet ASTool.dll --pullpush  --input http://cdn.iptv.lu/live/disk/artedehd/mss_
 http://localhost/VideoApp/Live/_live1.isml/manifest
 
 dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname toto 
-
+	
 
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
@@ -38,8 +38,12 @@ dotnet ASTool.dll --pullpush  --input http://cdn.iptv.lu/live/disk/artedehd/mss_
 
 dotnet ASTool.dll --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\temp\\astool\\testvod
 dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --output C:\\temp\\astool\\testdvr
-dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\\temp\\astool\\testdvr1
+dotnet ASTool.dll --pull --input 					  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\\temp\\astool\\testdvr1
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml  --loop 0
 
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
+
+            string s = "rgIAAAEAAQCkAjwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0AbABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwAuAG0AaQBjAHIAbwBzAG8AZgB0AC4AYwBvAG0ALwBEAFIATQAvADIAMAAwADcALwAwADMALwBQAGwAYQB5AFIAZQBhAGQAeQBIAGUAYQBkAGUAcgAiACAAdgBlAHIAcwBpAG8AbgA9ACIANAAuADAALgAwAC4AMAAiAD4APABEAEEAVABBAD4APABQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AEsARQBZAEwARQBOAD4AMQA2ADwALwBLAEUAWQBMAEUATgA+ADwAQQBMAEcASQBEAD4AQQBFAFMAQwBUAFIAPAAvAEEATABHAEkARAA+ADwALwBQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AEsASQBEAD4AWgBtAHcAdwBaAG0AMABKAGgAVQB1AGYAWgBPAFgAZABGADgAMwBoAGMAZwA9AD0APAAvAEsASQBEAD4APABDAEgARQBDAEsAUwBVAE0APgBaAG8AVQBSADcALwBkADEAWgBzAEUAPQA8AC8AQwBIAEUAQwBLAFMAVQBNAD4APABMAEEAXwBVAFIATAA+AGgAdAB0AHAAcwA6AC8ALwBuAHQAZwBwAGwAYQB5AHIAZQBhAGQAeQAuAG4AZQB0AGcAZQBtAHAAbABhAHQAZgBvAHIAbQAuAG4AZQB0AC8AcgBpAGcAaAB0AHMAbQBhAG4AYQBnAGUAcgAuAGEAcwBtAHgAPwBjAGkAZAA9AHQAZQBzAHQAPAAvAEwAQQBfAFUAUgBMAD4APAAvAEQAQQBUAEEAPgA8AC8AVwBSAE0ASABFAEEARABFAFIAPgA=";
+            var base64EncodedBytes = System.Convert.FromBase64String(s);
+            string ss= System.Text.Encoding.Unicode.GetString(base64EncodedBytes);

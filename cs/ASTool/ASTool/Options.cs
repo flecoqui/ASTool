@@ -108,7 +108,7 @@ namespace ASTool
 
         public TheadStatus Status { get; set; }
         public DateTime ThreadStartTime { get; set; }
-
+        public DateTime ThreadCounterTime { get; set; }
         public Dictionary<string, CounterDescription> ListCounters { get; set; }
         public string GetCountersInformation()
         {
@@ -226,7 +226,7 @@ namespace ASTool
         void LogMessage(LogLevel level, string Message)
         {
             string Text = string.Empty;
-            if (level <= TraceLevel)
+            if ((level <= TraceLevel)&&(!string.IsNullOrEmpty(this.TraceFile)))
             {
                 Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
                 LogTrace(this.TraceFile, this.TraceSize, Text);

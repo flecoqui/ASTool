@@ -60,6 +60,8 @@ namespace ASTool
             bool result = false;
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
+            opt.ThreadCounterTime = DateTime.Now;
+
 
             opt.LogInformation("\r\nPush " + opt.Name + "\r\n Pushing from : " + opt.InputUri + "\r\n Pushing to   : " + opt.OutputUri);
 

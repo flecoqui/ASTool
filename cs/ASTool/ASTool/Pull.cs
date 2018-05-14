@@ -144,6 +144,7 @@ namespace ASTool
             bool result = false;
             opt.Status = Options.TheadStatus.Running ;
             opt.ThreadStartTime = DateTime.Now;
+            opt.ThreadCounterTime = DateTime.Now;
             opt.LogInformation("\r\nPull " + opt.Name + "\r\n Pulling from : " + opt.InputUri + "\r\n Storing in   : " + opt.OutputUri);
 
 

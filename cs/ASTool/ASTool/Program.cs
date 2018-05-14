@@ -60,6 +60,7 @@ namespace ASTool
 
         static void Main(string[] args)
         {
+
             Options opt = Options.InitializeOptions(args);
             if (opt == null)
             {
@@ -195,7 +196,6 @@ namespace ASTool
                 }
             }
             bool bCompleted = false;
-            DateTime d = DateTime.Now;
             while (bCompleted == false)
             {
                 int StoppedThreadCounter = 0;
@@ -207,9 +207,9 @@ namespace ASTool
                     }
                     else
                     {
-                        if ((DateTime.Now - d).TotalSeconds > option.CounterPeriod)
+                        if ((DateTime.Now - option.ThreadCounterTime).TotalSeconds > option.CounterPeriod)
                         {
-                            d = DateTime.Now;
+                            option.ThreadCounterTime = DateTime.Now;
                             option.LogInformation("\r\nCounters for feature : " + option.ASToolAction.ToString() + " " + option.Name + "\r\n" + option.GetCountersInformation());
                         }
                     }
