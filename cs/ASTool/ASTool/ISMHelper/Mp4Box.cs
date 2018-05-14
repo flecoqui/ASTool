@@ -14,8 +14,10 @@ using System.Text;
 using System.IO;
 namespace ASTool.ISMHelper
 {
+
     public class Mp4Box
     {
+        static Guid kExtProtectHeaderBoxGuid = new Guid("{d08a4f18-10f3-4a82-b6c8-32d8aba183d3}");
         protected Int32 Length;
         protected string Type;
         protected byte[] Data;
@@ -487,7 +489,7 @@ namespace ASTool.ISMHelper
         }
         public static Mp4BoxMOOV CreateVideoMOOVBox(Int16 TrackID, 
             Int16 Width, Int16 Height, Int32 TimeScale, Int64 Duration, string LanguageCode,
-            string CodecPrivateData)
+            string CodecPrivateData, Guid ProtectionGuid, string ProtectionData)
         {
             Byte ConfigurationVersion = 0x01;
             Byte AVCProfileIndication = 0x64;
@@ -614,6 +616,17 @@ namespace ASTool.ISMHelper
                                                                                 {
                                                                                     list.Clear();
                                                                                     list.Add(boxmvhd);
+                                                                                    if ((!string.IsNullOrEmpty(ProtectionData))&&
+                                                                                        (ProtectionGuid != Guid.Empty))
+                                                                                    {
+                                                                                        Mp4BoxUUID boxuuid = Mp4BoxUUID.CreateUUIDBox(kExtProtectHeaderBoxGuid,ProtectionGuid,ProtectionData);
+                                                                                        if (boxuuid != null)
+                                                                                        {
+                                                                                            list.Add(boxuuid);
+                                                                                        }
+
+                                                                                    }
+
                                                                                     list.Add(boxtrak);
                                                                                     list.Add(boxmvex);
                                                                                     return Mp4BoxMOOV.CreateMOOVBox(list);
@@ -637,7 +650,7 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
-        public static Mp4BoxMOOV CreateAudioMOOVBox(Int16 TrackID, int MaxFrameSize, int Bitrate, int SampleSize, int SampleRate, int Channels, Int32 TimeScale, Int64 Duration, string LanguageCode, string CodecPrivateData)
+        public static Mp4BoxMOOV CreateAudioMOOVBox(Int16 TrackID, int MaxFrameSize, int Bitrate, int SampleSize, int SampleRate, int Channels, Int32 TimeScale, Int64 Duration, string LanguageCode, string CodecPrivateData, Guid ProtectionGuid, string ProtectionData)
 
         {
             Int16 RefIndex = 1;
@@ -752,6 +765,16 @@ namespace ASTool.ISMHelper
                                                                                 {
                                                                                     list.Clear();
                                                                                     list.Add(boxmvhd);
+                                                                                    if ((!string.IsNullOrEmpty(ProtectionData)) &&
+                                                                                         (ProtectionGuid != Guid.Empty))
+                                                                                    {
+                                                                                        Mp4BoxUUID boxuuid = Mp4BoxUUID.CreateUUIDBox(kExtProtectHeaderBoxGuid, ProtectionGuid, ProtectionData);
+                                                                                        if (boxuuid != null)
+                                                                                        {
+                                                                                            list.Add(boxuuid);
+                                                                                        }
+
+                                                                                    }
                                                                                     list.Add(boxtrak);
                                                                                     list.Add(boxmvex);
                                                                                     return Mp4BoxMOOV.CreateMOOVBox(list);
@@ -775,7 +798,7 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
-        public static Mp4BoxMOOV CreateTextMOOVBox(Int16 TrackID, Int32 TimeScale, Int64 Duration, string LanguageCode)
+        public static Mp4BoxMOOV CreateTextMOOVBox(Int16 TrackID, Int32 TimeScale, Int64 Duration, string LanguageCode,Guid ProtectionGuid, string ProtectionData)
         {
             Int16 RefIndex = 1;
 
@@ -889,6 +912,16 @@ namespace ASTool.ISMHelper
                                                                             {
                                                                                 list.Clear();
                                                                                 list.Add(boxmvhd);
+                                                                                if ((!string.IsNullOrEmpty(ProtectionData)) &&
+                                                                                        (ProtectionGuid != Guid.Empty))
+                                                                                {
+                                                                                    Mp4BoxUUID boxuuid = Mp4BoxUUID.CreateUUIDBox(kExtProtectHeaderBoxGuid, ProtectionGuid, ProtectionData);
+                                                                                    if (boxuuid != null)
+                                                                                    {
+                                                                                        list.Add(boxuuid);
+                                                                                    }
+
+                                                                                }
                                                                                 list.Add(boxtrak);
                                                                                 list.Add(boxmvex);
                                                                                 return Mp4BoxMOOV.CreateMOOVBox(list);

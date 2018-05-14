@@ -39,6 +39,17 @@ namespace ASTool
         public string TrackName { get; set; }
         [DataMember]
         public string Source { get; set; }
+        /// <summary>
+        /// Get Protection Guid.
+        /// </summary>
+        [DataMember]
+        public Guid ProtectionGuid { get; set; }
+        /// <summary>
+        /// Get Protection Data.
+        /// </summary>
+        [DataMember]
+        public string ProtectionData { get; set; }
+
         public byte[] GetFTYPData()
         {
             ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateFTYPBox();
@@ -66,7 +77,7 @@ namespace ASTool
         public string CodecPrivateData { get; set; }
         public override  byte[] GetMOOVData()
         {
-            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateVideoMOOVBox((Int16) TrackID, (Int16)Width, (Int16)Height, TimeScale, Duration, Language, CodecPrivateData);
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateVideoMOOVBox((Int16) TrackID, (Int16)Width, (Int16)Height, TimeScale, Duration, Language, CodecPrivateData,ProtectionGuid,ProtectionData);
             if (box != null)
                 return box.GetBoxBytes();
             return null;
@@ -94,7 +105,7 @@ namespace ASTool
 
         public override byte[] GetMOOVData()
         {
-            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateAudioMOOVBox((Int16)TrackID,MaxFramesize,Bitrate,BitsPerSample,SamplingRate,Channels, TimeScale, Duration, Language, CodecPrivateData);
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateAudioMOOVBox((Int16)TrackID,MaxFramesize,Bitrate,BitsPerSample,SamplingRate,Channels, TimeScale, Duration, Language, CodecPrivateData, ProtectionGuid, ProtectionData);
             if (box != null)
                 return box.GetBoxBytes();
             return null;
@@ -105,7 +116,7 @@ namespace ASTool
     {
         public override byte[] GetMOOVData()
         {
-            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateTextMOOVBox((Int16)TrackID, TimeScale,Duration,Language);
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateTextMOOVBox((Int16)TrackID, TimeScale,Duration,Language, ProtectionGuid, ProtectionData);
             if (box != null)
                 return box.GetBoxBytes();
             return null;

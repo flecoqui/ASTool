@@ -972,6 +972,8 @@ namespace ASTool
                                         configuration.Height = (int)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
                                         configuration.Source = this.StoragePath;
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         UpdateChunkList(videostream, configuration);
                                     }
                                 }
@@ -1035,7 +1037,8 @@ namespace ASTool
                                         // Evaluation of the buffersize for audio decoding
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
                                         configuration.Source = this.StoragePath;
-
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         UpdateChunkList(audiostream, configuration);
                                     }
                                 }
@@ -1069,7 +1072,8 @@ namespace ASTool
                                         configuration.TrackID = -1;
                                         configuration.FourCC = FourCC;
                                         configuration.Source = this.StoragePath;
-
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         UpdateChunkList(textstream, configuration);
                                     }
                                 }
@@ -1189,6 +1193,8 @@ namespace ASTool
                                         configuration.Height = (int)currentHeight;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
                                         configuration.Source = this.StoragePath;
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         AddChunkList(videostream, configuration,LiveOffset);
                                     }
                                 }
@@ -1263,7 +1269,8 @@ namespace ASTool
                                         // Evaluation of the buffersize for audio decoding
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
                                         configuration.Source = this.StoragePath;
-
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         AddChunkList(audiostream, configuration, LiveOffset);
                                     }
                                 }
@@ -1303,7 +1310,8 @@ namespace ASTool
                                         configuration.TrackID = -1;
                                         configuration.FourCC = currentFourCC;
                                         configuration.Source = this.StoragePath;
-
+                                        configuration.ProtectionGuid = this.ProtectionGuid;
+                                        configuration.ProtectionData = this.ProtectionData;
                                         AddChunkList(textstream, configuration, LiveOffset);
                                     }
                                 }
