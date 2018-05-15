@@ -2,7 +2,7 @@
 # This bash file install apache
 # Parameter 1 hostname 
 azure_hostname=$1
-
+astool_configfile=$2
 #############################################################################
 log()
 {
@@ -90,6 +90,12 @@ yum -y install git
 
 build_astool(){
 mkdir /git
+mkdir /git/config
+mkdir /git/dvr
+mkdir /git/dvr/test1
+mkdir /git/dvr/test2
+cd /git/config
+wget $astool_configfile
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
@@ -110,7 +116,7 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool 
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool --import --configfile /git/config/astool.linux.pull.xml
 Restart=on-abort
 
 [Install]
@@ -217,6 +223,9 @@ else
 	    log "install astool debian"
 		install_astool
 	fi
+	log "Start ASTOOL service"
+	systemctl enable astool
+	systemctl start astool  
 
 fi
 exit 0 

@@ -13,7 +13,7 @@
     <MaxDuration>3600000</MaxDuration>
     <MinBitrate>100000</MinBitrate>
     <Name>PullService1</Name>
-    <OutputUri>C:\temp\testdvr1</OutputUri>
+    <OutputUri>/git/dvr/test1</OutputUri>
     <TextTrackName/>
     <TraceFile>TracePullService1.log</TraceFile>
     <TraceLevel>Information</TraceLevel>
@@ -34,7 +34,7 @@
     <MaxDuration>3600000</MaxDuration>
     <MinBitrate>100000</MinBitrate>
     <Name>PullService2</Name>
-    <OutputUri>C:\temp\testdvr2</OutputUri>
+    <OutputUri>/git/dvr/test2</OutputUri>
     <TextTrackName/>
     <TraceFile>TracePullService2.log</TraceFile>
     <TraceLevel>Information</TraceLevel>
