@@ -134,6 +134,7 @@ if (($EditionId -eq "ServerStandardNano") -or
 }
 else
 {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	$webClient = New-Object System.Net.WebClient  
 	$webClient.DownloadFile($url,$source + "\Git-2.17.0-64-bit.exe" )  
 	WriteLog "Git-2.17.0-64-bit.exe copied" 
@@ -168,12 +169,15 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "C:\temp\ASTool\dotnet-install.ps1"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "C:\source\dotnet-install.ps1"
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
-Git-2.17.0-64-bit.exe  /VERYSILENT
-WriteLog "Git installed" 
+Start-Process -FilePath "c:\source\Git-2.17.0-64-bit.exe" -Wait -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/NOCANCEL","/SP-","/LOG"
+
+$count=0
+while ((!(Test-Path "C:\Program Files\Git\bin\git.exe"))-and($count -lt 20)) { Start-Sleep 10; $count++}
+WriteLog "git Installed" 
 
 WriteLog "Building ASTOOL" 
 mkdir \git
@@ -201,11 +205,14 @@ mkdir \git\dvr
 mkdir \git\dvr\test1
 mkdir \git\dvr\test2
 cd \git
-git clone https://github.com/flecoqui/ASTool.git
+cd c:\git
+Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/ASTool.git"
+
 cd ASTool\cs\ASTool\ASTool
-dotnet publish -c Release -r ubuntu.16.10-x64
+Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "-c", "Release", "-r", "win10-x64"
 cd bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish
 astool --help
+Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish\ASTool.exe" -Wait -ArgumentList "--help"
 WriteLog "ASTOOL built" 
 
 WriteLog "Installing ASTOOL as a service" 
