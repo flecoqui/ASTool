@@ -72,7 +72,7 @@
         "offer": "Debian",
         "sku": "8",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -87,7 +87,7 @@
         "offer": "UbuntuServer",
         "sku": "16.04.0-LTS",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -102,7 +102,7 @@
         "offer": "centos",
         "sku": "7.2",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -117,7 +117,7 @@
         "offer": "RHEL",
         "sku": "7.2",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -132,7 +132,7 @@
         "offer": "WindowsServer",
         "sku": "2016-Datacenter",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software-windows.ps1",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software-windows.ps1",
         "installScriptFileName": "install-software-windows.ps1",
         "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"  ', parameters('adminUsername') )]",
         "extensionPublisher": "Microsoft.Compute",
@@ -147,7 +147,7 @@
         "offer": "WindowsServer",
         "sku": "2016-Nano-Server",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/azure/master/azure-quickstart-templates/101-vm-simple-universal/install-software-windows.ps1",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software-windows.ps1",
         "installScriptFileName": "install-software-windows.ps1",
         "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"  ', parameters('adminUsername') )]",
         "extensionPublisher": "Microsoft.Compute",
@@ -468,10 +468,6 @@
     "httpClient": {
       "type": "string",
       "value": "[variables('configurationOS')[parameters('configurationOS')].httpUrl]"
-    },
-    "iperf3client": {
-      "type": "string",
-      "value": "[concat('iperf3 -c ', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com -p 5201 --parallel 32') ]"
     }
   }
 }

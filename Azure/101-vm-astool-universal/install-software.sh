@@ -57,18 +57,18 @@ iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 install_netcore(){
 wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
 dpkg -i packages-microsoft-prod.deb
-apt-get install apt-transport-https
-apt-get update
-apt-get install dotnet-sdk-2.1.200
+apt-get -y install apt-transport-https
+apt-get -y update
+apt-get -y install dotnet-sdk-2.1.200
 }
 install_netcore_centos(){
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
-yum update
-yum install libunwind libicu
-yum install dotnet-sdk-2.1.200
+yum -y update
+yum -y install libunwind libicu
+yum -y install dotnet-sdk-2.1.200
 }
 install_netcore_redhat(){
-yum install rh-dotnet20 -y
+yum -y install rh-dotnet20 -y
 scl enable rh-dotnet20 bash
 }
 install_netcore_debian(){
@@ -81,20 +81,64 @@ apt-get install dotnet-sdk-2.1.200
 }
 #############################################################################
 install_git_ubuntu(){
-apt-get install git
+apt-get -y install git
 }
 install_git_centos(){
-yum install git
+yum -y install git
 }
 #############################################################################
+
 build_astool(){
-md \git
-cd \git
+mkdir /git
+cd /git
 git clone https://github.com/flecoqui/ASTool.git
-cd ASTool\cs\ASTool\ASTool
+cd ASTool/cs/ASTool/ASTool
 dotnet publish -c Release -r ubuntu.16.10-x64
-cd bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish
-astool --help
+}
+install_astool(){
+cd /git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
+export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
+echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish" >> /etc/profile
+./ASTool --help
+
+adduser astool --disabled-login
+cat <<EOF > /etc/systemd/system/astool.service
+[Unit]
+Description=astool Service
+After=network.target
+
+[Service]
+Type=simple
+User=astool
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool 
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+install_astool_centos(){
+cd /git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
+export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
+echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish" >> /etc/profile
+./ASTool --help
+
+adduser astool -s /sbin/nologin
+cat <<EOF > /etc/systemd/system/astool.service
+[Unit]
+Description=astool Service
+After=network.target
+
+[Service]
+Type=simple
+User=astool
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool 
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target
+EOF
 }
 
 #############################################################################
@@ -159,6 +203,20 @@ else
 	fi
 	log "build ASTool"
 	build_astool
+
+	if [ $iscentos -eq 0 ] ; then
+	    log "install astool centos"
+		install_astool_centos
+	elif [ $isredhat -eq 0 ] ; then
+	    log "install astool redhat"
+		install_astool_centos
+	elif [ $isubuntu -eq 0 ] ; then
+	    log "install astool ubuntu"
+		install_astool
+	elif [ $isdebian -eq 0 ] ; then
+	    log "install astool debian"
+		install_astool
+	fi
 
 fi
 exit 0 
