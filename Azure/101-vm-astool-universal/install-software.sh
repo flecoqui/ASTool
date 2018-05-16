@@ -99,7 +99,7 @@ wget $astool_configfile
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
-dotnet publish -c Release -r ubuntu.16.10-x64
+dotnet publish --self-contained -c Release -r ubuntu.16.10-x64
 }
 install_astool(){
 cd /git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
@@ -116,7 +116,7 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool --import --configfile /git/config/astool.linux.pull.xml
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool --import --configfile /git/config/astool.linux.xml
 Restart=on-abort
 
 [Install]

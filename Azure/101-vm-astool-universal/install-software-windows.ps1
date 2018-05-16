@@ -192,13 +192,13 @@ if (($EditionId -eq "ServerStandardNano") -or
     ($EditionId -eq "NanoServer") -or
     ($EditionId -eq "ServerTuva")) {
 	Download $url "\git\config"
-	WriteLog "astool.windows.pull.xml copied" 
+	WriteLog "astool.windows.xml copied" 
 }
 else
 {
 	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url, "\git\config\astool.windows.pull.xml" )  
-	WriteLog "astool.windows.pull.xml copied" 
+	$webClient.DownloadFile($url, "\git\config\astool.windows.xml" )  
+	WriteLog "astool.windows.xml copied" 
 }
 
 mkdir \git\dvr
@@ -209,14 +209,14 @@ cd c:\git
 Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/ASTool.git"
 
 cd ASTool\cs\ASTool\ASTool
-Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "-c", "Release", "-r", "win10-x64"
+Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "--self-contained", "-c", "Release", "-r", "win10-x64"
 cd bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish
 astool --help
 Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish\ASTool.exe" -Wait -ArgumentList "--help"
 WriteLog "ASTOOL built" 
 
 WriteLog "Installing ASTOOL as a service" 
-sc.exe create ASTOOL binpath= "cmd.exe /c c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish\ASTool.exe \git\config\astool.windows.pull.xml" type= own start= auto DisplayName= "ASTOOL"
+sc.exe create ASTOOL binpath= "cmd.exe /c c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\ubuntu.16.10-x64\publish\ASTool.exe \git\config\astool.windows.xml" type= own start= auto DisplayName= "ASTOOL"
 WriteLog "ASTOOL Installed" 
 
 WriteLog "Initialization completed !" 

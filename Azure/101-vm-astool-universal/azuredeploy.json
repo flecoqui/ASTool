@@ -50,8 +50,8 @@
     }
   },
   "variables": {
-    "astoolConfigFileLinux": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.pull.xml",
-    "astoolConfigFileWindows": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.pull.xml",
+    "astoolConfigFileLinux": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.xml",
+    "astoolConfigFileWindows": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.xml",
     "configurationSizeSmall": {
       "vmSize": "Standard_F1",
       "diskSize": "128"
