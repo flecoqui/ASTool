@@ -100,7 +100,13 @@ wget $astool_configfile
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
-dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin
+log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
+
+dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin > /source/dotnet.log
+
+log "dotnet publish done"
+
+
 }
 install_astool(){
 cd /git/ASTool/cs/ASTool/ASTool/bin
