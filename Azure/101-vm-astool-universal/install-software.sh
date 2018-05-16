@@ -9,6 +9,7 @@ log()
 	# If you want to enable this logging, uncomment the line below and specify your logging key 
 	#curl -X POST -H "content-type:text/plain" --data-binary "$(date) | ${HOSTNAME} | $1" https://logs-01.loggly.com/inputs/${LOGGING_KEY}/tag/redis-extension,${HOSTNAME}
 	echo "$1"
+	echo "$1" >> /source/install.log
 }
 #############################################################################
 check_os() {
@@ -165,7 +166,8 @@ firewall-cmd --reload
 #############################################################################
 
 environ=`env`
-
+# Create folder source to store local logs
+mkdir /source
 log "Environment before installation: $environ"
 
 log "Installation script start : $(date)"
