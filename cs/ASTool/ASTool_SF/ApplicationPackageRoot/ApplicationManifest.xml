@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="ASTool_SFType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="ASTool_SFType" ApplicationTypeVersion="1.1.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
     <Parameter Name="AdaptativeStreamingService_InstanceCount" DefaultValue="1" />
   </Parameters>
@@ -7,7 +7,7 @@
        doivent correspondre aux attributs Name et Version de l'élément ServiceManifest défini dans le 
        fichier ServiceManifest.xml. -->
   <ServiceManifestImport>
-    <ServiceManifestRef ServiceManifestName="AdaptativeStreamingServicePkg" ServiceManifestVersion="1.0.0" />
+    <ServiceManifestRef ServiceManifestName="AdaptativeStreamingServicePkg" ServiceManifestVersion="1.1.0" />
     <ConfigOverrides />
   </ServiceManifestImport>
   <DefaultServices>

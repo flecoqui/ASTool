@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using ASTool.CacheHelper;
 namespace ASTool.Core
 {
@@ -74,7 +75,7 @@ namespace ASTool.Core
             opt.SetCounter(mc.StoragePath + "_InputBytes", "Total Number of Input Bytes", InputBytes, string.Empty, "Total Number of Input Bytes");
             opt.SetCounter(mc.StoragePath + "_OutputChunks", "Total Number of Output Chunks", OutputChunks, string.Empty, "Total Number of Output Chunks");
             opt.SetCounter(mc.StoragePath + "_OutputBytes", "Total Number of Output Bytes", OutputBytes, string.Empty, "Total Number of Output Bytes");
-            opt.SetCounter(mc.StoragePath + "_Bitrate", "Current input bitrate", (int) (InputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds), "b/s", "Current input bitrate");
+            opt.SetCounter(mc.StoragePath + "_Bitrate", "Current input bitrate", (int)(InputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds), "b/s", "Current input bitrate");
 
         }
         static void UpdatePullPushCounters(Options opt, ManifestManager mc)
@@ -138,12 +139,11 @@ namespace ASTool.Core
             opt.SetCounter(mc.StoragePath + "_Bitrate", (int)(InputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds));
 
         }
-        public static bool PullPush(Options opt)
+        static public async Task<bool> PullPush(Options opt)
         {
             bool result = false;
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
-            opt.ThreadCounterTime = DateTime.Now;
 
 
             opt.LogInformation("\r\nPullPush " + opt.Name + "\r\n Pulling from : " + opt.InputUri + "\r\n Pushing to : " + opt.OutputUri);
@@ -151,26 +151,21 @@ namespace ASTool.Core
             SmoothLiveOutput d = new SmoothLiveOutput();
             if (d != null)
             {
-                var t = d.Initialize(opt);
-                t.Wait();
-                if(t.Result == true)
+                result = d.Initialize(opt);
+                if (result == true)
                 {
                     ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.MaxDuration, (ulong)opt.BufferSize, opt.LiveOffset);
                     if (mc != null)
                     {
                         if (mc.SetManifestOutput(d) == true)
                         {
-                            t = mc.DownloadManifest();
-                            t.Wait();
-                            result = t.Result;
+                            result = await mc.DownloadManifest();
                             if (result == true)
                             {
-                                var tt = mc.StartDownloadChunks();
-                                tt.Wait();
-                                result = tt.Result;
+                                result = await mc.StartDownloadChunks();
                                 while (mc.GetAssetStatus() != AssetStatus.ChunksDownloaded)
                                 {
-                                    System.Threading.Tasks.Task.Delay(5000).Wait();
+                                    await Task.Delay(5000);
                                     if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
                                         CreatePullPushCounters(opt, mc);
                                     else

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ServiceManifest Name="AdaptativeStreamingServicePkg"
-                 Version="1.0.0"
+                 Version="1.1.0"
                  xmlns="http://schemas.microsoft.com/2011/01/fabric"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -11,7 +11,7 @@
   </ServiceTypes>
 
   <!-- Le package de code est votre exécutable de service. -->
-  <CodePackage Name="Code" Version="1.0.0">
+  <CodePackage Name="Code" Version="1.1.0">
     <EntryPoint>
       <ExeHost>
         <Program>AdaptativeStreamingService.exe</Program>
@@ -21,7 +21,7 @@
 
   <!-- Le package de configuration est le contenu du répertoire Config sous PackageRoot qui comprend 
        un ensemble avec version pouvant être mis à jour indépendamment des paramètres de configuration personnalisés de votre service. -->
-  <ConfigPackage Name="Config" Version="1.0.0" />
+  <ConfigPackage Name="Config" Version="1.1.0" />
 
   <Resources>
     <Endpoints>

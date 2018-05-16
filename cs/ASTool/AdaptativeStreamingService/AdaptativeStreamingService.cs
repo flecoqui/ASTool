@@ -33,6 +33,9 @@ namespace AdaptativeStreamingService
             return new ServiceInstanceListener[0];
         }
 
+        private static Task mainTask;
+
+
         /// <summary>
         /// Point d'entrée principal de votre instance de service.
         /// </summary>
@@ -47,14 +50,12 @@ namespace AdaptativeStreamingService
 #if DEBUG
             if (string.IsNullOrEmpty(cliArg))
             {
-             }
+            }
 #endif
 
             var args = cliArg.Split(' ');
 
-            Thread astoolEngineThread = new Thread(new ParameterizedThreadStart(AstoolCli_Main));
-            astoolEngineThread.Start(args);
-
+            AstoolCli_Main(args);
             try
             {
                 while (true)
@@ -66,9 +67,8 @@ namespace AdaptativeStreamingService
             catch (OperationCanceledException oce)
             {
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Cancel async received !!");
-                // HACK : killing ASToolEngin thread when service terminate. 
+
                 // TODO : replace with CancellationToken handling
-                astoolEngineThread.Abort();
             }
         }
 
@@ -101,7 +101,8 @@ namespace AdaptativeStreamingService
             {
                 if (option.ASToolAction == Options.Action.PullPush)
                 {
-                    OptionsLauncher.LaunchThread(ASTool.Core.ASToolEngine.PullPush, option);
+                    mainTask = ASTool.Core.ASToolEngine.PullPush(option);
+                    //OptionsLauncher.LaunchThread(ASTool.Core.ASToolEngine.PullPush, option);
                 }
             }
 

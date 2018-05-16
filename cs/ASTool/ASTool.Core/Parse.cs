@@ -14,6 +14,8 @@ using System.Text;
 using System.IO;
 using ASTool.CacheHelper;
 using ASTool.ISMHelper;
+using System.Threading.Tasks;
+
 namespace ASTool.Core
 {
     public partial class ASToolEngine
@@ -52,15 +54,15 @@ namespace ASTool.Core
             DateTime UpdateTime = DateTime.Now;
             Int32 Flags = 7;
             Mp4BoxAVCC avccbox = Mp4BoxAVCC.CreateAVCCBox(ConfigurationVersion, AVCProfileIndication, ProfileCompatibility, AVCLevelIndication, SPSNALUContent, PPSNALUContent);
-           // Mp4BoxBTRT btrtbox = Mp4BoxBTRT.CreateBTRTBox(BufferSize, MaxBitrate, AvgBitrate);
+            // Mp4BoxBTRT btrtbox = Mp4BoxBTRT.CreateBTRTBox(BufferSize, MaxBitrate, AvgBitrate);
             if (avccbox != null)
-                //&& (btrtbox != null))
+            //&& (btrtbox != null))
             {
                 List<Mp4Box> list = new List<Mp4Box>();
                 if (list != null)
                 {
                     list.Add(avccbox);
-//                    list.Add(btrtbox);
+                    //                    list.Add(btrtbox);
                     Mp4BoxAVC1 boxavc1 = Mp4BoxAVC1.CreateAVC1Box(RefIndex, Width, Height, HorizontalRes, VerticalRes, FrameCount, Depth, list);
                     if (boxavc1 != null)
                     {
@@ -144,7 +146,7 @@ namespace ASTool.Core
                                                                         {
                                                                             Mp4BoxMEHD boxmehd = Mp4BoxMEHD.CreateMEHDBox(Duration);
                                                                             Mp4BoxTREX boxtrex = Mp4BoxTREX.CreateTREXBox(TrackID);
-                                                                            if ((boxmehd != null)&&
+                                                                            if ((boxmehd != null) &&
                                                                                 (boxtrex != null))
                                                                             {
 
@@ -197,7 +199,7 @@ namespace ASTool.Core
                 if (list != null)
                 {
                     list.Add(boxesds);
-                    Mp4BoxMP4A boxmp4a = Mp4BoxMP4A.CreateMP4ABox(RefIndex,(Int16) Channels, (Int16) SampleSize, SampleRate, list);
+                    Mp4BoxMP4A boxmp4a = Mp4BoxMP4A.CreateMP4ABox(RefIndex, (Int16)Channels, (Int16)SampleSize, SampleRate, list);
                     if (boxmp4a != null)
                     {
                         list.Clear();
@@ -386,7 +388,7 @@ namespace ASTool.Core
         }
         static byte[] GetMVHDBoxData(DateTime CreationTime, DateTime ModificationTime, Int32 TimeScale, Int64 Duration, Int32 NextTrackID)
         {
-            Mp4BoxMVHD box = Mp4BoxMVHD.CreateMVHDBox( CreationTime, ModificationTime,  TimeScale, Duration,  NextTrackID);
+            Mp4BoxMVHD box = Mp4BoxMVHD.CreateMVHDBox(CreationTime, ModificationTime, TimeScale, Duration, NextTrackID);
             if (box != null)
             {
                 return box.GetBoxBytes();
@@ -405,7 +407,7 @@ namespace ASTool.Core
         static char GetChar(byte b)
         {
             if ((b >= 32) && (b < 127))
-                return (char) b;
+                return (char)b;
             return '.';
         }
 
@@ -413,12 +415,12 @@ namespace ASTool.Core
         {
             string resultHex = " ";
             string resultASCII = " ";
-            int Len = ((data.Length%16 == 0) ? (data.Length/16): (data.Length / 16)+1)*16;
+            int Len = ((data.Length % 16 == 0) ? (data.Length / 16) : (data.Length / 16) + 1) * 16;
             for (int i = 0; i < Len; i++)
             {
                 if (i < data.Length)
                 {
-                    resultASCII += string.Format("{0}", GetChar(data[i])); 
+                    resultASCII += string.Format("{0}", GetChar(data[i]));
                     resultHex += string.Format("{0:X2} ", data[i]);
                 }
                 else
@@ -426,9 +428,9 @@ namespace ASTool.Core
                     resultASCII += " ";
                     resultHex += "   ";
                 }
-                if (i%16==15)
+                if (i % 16 == 15)
                 {
-                    Console.WriteLine(string.Format("{0:X8} ",i-15) + resultHex + resultASCII);
+                    Console.WriteLine(string.Format("{0:X8} ", i - 15) + resultHex + resultASCII);
                     resultHex = " ";
                     resultASCII = " ";
                 }
@@ -474,30 +476,30 @@ namespace ASTool.Core
                     fs.Close();
                 }
             }
-            catch(Exception )
+            catch (Exception)
             {
                 result = false;
             }
-            
+
             return result;
         }
 
 
 
-        public static bool Parse(Options opt)
+        static public Task<bool> Parse(Options opt)
         {
             bool result = true;
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
             opt.LogInformation("Parsing file: " + opt.InputUri);
 
-            if(opt.TraceLevel>= Options.LogLevel.Verbose)
+            if (opt.TraceLevel >= Options.LogLevel.Verbose)
                 opt.LogVerbose(Mp4Box.ParseFileVerbose(opt.InputUri));
             else
                 opt.LogInformation(Mp4Box.ParseFile(opt.InputUri));
             opt.LogInformation("Parsing file: " + opt.InputUri + " done");
             opt.Status = Options.TheadStatus.Stopped;
-            return result;
+            return Task.FromResult<bool>(result);
         }
     }
 }

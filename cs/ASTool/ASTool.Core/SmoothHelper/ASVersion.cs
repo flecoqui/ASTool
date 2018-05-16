@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ASTool.Core
+namespace ASTool
 {
     public class ASVersion
     {

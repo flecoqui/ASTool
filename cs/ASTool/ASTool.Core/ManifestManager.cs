@@ -40,7 +40,7 @@ namespace ASTool
         ErrorParameters,
     }
 
-    public  class Track
+    public class Track
     {
         public int Index { get; set; }
         public int Bitrate { get; set; }
@@ -61,15 +61,15 @@ namespace ASTool
         public int SamplingRate { get; set; }
         public string CodecPrivateData { get; set; }
     }
-    public sealed class VideoTrack :Track
+    public sealed class VideoTrack : Track
     {
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }
 
         public string CodecPrivateData { get; set; }
     }
-    [DataContract(Name ="ManifestManager")]
-    public  class ManifestManager : IDisposable
+    [DataContract(Name = "ManifestManager")]
+    public class ManifestManager : IDisposable
     {
 
         public const ulong TimeUnit = 10000000;
@@ -93,7 +93,7 @@ namespace ASTool
         /// if the value is false, the user could play this asset once a percentage of the asset is downloaded.
         /// </summary>
         [DataMember]
-        public bool DownloadToGo { get;  set; }
+        public bool DownloadToGo { get; set; }
 
         /// <summary>
         /// MaxError 
@@ -160,7 +160,7 @@ namespace ASTool
         /// ExpectedMediaSize 
         /// The estimated asset size in bytes based on the duration, the audio bitrate and video bitrate  
         /// </summary>
-        public ulong ExpectedMediaSize { get { return GetExpectedSize();  } }
+        public ulong ExpectedMediaSize { get { return GetExpectedSize(); } }
         /// <summary>
         /// CurrentMediaSize 
         /// The number of audio and video bytes stored on disk 
@@ -216,12 +216,7 @@ namespace ASTool
         /// </summary>
         [DataMember]
         public ulong DownloadThreadTextCount { get; set; }
-        /// <summary>
-        /// manifestBuffer 
-        /// Buffer where the manifest is stored 
-        /// </summary>
-        [DataMember]
-        public byte[] manifestBuffer{ get; set; }
+
         /// <summary>
         /// Get Protection Guid.
         /// </summary>
@@ -256,7 +251,7 @@ namespace ASTool
         /// Name of the Audio track to select
         /// </summary>
         [DataMember]
-        public string AudioTrackName  { get; set; }
+        public string AudioTrackName { get; set; }
 
         /// <summary>
         /// TextTrackName
@@ -342,7 +337,8 @@ namespace ASTool
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestManager() {
+        public ManifestManager()
+        {
             Initialize();
         }
         /// <summary>
@@ -369,7 +365,7 @@ namespace ASTool
         /// ManifestCache 
         /// ManifestCache contructor 
         /// </summary>
-        public ManifestManager(Uri manifestUri,  ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1, int liveOffset = 0)
+        public ManifestManager(Uri manifestUri, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1, int liveOffset = 0)
         {
             Initialize();
             ManifestUri = manifestUri;
@@ -422,7 +418,7 @@ namespace ASTool
         /// </summary>
         /// <param name="forceNewDownload">Specifies whether to force a new download and avoid cached results.</param>
         /// <returns>A byte array</returns>
-        public async Task<byte[]> DownloadManifestAsync(bool forceNewDownload)
+        public async Task<Stream> DownloadManifestAsync(bool forceNewDownload)
         {
             Uri manifestUri = this.ManifestUri;
             System.Diagnostics.Debug.WriteLine("Download Manifest: " + manifestUri.ToString() + " start at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now));
@@ -450,7 +446,7 @@ namespace ASTool
                     System.Diagnostics.Debug.WriteLine("Header key: " + v.Key + " value: " + v.Value.ToString());
                 }
                 */
-                var buffer = await response.Content.ReadAsByteArrayAsync();
+                Stream buffer = await response.Content.ReadAsStreamAsync();
                 if (buffer != null)
                 {
 
@@ -466,8 +462,7 @@ namespace ASTool
                     }
                     this.BaseUrl = GetBaseUri(manifestUri.AbsoluteUri);
 
-                    int val = buffer.Length;
-                    System.Diagnostics.Debug.WriteLine("Download " + val.ToString() + " Bytes Manifest: " + manifestUri.ToString() + " done at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now));
+                    System.Diagnostics.Debug.WriteLine("Download  Manifest: " + manifestUri.ToString() + " done at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now));
                     return buffer;
                 }
             }
@@ -543,9 +538,9 @@ namespace ASTool
         /// <returns>string base Uri</returns>
         public static string GetBaseUri(string source)
         {
-            int manitestPosition = source.LastIndexOf(@"/manifest",StringComparison.OrdinalIgnoreCase);
+            int manitestPosition = source.LastIndexOf(@"/manifest", StringComparison.OrdinalIgnoreCase);
             if (manitestPosition < 0)
-                manitestPosition = source.LastIndexOf(@"/qualitylevels",StringComparison.OrdinalIgnoreCase);
+                manitestPosition = source.LastIndexOf(@"/qualitylevels", StringComparison.OrdinalIgnoreCase);
             return manitestPosition < 0 ?
                                 source :
                                 source.Substring(0, manitestPosition);
@@ -596,7 +591,7 @@ namespace ASTool
         /// <returns>List of video tracks</returns>
         public IReadOnlyList<VideoTrack> GetVideoTracks()
         {
-            return ListVideoTracks ;
+            return ListVideoTracks;
         }
         /// <summary>
         /// GetTextTracks
@@ -636,7 +631,7 @@ namespace ASTool
                 }
                 TextChunkListList.Clear();
             }
-            catch(Exception)
+            catch (Exception)
             {
 
             }
@@ -697,9 +692,9 @@ namespace ASTool
                                 l.TemplateUrlType = ChunkList.GetType(UrlTemplate);
                                 if (stream.StreamType.ToLower() == "video")
                                 {
-                                    foreach(var vl in this.VideoChunkListList)
+                                    foreach (var vl in this.VideoChunkListList)
                                     {
-                                        if(vl.Configuration.GetSourceName()==
+                                        if (vl.Configuration.GetSourceName() ==
                                             l.Configuration.GetSourceName())
                                         {
                                             UpdateChunkList(vl, l);
@@ -766,24 +761,24 @@ namespace ASTool
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Exception while Updating ChunkList " + org.Configuration.GetSourceName() + ": " + ex.Message);
             }
-            if (NewChunk>0)
-                System.Diagnostics.Debug.WriteLine("Updating ChunkList " + org.Configuration.GetSourceName() + " Add " + NewChunk.ToString() + " from " + org.TotalChunks.ToString() + "  chunks in the chunklist " +  org.Configuration.GetSourceName() );
+            if (NewChunk > 0)
+                System.Diagnostics.Debug.WriteLine("Updating ChunkList " + org.Configuration.GetSourceName() + " Add " + NewChunk.ToString() + " from " + org.TotalChunks.ToString() + "  chunks in the chunklist " + org.Configuration.GetSourceName());
             return bResult;
         }
         int GetNumberOfChunks(IList<Chunk> list, int TimeScale, int LiveOffset)
         {
-            if((list!=null)&& (LiveOffset > 0))
+            if ((list != null) && (LiveOffset > 0))
             {
                 int i = 1;
                 float d = 0;
-                while ((list.Count - i)>=0)
+                while ((list.Count - i) >= 0)
                 {
-                    d += (float) list[list.Count - i].Duration / (float) TimeScale;
-                    if(d>LiveOffset)
+                    d += (float)list[list.Count - i].Duration / (float)TimeScale;
+                    if (d > LiveOffset)
                     {
                         return i;
                     }
@@ -845,7 +840,7 @@ namespace ASTool
                                     else
                                         duration = 0;
                                     if (chunk.Time != null)
-                                        l.LastTimeChunksToRead  = (UInt64)chunk.Time;
+                                        l.LastTimeChunksToRead = (UInt64)chunk.Time;
 
                                     if (index++ >= Threshold)
                                     {
@@ -906,9 +901,9 @@ namespace ASTool
                         ulong Duration = mi.ManifestDuration;
                         string UrlTemplate = string.Empty;
 
-                        if(this.Duration != Duration)
+                        if (this.Duration != Duration)
                             this.Duration = Duration;
-                        if(this.TimeScale != mi.Timescale)
+                        if (this.TimeScale != mi.Timescale)
                             this.TimeScale = mi.Timescale;
                         this.IsLive = mi.IsLive;
 
@@ -1079,8 +1074,6 @@ namespace ASTool
                                 }
                             }
                         }
-                        if (this.manifestBuffer == null)
-                            this.manifestBuffer = manifestBuffer;
                         bResult = true;
                     }
                 }
@@ -1105,8 +1098,8 @@ namespace ASTool
             if (manifestBuffer != null)
             {
                 try
-                { 
-                SmoothStreamingManifest parser = new SmoothStreamingManifest(manifestBuffer);
+                {
+                    SmoothStreamingManifest parser = new SmoothStreamingManifest(manifestBuffer);
                     if ((parser != null) && (parser.ManifestInfo != null))
                     {
                         ManifestInfo mi = parser.ManifestInfo;
@@ -1144,7 +1137,7 @@ namespace ASTool
                             if (stream.StreamType.ToUpper() == "VIDEO")
                             {
                                 string Lang = "und";
-                                stream.TryGetAttributeValueAsString("Language",out Lang);
+                                stream.TryGetAttributeValueAsString("Language", out Lang);
                                 string TrackName = string.Empty;
                                 stream.TryGetAttributeValueAsString("Name", out TrackName);
                                 string FourCC = string.Empty;
@@ -1182,9 +1175,9 @@ namespace ASTool
                                         videoselected = track;
                                         videostream = stream;
                                         VideoChunkListConfiguration configuration = new VideoChunkListConfiguration();
-                                        configuration.Bitrate = (int) currentBitrate;
-                                        configuration.Duration = (long) Duration;
-                                        configuration.TimeScale = (int) TimeScale;
+                                        configuration.Bitrate = (int)currentBitrate;
+                                        configuration.Duration = (long)Duration;
+                                        configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
                                         configuration.TrackName = TrackName;
                                         configuration.TrackID = -1;
@@ -1195,7 +1188,7 @@ namespace ASTool
                                         configuration.Source = this.StoragePath;
                                         configuration.ProtectionGuid = this.ProtectionGuid;
                                         configuration.ProtectionData = this.ProtectionData;
-                                        AddChunkList(videostream, configuration,LiveOffset);
+                                        AddChunkList(videostream, configuration, LiveOffset);
                                     }
                                 }
                             }
@@ -1240,9 +1233,9 @@ namespace ASTool
                                         Index = (int)audioIndex,
                                         Bitrate = (int)currentBitrate,
                                         FourCC = currentFourCC,
-                                        BitsPerSample = (int) currentBitsPerSample,
-                                        Channels = (int) currentChannels,
-                                        SamplingRate = (int) currentSamplingRate,
+                                        BitsPerSample = (int)currentBitsPerSample,
+                                        Channels = (int)currentChannels,
+                                        SamplingRate = (int)currentSamplingRate,
                                         CodecPrivateData = currentCodecPrivateData,
                                         Language = Lang,
                                     });
@@ -1262,10 +1255,10 @@ namespace ASTool
                                         configuration.FourCC = currentFourCC;
                                         configuration.BitsPerSample = (int)currentBitsPerSample;
                                         configuration.Channels = (int)currentChannels;
-                                        configuration.SamplingRate = (int) currentSamplingRate;
+                                        configuration.SamplingRate = (int)currentSamplingRate;
                                         configuration.CodecPrivateData = currentCodecPrivateData;
                                         configuration.AudioTag = currentAudioTag;
-                                        configuration.PacketSize = (int) currentPacketSize;
+                                        configuration.PacketSize = (int)currentPacketSize;
                                         // Evaluation of the buffersize for audio decoding
                                         configuration.MaxFramesize = (int)((currentBitrate * 16) / (10 * currentBitsPerSample * 2));
                                         configuration.Source = this.StoragePath;
@@ -1317,17 +1310,15 @@ namespace ASTool
                                 }
                             }
                         }
-                        if (this.manifestBuffer == null)
-                            this.manifestBuffer = manifestBuffer;
 
-                        if(this.IsLive)
+                        if (this.IsLive)
                         {
-                            this.StartChunkListsUpdateThread(6000);
+                            await this.StartChunkListsUpdateThread(6000);
                         }
                         bResult = true;
-                    }                
+                    }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Exception while parsing Smooth Streaming manifest : " + ex.Message);
                     bResult = false;
@@ -1335,11 +1326,11 @@ namespace ASTool
             }
             return bResult;
         }
-        bool StartChunkListsUpdateThread(int Period)
+        async Task<bool> StartChunkListsUpdateThread(int Period)
         {
             if (downloadManifestTaskCancellationtoken == null)
                 downloadManifestTaskCancellationtoken = new System.Threading.CancellationTokenSource();
-            var t = Task.Run(async  () =>
+            var t = Task.Run(async () =>
             {
                 this.downloadManifestTaskRunning = true;
                 while (this.downloadManifestTaskRunning)
@@ -1352,7 +1343,7 @@ namespace ASTool
                         // Clean up here, then...
                         downloadManifestTaskCancellationtoken.Token.ThrowIfCancellationRequested();
                     }
-                    System.Threading.Tasks.Task.Delay(Period).Wait();
+                    await Task.Delay(Period);
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Update Manifest for Uri: " + ManifestUri.ToString());
                     await UpdateManifest();
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Update Manifest done for Uri: " + ManifestUri.ToString());
@@ -1388,7 +1379,7 @@ namespace ASTool
                     bResult = await this.ParseAndUpdateHLSManifest();
                 }
             }
-            if(bResult==true)
+            if (bResult == true)
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Updating Manifest done for Uri: " + ManifestUri.ToString());
             else
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Update Manifest failed for Uri: " + ManifestUri.ToString());
@@ -1453,10 +1444,10 @@ namespace ASTool
         ///                             1 Default: The cache will download the audio and video chunks step by step in one single thread
         ///                             N The cache will create N parallel threads to download the audio chunks and N parallel threads to downlaod video chunks </param>
         /// <returns>return a ManifestCache (null if not successfull)</returns>
-        public static ManifestManager CreateManifestCache(Uri manifestUri,  ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, int liveOffset)
+        public static ManifestManager CreateManifestCache(Uri manifestUri, ulong minBitrate, ulong maxBitrate, string AudioTrackName, string TextTrackName, ulong MaxDuration, ulong maxMemoryBufferSize, int liveOffset)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestManager mc = new ManifestManager(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize,  liveOffset);
+            ManifestManager mc = new ManifestManager(manifestUri, minBitrate, maxBitrate, AudioTrackName, TextTrackName, MaxDuration, maxMemoryBufferSize, liveOffset);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1481,7 +1472,7 @@ namespace ASTool
         public static ManifestManager CreateManifestCache(Uri manifestUri, bool downloadToGo, ulong maxMemoryBufferSize, uint maxError, int downloadMethod = 1)
         {
             // load the stream associated with the HLS, SMOOTH or DASH manifest
-            ManifestManager mc = new ManifestManager(manifestUri,  maxMemoryBufferSize, maxError, downloadMethod);
+            ManifestManager mc = new ManifestManager(manifestUri, maxMemoryBufferSize, maxError, downloadMethod);
             if (mc != null)
             {
                 mc.ManifestStatus = AssetStatus.Initialized;
@@ -1525,9 +1516,9 @@ namespace ASTool
         {
             string result = "source";
             string[] list = message.Split("/");
-            if((list!=null)&&(list.Length>1))
+            if ((list != null) && (list.Length > 1))
             {
-                if(list[list.Length-1].ToLower()!="manifest")
+                if (list[list.Length - 1].ToLower() != "manifest")
                 {
                     result = list[list.Length - 1];
                 }
@@ -1535,7 +1526,7 @@ namespace ASTool
                 {
                     result = list[list.Length - 2];
                     int pos = result.IndexOf(".");
-                    if(pos>0)
+                    if (pos > 0)
                         result = result.Substring(0, pos);
                 }
                 if (string.IsNullOrEmpty(result))
@@ -1561,7 +1552,7 @@ namespace ASTool
         {
             //ulong expectedSize = ((this.AudioBitrate + this.VideoBitrate) * this.TimescaleToHNS(this.Duration)) / (8 * ManifestCache.TimeUnit);
             ulong duration = this.TimescaleToHNS(this.Duration) / (ManifestManager.TimeUnit);
-            ulong expectedSize = ((this.AudioBitrate + this.VideoBitrate) * duration) / 8 ;
+            ulong expectedSize = ((this.AudioBitrate + this.VideoBitrate) * duration) / 8;
             return expectedSize;
         }
         /// <summary>
@@ -1654,13 +1645,13 @@ namespace ASTool
         {
             if ((IsDownloadCompleted(VideoChunkListList)) &&
                 (IsDownloadCompleted(AudioChunkListList)) &&
-                (IsDownloadCompleted(TextChunkListList) ))
+                (IsDownloadCompleted(TextChunkListList)))
                 return 0;
             DateTime time = DateTime.Now;
             double currentBitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
             return currentBitrate;
         }
-        
+
         /// <summary>
         /// DownloadChunkAsync
         /// Download asynchronously a chunk.
@@ -1670,8 +1661,8 @@ namespace ASTool
         /// <returns>return a byte array containing the chunk</returns>
         public virtual async Task<byte[]> DownloadChunkAsync(Uri chunkUri, bool forceNewDownload = true)
         {
-            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DownloadChunk start for chunk: " + chunkUri.ToString() );
-            
+            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DownloadChunk start for chunk: " + chunkUri.ToString());
+
             var client = new System.Net.Http.HttpClient();
             try
             {
@@ -1681,16 +1672,16 @@ namespace ASTool
                     string newUriString = string.Concat(chunkUri.AbsoluteUri, modifier, "ignore=", Guid.NewGuid());
                     chunkUri = new Uri(newUriString);
                 }
-//                System.Net.Http.HttpResponseMessage response = await client.GetAsync(chunkUri, System.Net.Http.HttpCompletionOption.ResponseContentRead).AsTask(downloadTaskCancellationtoken.Token);
+                //                System.Net.Http.HttpResponseMessage response = await client.GetAsync(chunkUri, System.Net.Http.HttpCompletionOption.ResponseContentRead).AsTask(downloadTaskCancellationtoken.Token);
                 System.Net.Http.HttpResponseMessage response = await client.GetAsync(chunkUri, System.Net.Http.HttpCompletionOption.ResponseContentRead);
 
                 response.EnsureSuccessStatusCode();
                 byte[] buffer = await response.Content.ReadAsByteArrayAsync();
-                if(buffer!=null)
+                if (buffer != null)
                 {
                     int val = buffer.Length;
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DownloadChunk done for chunk: " + chunkUri.ToString());
-                    return buffer.ToArray();
+                    return buffer;
                 }
             }
             catch (Exception e)
@@ -1699,7 +1690,7 @@ namespace ASTool
             }
 
             return null;
-            
+
         }
 
         /// <summary>
@@ -1716,7 +1707,7 @@ namespace ASTool
                 if (i < cl.TotalChunks)
                     return false;
             }
-            return true ;
+            return true;
         }
         /// <summary>
         /// IsArchiveCompleted
@@ -1750,11 +1741,11 @@ namespace ASTool
                 lock (cl.ChunksQueue)
                 {
                     var enu = cl.ChunksQueue.GetEnumerator();
-                    if(enu!=null)
+                    if (enu != null)
                     {
-                        while((enu.MoveNext()) && (enu.Current !=null ))
+                        while ((enu.MoveNext()) && (enu.Current != null))
                         {
-                            listSize += (ulong)(enu.Current.chunkBuffer == null ? 0:enu.Current.chunkBuffer.Length);
+                            listSize += (ulong)(enu.Current.chunkBuffer == null ? 0 : enu.Current.chunkBuffer.Length);
                         }
                     }
                 }
@@ -1773,15 +1764,15 @@ namespace ASTool
             try
             {
 
-                ISMHelper.Mp4Box box  = ISMHelper.Mp4Box.CreateMp4Box(data, 0);
-                if(box.GetBoxType()== "moof")
+                ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateMp4Box(data, 0);
+                if (box.GetBoxType() == "moof")
                 {
-                    List<ISMHelper.Mp4Box> listmoof =  box.GetChildren();
-                    if(listmoof!=null)
+                    List<ISMHelper.Mp4Box> listmoof = box.GetChildren();
+                    if (listmoof != null)
                     {
-                        foreach(var boxinmoof in listmoof)
+                        foreach (var boxinmoof in listmoof)
                         {
-                            if(boxinmoof.GetBoxType()=="traf")
+                            if (boxinmoof.GetBoxType() == "traf")
                             {
                                 List<ISMHelper.Mp4Box> listtraf = boxinmoof.GetChildren();
                                 if (listtraf != null)
@@ -1790,8 +1781,8 @@ namespace ASTool
                                     {
                                         if (boxintraf.GetBoxType() == "tfhd")
                                         {
-                                            byte[] buffer =  boxintraf.GetBoxData();
-                                            if(buffer!=null)
+                                            byte[] buffer = boxintraf.GetBoxData();
+                                            if (buffer != null)
                                             {
                                                 return ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 4);
                                             }
@@ -1804,7 +1795,7 @@ namespace ASTool
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
 
             }
@@ -1823,7 +1814,7 @@ namespace ASTool
             foreach (var cl in list)
             {
                 ChunkBuffer cb;
-                if(cl.ChunksToReadQueue.TryDequeue(out cb))
+                if (cl.ChunksToReadQueue.TryDequeue(out cb))
                 {
                     string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cb.Time.ToString());
                     cb.chunkBuffer = await DownloadChunkAsync(new Uri(url));
@@ -1846,8 +1837,8 @@ namespace ASTool
                         len += (long)l;
                         cl.InputChunks++;
                         cl.ChunksQueue.Enqueue(cb);
-                    //    ChunkBuffer dummy;
-                     //   cl.ChunksToReadQueue.TryDequeue(out dummy);
+                        //    ChunkBuffer dummy;
+                        //   cl.ChunksToReadQueue.TryDequeue(out dummy);
 
                     }
                     else
@@ -1884,27 +1875,27 @@ namespace ASTool
 
 
 
-                    //string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cl.ChunksList[(int)i].Time.ToString());
-                    //cl.ChunksList[(int)i].chunkBuffer = await DownloadChunkAsync(new Uri(url));
-                    //if((cl.Configuration!=null) && (cl.Configuration.TrackID == -1))
-                    //{
-                    //    cl.Configuration.TrackID = GetTrackID(cl.ChunksList[(int)i].chunkBuffer);
+                //string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cl.ChunksList[(int)i].Time.ToString());
+                //cl.ChunksList[(int)i].chunkBuffer = await DownloadChunkAsync(new Uri(url));
+                //if((cl.Configuration!=null) && (cl.Configuration.TrackID == -1))
+                //{
+                //    cl.Configuration.TrackID = GetTrackID(cl.ChunksList[(int)i].chunkBuffer);
 
-                    //    if (cl.Configuration.TrackID != -1)
-                    //    {
-                    //        // Now the TrackID is available, we can build ftyp and moov boxes
-                    //        cl.ftypData = cl.Configuration.GetFTYPData();
-                    //        cl.moovData = cl.Configuration.GetMOOVData();
-                    //    }
+                //    if (cl.Configuration.TrackID != -1)
+                //    {
+                //        // Now the TrackID is available, we can build ftyp and moov boxes
+                //        cl.ftypData = cl.Configuration.GetFTYPData();
+                //        cl.moovData = cl.Configuration.GetMOOVData();
+                //    }
 
-                    //}
-                    //if (cl.ChunksList[(int)i].IsChunkDownloaded())
-                    //{
-                    //    ulong l = cl.ChunksList[(int)i].GetLength();
-                    //    cl.InputBytes += l;
-                    //    len += l;
-                    //    cl.InputChunks++;
-                    //}
+                //}
+                //if (cl.ChunksList[(int)i].IsChunkDownloaded())
+                //{
+                //    ulong l = cl.ChunksList[(int)i].GetLength();
+                //    cl.InputBytes += l;
+                //    len += l;
+                //    cl.InputChunks++;
+                //}
                 //}
             }
             return len;
@@ -1926,20 +1917,20 @@ namespace ASTool
         //        }
 
         //    }, downloadTaskCancellationtoken.Token);
-            //return Task.Run(async () =>
-            //{
-            //    foreach (var cl in list)
-            //    {
-            //        string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cl.ChunksList[(int)i].Time.ToString());
-            //        System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks for Uri: " + url.ToString());
-            //        cl.ChunksList[(int)i].chunkBuffer = await DownloadChunkAsync(new Uri(url));
-            //        if (cl.ChunksList[(int)i].IsChunkDownloaded())
-            //            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks done for Uri: " + url.ToString());
-            //        else
-            //            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks error for Uri: " + url.ToString());
-            //    }
+        //return Task.Run(async () =>
+        //{
+        //    foreach (var cl in list)
+        //    {
+        //        string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cl.ChunksList[(int)i].Time.ToString());
+        //        System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks for Uri: " + url.ToString());
+        //        cl.ChunksList[(int)i].chunkBuffer = await DownloadChunkAsync(new Uri(url));
+        //        if (cl.ChunksList[(int)i].IsChunkDownloaded())
+        //            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks done for Uri: " + url.ToString());
+        //        else
+        //            System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading chunks error for Uri: " + url.ToString());
+        //    }
 
-            //}, downloadTaskCancellationtoken.Token);
+        //}, downloadTaskCancellationtoken.Token);
 
         //}
 
@@ -1952,7 +1943,7 @@ namespace ASTool
         /// </summary>
         /// <param name=""></param>
         /// <returns>return the length of the downloaded audio chunk</returns>
-        public async  Task<bool> downloadThread()
+        public async Task<bool> downloadThread()
         {
 
             System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread started for Uri: " + ManifestUri.ToString());
@@ -1986,10 +1977,10 @@ namespace ASTool
 
                 bool result = false;
                 // Download Video Chunks
-                if((VideoChunkListList != null)&&(VideoChunkListList.Count>0))
+                if ((VideoChunkListList != null) && (VideoChunkListList.Count > 0))
                 {
                     // Something to download
-                    if(!IsDownloadCompleted(VideoChunkListList))
+                    if (!IsDownloadCompleted(VideoChunkListList))
                     {
                         System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading video chunks for Uri: " + ManifestUri.ToString());
                         long len = await DownloadCurrentChunks(VideoChunkListList);
@@ -2082,12 +2073,12 @@ namespace ASTool
                         System.Diagnostics.Debug.WriteLine("Download bitrate for the current session: " + bitrate.ToString() + " bps");
                         ManifestStatus = AssetStatus.ErrorChunksDownload;
                         downloadTaskRunning = false;
-                        downloadManifestTaskRunning = false; 
+                        downloadManifestTaskRunning = false;
                     }
                 }
-                if (IsDownloadCompleted(VideoChunkListList)&&
-                    IsDownloadCompleted(AudioChunkListList)&&
-                    IsDownloadCompleted(TextChunkListList)&&
+                if (IsDownloadCompleted(VideoChunkListList) &&
+                    IsDownloadCompleted(AudioChunkListList) &&
+                    IsDownloadCompleted(TextChunkListList) &&
                         (!this.IsLive))
                 {
                     DateTime time = DateTime.Now;
@@ -2107,7 +2098,7 @@ namespace ASTool
                 }
                 DateTime currentTime = DateTime.Now;
                 if ((MaxDuration > 0) &&
-                 ((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration)) 
+                 ((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration))
                 {
                     DateTime time = DateTime.Now;
                     System.Diagnostics.Debug.WriteLine("Download stopped at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time) + " at MaxDuration: " + MaxDuration.ToString());
@@ -2139,7 +2130,7 @@ namespace ASTool
             downloadTaskRunning = false;
             downloadManifestTaskRunning = false;
             System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread ended for Uri: " + ManifestUri.ToString());
-            return true; 
+            return true;
 
         }
         /// <summary>
@@ -2165,7 +2156,7 @@ namespace ASTool
         {
 
 
-            if (OutputManager!=null)
+            if (OutputManager != null)
                 await OutputManager.ProcessManifest(this);
             return true;
         }
@@ -2175,7 +2166,7 @@ namespace ASTool
         /// </summary>
         /// <param name=""></param>
         /// <returns>Return true if successful</returns>
-        private bool StopDownloadThread()
+        private async Task<bool> StopDownloadThread()
         {
             if ((downloadTask != null) && (downloadTaskRunning == true))
             {
@@ -2190,7 +2181,7 @@ namespace ASTool
                 try
                 {
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask thread Waiting end of thread for Uri: " + ManifestUri.ToString());
-                    downloadTask.Wait(500);
+                    await Task.WhenAny(downloadTask, Task.Delay(500));
                 }
                 catch (Exception e)
                 {
@@ -2204,26 +2195,6 @@ namespace ASTool
         }
 
         /// <summary>
-        /// PauseDownloadChunks
-        /// Pause the download of chunks
-        /// </summary>
-        /// <param name=""></param>
-        /// <returns>Return true if successful</returns>
-        public bool PauseDownloadChunks()
-        {
-            return StopDownloadThread();
-        }
-        /// <summary>
-        /// StopDownloadChunks
-        /// Stop the download of chunks
-        /// </summary>
-        /// <param name=""></param>
-        /// <returns>Return true if successful</returns>
-        public bool StopDownloadChunks()
-        {
-            return StopDownloadThread();
-        }
-        /// <summary>
         /// StartDownloadThread
         /// Start the downlaod thread
         /// </summary>
@@ -2234,10 +2205,14 @@ namespace ASTool
             if (downloadTask == null)
             {
                 downloadTaskRunning = false;
-                if(downloadTaskCancellationtoken == null)
+                if (downloadTaskCancellationtoken == null)
                     downloadTaskCancellationtoken = new System.Threading.CancellationTokenSource();
-                if(DownloadMethod == 1)
-                    downloadTask = Task.Run(async () => { await downloadThread(); }, downloadTaskCancellationtoken.Token);
+                if (DownloadMethod == 1)
+
+                {
+                    //downloadTask = Task.Run(async () => { await downloadThread(); }, downloadTaskCancellationtoken.Token);
+                    downloadTask = downloadThread();
+                }
                 //else
                 //    downloadTask = Task.Run(async () => { await downloadParallelThread(); }, downloadTaskCancellationtoken.Token);
                 if (downloadTask != null)
@@ -2255,7 +2230,7 @@ namespace ASTool
         {
 
             // stop the download thread if running
-            StopDownloadThread();
+            await StopDownloadThread();
             // Initialize Download paramters
             await InitializeDownloadParameters();
             return StartDownloadThread();
@@ -2292,14 +2267,14 @@ namespace ASTool
         //        }
         //    }
 
-            //if (Index < TextChunkListList.Count)
-            //{
-            //    for (int i = 0; i < TextChunkListList[Index].ChunksList.Count; i++)
-            //    {
-            //        if (TextChunkListList[Index].ChunksList[i].Time == time)
-            //            return TextChunkListList[Index].ChunksList[i];
-            //    }
-            //}
+        //if (Index < TextChunkListList.Count)
+        //{
+        //    for (int i = 0; i < TextChunkListList[Index].ChunksList.Count; i++)
+        //    {
+        //        if (TextChunkListList[Index].ChunksList[i].Time == time)
+        //            return TextChunkListList[Index].ChunksList[i];
+        //    }
+        //}
         //    return null;
         //}
         /// <summary>
@@ -2319,14 +2294,14 @@ namespace ASTool
         //                return AudioChunkListList[Index].ChunksList.Values.ElementAt(i);
         //        }
         //    }
-            //if (Index < AudioChunkListList.Count)
-            //{
-            //    for (int i = 0; i < AudioChunkListList[Index].ChunksList.Count; i++)
-            //    {
-            //        if (AudioChunkListList[Index].ChunksList[i].Time == time)
-            //            return AudioChunkListList[Index].ChunksList[i];
-            //    }
-            //}
+        //if (Index < AudioChunkListList.Count)
+        //{
+        //    for (int i = 0; i < AudioChunkListList[Index].ChunksList.Count; i++)
+        //    {
+        //        if (AudioChunkListList[Index].ChunksList[i].Time == time)
+        //            return AudioChunkListList[Index].ChunksList[i];
+        //    }
+        //}
         //    return null;
         //}
         /// <summary>
@@ -2338,14 +2313,14 @@ namespace ASTool
         /// <returns>Return a ChunkCache </returns>
         //public ChunkBuffer GetVideoChunkCache(int Index, ulong time)
         //{
-            //if (Index < VideoChunkListList.Count)
-            //{
-            //    for (int i = 0; i < VideoChunkListList[Index].ChunksList.Count; i++)
-            //    {
-            //        if (VideoChunkListList[Index].ChunksList[i].Time == time)
-            //            return VideoChunkListList[Index].ChunksList[i];
-            //    }
-            //}
+        //if (Index < VideoChunkListList.Count)
+        //{
+        //    for (int i = 0; i < VideoChunkListList[Index].ChunksList.Count; i++)
+        //    {
+        //        if (VideoChunkListList[Index].ChunksList[i].Time == time)
+        //            return VideoChunkListList[Index].ChunksList[i];
+        //    }
+        //}
         //    if (Index < VideoChunkListList.Count)
         //    {
         //        for (int i = 0; i < VideoChunkListList[Index].ChunksList.Count; i++)
@@ -2362,7 +2337,8 @@ namespace ASTool
         /// ManifestStatus
         /// Return a ManifestStatus 
         /// </summary>
-        public AssetStatus ManifestStatus {
+        public AssetStatus ManifestStatus
+        {
             get
             {
                 return mStatus;
@@ -2372,7 +2348,7 @@ namespace ASTool
                 if (mStatus != value)
                 {
                     mStatus = value;
-                    if (StatusProgress!=null)
+                    if (StatusProgress != null)
                         StatusProgress(this, mStatus);
                 }
             }
@@ -2382,7 +2358,8 @@ namespace ASTool
         /// DownloadedPercentage
         /// Return a downloaded Percentage based on the number of audio and video chunks downloaded
         /// </summary>
-        public uint DownloadedPercentage {
+        public uint DownloadedPercentage
+        {
             get
             {
                 ulong TotalVideoChunks = 0;
@@ -2413,12 +2390,12 @@ namespace ASTool
             }
             set
             {
-                if(downloadedPercentage != value)
+                if (downloadedPercentage != value)
                 {
                     downloadedPercentage = value;
                     if (DownloadProgress != null)
                         DownloadProgress(this, downloadedPercentage);
-                } 
+                }
             }
         }
 
@@ -2437,12 +2414,11 @@ namespace ASTool
         #endregion
         public void Dispose()
         {
-            manifestBuffer = null;
-            if(VideoChunkListList!= null)
+            if (VideoChunkListList != null)
             {
-                foreach( var c in VideoChunkListList)
+                foreach (var c in VideoChunkListList)
                 {
-                    c.Dispose();                    
+                    c.Dispose();
                 }
             }
             VideoChunkListList.Clear();

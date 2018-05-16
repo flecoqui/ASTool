@@ -23,7 +23,8 @@ namespace ASTool
     public class Options
     {
         [DataContract(Name = "Action")]
-        public enum Action {
+        public enum Action
+        {
             [EnumMember]
             None = 0,
             [EnumMember]
@@ -108,28 +109,27 @@ namespace ASTool
 
         public TheadStatus Status { get; set; }
         public DateTime ThreadStartTime { get; set; }
-        public DateTime ThreadCounterTime { get; set; }
         public Dictionary<string, CounterDescription> ListCounters { get; set; }
         public string GetCountersInformation()
         {
             string result = string.Empty;
 
-            if((ListCounters!=null)&& (ListCounters.Count>0))
+            if ((ListCounters != null) && (ListCounters.Count > 0))
             {
-                foreach(var c in ListCounters)
+                foreach (var c in ListCounters)
                 {
-                    result += c.Value.Name + ": " + c.Value.value.ToString() + " " + c.Value.UnitString + "\r\n"; 
+                    result += c.Value.Name + ": " + c.Value.value.ToString() + " " + c.Value.UnitString + "\r\n";
                 }
             }
             return result;
         }
-        public bool SetCounter(string key, string name, object value, string unit, string description )
+        public bool SetCounter(string key, string name, object value, string unit, string description)
         {
             bool result = false;
             if (ListCounters == null)
                 ListCounters = new Dictionary<string, CounterDescription>();
 
-            if(ListCounters!=null)
+            if (ListCounters != null)
             {
                 try
                 {
@@ -155,7 +155,7 @@ namespace ASTool
                     }
                     result = true;
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     result = false;
                 }
@@ -196,7 +196,7 @@ namespace ASTool
             return ErrorMessagePrefix;
         }
         private string ErrorMessagePrefix = "ASTool Error: \r\n";
-        private string InformationMessage = "ASTool:\r\n" + "Version: {0} \r\n"  + "Syntax:\r\n"+
+        private string InformationMessage = "ASTool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
             "ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
@@ -204,14 +204,14 @@ namespace ASTool
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
-            "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
+            "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
-            "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
+            "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
@@ -226,14 +226,14 @@ namespace ASTool
         void LogMessage(LogLevel level, string Message)
         {
             string Text = string.Empty;
-            if ((level <= TraceLevel)&&(!string.IsNullOrEmpty(this.TraceFile)))
+            if ((level <= TraceLevel) && (!string.IsNullOrEmpty(this.TraceFile)))
             {
                 Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
                 LogTrace(this.TraceFile, this.TraceSize, Text);
             }
             if (level <= ConsoleLevel)
             {
-                if(string.IsNullOrEmpty(Text))
+                if (string.IsNullOrEmpty(Text))
                     Text = string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " " + Message + "\r\n";
                 Console.Write(Text);
             }
@@ -320,7 +320,7 @@ namespace ASTool
         static public LogLevel GetLogLevel(string text)
         {
             LogLevel level = LogLevel.None;
-            switch(text.ToLower())
+            switch (text.ToLower())
             {
                 case "none":
                     level = LogLevel.None;
@@ -342,7 +342,7 @@ namespace ASTool
             }
             return level;
         }
-        public static  object ReadObjectByType(string filepath, Type type)
+        public static object ReadObjectByType(string filepath, Type type)
         {
             object retVal = null;
             try
@@ -352,7 +352,7 @@ namespace ASTool
                 {
                     System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(type);
                     retVal = ser.ReadObject(fs);
-                    fs.Close();                        
+                    fs.Close();
                 }
             }
             catch (Exception ex)
@@ -371,11 +371,11 @@ namespace ASTool
                 if (fs != null)
                 {
                     System.Runtime.Serialization.DataContractSerializer ser = new System.Runtime.Serialization.DataContractSerializer(type);
-                    ser.WriteObject(fs,obj);
+                    ser.WriteObject(fs, obj);
                     fs.Close();
                     retVal = true;
                 }
-                    
+
 
             }
             catch (Exception ex)
@@ -553,26 +553,26 @@ namespace ASTool
             List<Options> list = new List<Options>();
             Options options = new Options();
 
-            if ((options == null)||(list == null))
+            if ((options == null) || (list == null))
             {
                 return null;
             }
             try
             {
-                
+
                 options.TraceFile = "ASTOOL.log";
-                if (args!=null)
+                if (args != null)
                 {
 
                     int i = 0;
-                    if(args.Length == 0)
+                    if (args.Length == 0)
                     {
-                        options.ErrorMessage = "No parameter in the command line" ;
+                        options.ErrorMessage = "No parameter in the command line";
                         return options;
                     }
-                    while ((i < args.Length)&&(string.IsNullOrEmpty(options.ErrorMessage)))
+                    while ((i < args.Length) && (string.IsNullOrEmpty(options.ErrorMessage)))
                     {
-                        switch(args[i++])
+                        switch (args[i++])
                         {
 
                             case "--help":
@@ -702,7 +702,7 @@ namespace ASTool
                             case "--buffersize":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                 {
-                                    int buffersize= 0;
+                                    int buffersize = 0;
                                     if (int.TryParse(args[i++], out buffersize))
                                         options.BufferSize = buffersize;
                                     else
@@ -748,7 +748,7 @@ namespace ASTool
                                     (args[i - 1].ToLower() == "astool.dll") ||
                                     (args[i - 1].ToLower() == "astool.exe"))
                                     break;
-                                options.ErrorMessage = "wrong parameter: " + args[i-1];
+                                options.ErrorMessage = "wrong parameter: " + args[i - 1];
                                 return options;
                         }
                     }

@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using ASTool.ISMHelper;
 namespace ASTool.Core
 {
@@ -29,7 +30,7 @@ namespace ASTool.Core
                 OutputChunks += cl.OutputChunks;
                 OutputBytes += cl.OutputBytes;
             }
-            
+
             opt.SetCounter(source + "_Source", "Total Counters for source", opt.InputUri, string.Empty, "Total Counters for source");
             opt.SetCounter(source + "_OutputChunks", "Total Number of Output Chunks", OutputChunks, string.Empty, "Total Number of Output Chunks");
             opt.SetCounter(source + "_OutputBytes", "Total Number of Output Bytes", OutputBytes, string.Empty, "Total Number of Output Bytes");
@@ -51,16 +52,15 @@ namespace ASTool.Core
             opt.SetCounter(source + "_Source", opt.InputUri);
             opt.SetCounter(source + "_OutputChunks", OutputChunks);
             opt.SetCounter(source + "_OutputBytes", OutputBytes);
-            opt.SetCounter(source  + "_Bitrate", (int)(OutputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds));
+            opt.SetCounter(source + "_Bitrate", (int)(OutputBytes * 8 / (DateTime.Now - opt.ThreadStartTime).TotalSeconds));
 
         }
 
-        public static bool Push(Options opt)
+        static public async Task<bool> Push(Options opt)
         {
             bool result = false;
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
-            opt.ThreadCounterTime = DateTime.Now;
 
 
             opt.LogInformation("\r\nPush " + opt.Name + "\r\n Pushing from : " + opt.InputUri + "\r\n Pushing to   : " + opt.OutputUri);
@@ -117,16 +117,16 @@ namespace ASTool.Core
             bool IsRunning = true;
             while (IsRunning)
             {
-                System.Threading.Tasks.Task.Delay(5000).Wait();
+                await Task.Delay(5000);
                 if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
-                    CreatePushCounters(opt,pushers, ism.IsmcFilePath);
+                    CreatePushCounters(opt, pushers, ism.IsmcFilePath);
                 else
-                    UpdatePushCounters(opt,pushers, ism.IsmcFilePath);
+                    UpdatePushCounters(opt, pushers, ism.IsmcFilePath);
                 IsRunning = false;
                 foreach (IsmPushEncoder pusher in pushers)
                 {
                     if (pusher.IsRunning() == true)
-                    { 
+                    {
                         IsRunning = true;
                         break;
                     }
