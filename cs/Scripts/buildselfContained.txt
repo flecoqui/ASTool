@@ -1,4 +1,4 @@
-dotnet publish -c Release -r win10-x64
+dotnet publish --self-contained -c Release -r win10-x64
 dotnet publish -c Release -r ubuntu.16.10-x64
 
 
@@ -23,8 +23,9 @@ dotnet ASTool.dll --pullpush  --input http://cdn.iptv.lu/live/disk/artedehd/mss_
 http://localhost/VideoApp/Live/_live1.isml/manifest
 
 dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --maxbitrate 1000000   --output http://localhost/VideoApp/Live/_live1.isml  --texttrackname toto 
+dotnet ASTool.dll --pullpush  --input  http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --liveoffset 10   --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml  --texttrackname ARTEHD 
 	
-
+http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
 dotnet ASTool.dll --parse  --input  C:\temp\ASTool\test4\metisser\Audio_0.isma
