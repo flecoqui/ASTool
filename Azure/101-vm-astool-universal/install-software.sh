@@ -134,19 +134,21 @@ adduser astool -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/astool.service
 [Unit]
 Description=astool Service
-After=network.target
 
 [Service]
-Type=simple
+WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool  --import --configfile /git/config/astool.linux.xml
-Restart=on-abort
+ExecStart=/bin/sh -c '/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool  --import --configfile /git/config/astool.linux.xml'
+Restart=always
+RestartSec=10
+SyslogIdentifier=ASTool
 
 
 [Install]
 WantedBy=multi-user.target
 EOF
 }
+
 
 #############################################################################
 configure_network_centos(){
