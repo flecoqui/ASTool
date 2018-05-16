@@ -52,11 +52,22 @@ namespace AdaptativeStreamingService
 
             var args = cliArg.Split(' ');
 
-            // HACK : reusing Main from CLI for first tests
-            AstoolCli_Main(args);
+            Thread astoolEngineThread = new Thread(new ParameterizedThreadStart(AstoolCli_Main));
+            astoolEngineThread.Start(args);
 
-            // TODO launch Main in a Task and implemented loop with cancellationToken support
-            
+            try
+            {
+                while (true)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                }
+            }
+            catch (OperationCanceledException oce)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Cancel async received !!");
+                astoolEngineThread.Abort();
+            }
             //long iterations = 0;
             //while (true)
             //{
@@ -69,8 +80,11 @@ namespace AdaptativeStreamingService
         }
 
 
-        void AstoolCli_Main(string[] args)
+        void  AstoolCli_Main(object genericArgs)
         {
+            string[] args = (string[]) genericArgs;
+            // HACK : reusings Main from CLI for first tests
+
             // TODO remove pure CLI code (help, ...) and implement statis code return.
 
             int Version = ASVersion.SetVersion(0x01, 0x00, 0x00, 0x00);

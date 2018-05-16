@@ -17,6 +17,10 @@ using ASTool;
 using ASTool.CacheHelper;
 namespace ASTool.Core
 {
+
+    // TODO : replace thread with TPL in ASTools core
+
+
     /// <summary>
     /// Old Program.Main() refactored to externalize starting/launching task, and favorizing overs progrject type (Stateless Service, ...)
     /// </summary>
