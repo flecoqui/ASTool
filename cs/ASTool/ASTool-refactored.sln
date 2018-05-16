@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2015
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASTool-cli", "ASTool-cli\ASTool-cli.csproj", "{A8F156E8-F58F-479D-863E-C0D193E03F0C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASTool.Core", "ASTool.Core\ASTool.Core.csproj", "{F326C6CF-B7BB-4A7A-9318-A137997254B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8F156E8-F58F-479D-863E-C0D193E03F0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8F156E8-F58F-479D-863E-C0D193E03F0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8F156E8-F58F-479D-863E-C0D193E03F0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8F156E8-F58F-479D-863E-C0D193E03F0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F326C6CF-B7BB-4A7A-9318-A137997254B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F326C6CF-B7BB-4A7A-9318-A137997254B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F326C6CF-B7BB-4A7A-9318-A137997254B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F326C6CF-B7BB-4A7A-9318-A137997254B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {563D8E05-88D7-4F1F-BBB2-EA7ACAEA02B3}
+	EndGlobalSection
+EndGlobal
