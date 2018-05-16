@@ -169,7 +169,7 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "C:\source\dotnet-install.ps1"
+& "C:\source\dotnet-install.ps1" --version 2.1.200
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
