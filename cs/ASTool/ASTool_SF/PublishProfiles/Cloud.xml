@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PublishProfile xmlns="http://schemas.microsoft.com/2015/05/fabrictools">
+  <!-- ClusterConnectionParameters vous permet de spécifier les paramètres PowerShell à utiliser pour la connexion au cluster Service Fabric.
+       Les paramètres valides sont ceux acceptés par l'applet de commande Connect-ServiceFabricCluster.
+       
+       Pour un cluster distant, vous devez spécifier les paramètres appropriés spécifiquement à ce dernier.
+         Exemple : <ClusterConnectionParameters ConnectionEndpoint="mycluster.westus.cloudapp.azure.com:19000" />
+
+       Exemple de paramètres d'un cluster qui utilise la sécurité basée sur les certificats :
+       <ClusterConnectionParameters ConnectionEndpoint="mycluster.westus.cloudapp.azure.com:19000"
+                                    X509Credential="true"
+                                    ServerCertThumbprint="0123456789012345678901234567890123456789"
+                                    FindType="FindByThumbprint"
+                                    FindValue="9876543210987654321098765432109876543210"
+                                    StoreLocation="CurrentUser"
+                                    StoreName="My" />
+
+       Exemple de paramètres d'un cluster qui utilise la sécurité basée sur Azure Active Directory (AAD) :
+       <ClusterConnectionParameters ConnectionEndpoint="mycluster.westus.cloudapp.azure.com:19000"
+                                    AzureActiveDirectory="true"
+                                    ServerCertThumbprint="0123456789012345678901234567890123456789" />
+  -->
+  <ClusterConnectionParameters ConnectionEndpoint="" />
+  <ApplicationParameterFile Path="..\ApplicationParameters\Cloud.xml" />
+  <CopyPackageParameters CompressPackage="true" />
+</PublishProfile>

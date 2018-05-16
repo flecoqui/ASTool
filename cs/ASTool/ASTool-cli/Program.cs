@@ -184,6 +184,7 @@ namespace ASTool_cli
                 if (StoppedThreadCounter == list.Count)
                     bCompleted = true;
             }
+
         }
     }
 }
