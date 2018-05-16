@@ -101,7 +101,7 @@ cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
 log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
-
+HOME=/root
 /usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin > /source/dotnet.log 2> /source/dotneterror.log
 
 
