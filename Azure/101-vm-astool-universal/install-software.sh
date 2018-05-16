@@ -101,8 +101,11 @@ cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
 log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
-HOME=/root
-/usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin > /source/dotnet.log 2> /source/dotneterror.log
+export HOME=/root
+env  > /source/env.log
+
+/usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 > /source/dotnet1.log 2> /source/dotneterror1.log
+/usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin > /source/dotnet2.log 2> /source/dotneterror2.log
 
 
 log "dotnet publish done"
