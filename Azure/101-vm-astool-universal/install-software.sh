@@ -100,12 +100,12 @@ wget $astool_configfile
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
 cd ASTool/cs/ASTool/ASTool
-dotnet publish --self-contained -c Release -r ubuntu.16.10-x64
+dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin
 }
 install_astool(){
-cd /git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
-export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
-echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish" >> /etc/profile
+cd /git/ASTool/cs/ASTool/ASTool/bin
+export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
+echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
 ./ASTool --help
 
 adduser astool --disabled-login
@@ -117,7 +117,7 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool --import --configfile /git/config/astool.linux.xml
+ExecStart=/usr/bin/dotnet /git/ASTool/cs/ASTool/ASTool/bin/ASTool.dll --import --configfile /git/config/astool.linux.xml
 Restart=on-abort
 
 [Install]
@@ -125,9 +125,9 @@ WantedBy=multi-user.target
 EOF
 }
 install_astool_centos(){
-cd /git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
-export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish
-echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish" >> /etc/profile
+cd /git/ASTool/cs/ASTool/ASTool/bin
+export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
+echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
 ./ASTool --help
 
 adduser astool -s /sbin/nologin
@@ -136,9 +136,9 @@ cat <<EOF > /etc/systemd/system/astool.service
 Description=astool Service
 
 [Service]
-WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/
+WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin
 User=astool
-ExecStart=/bin/sh -c '/git/ASTool/cs/ASTool/ASTool/bin/Release/netcoreapp2.0/ubuntu.16.10-x64/publish/ASTool  --import --configfile /git/config/astool.linux.xml'
+ExecStart=/usr/bin/dotnet /git/ASTool/cs/ASTool/ASTool/bin/ASTool.dll  --import --configfile /git/config/astool.linux.xml'
 Restart=always
 RestartSec=10
 SyslogIdentifier=ASTool
