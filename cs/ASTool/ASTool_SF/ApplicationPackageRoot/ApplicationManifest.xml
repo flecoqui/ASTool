@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="ASTool_SFType" ApplicationTypeVersion="1.1.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters>
+    <Parameter Name="AdaptativeStreamingService_InstanceCount" DefaultValue="1" />
+  </Parameters>
+  <!-- Importez ServiceManifest à partir de ServicePackage. ServiceManifestName et ServiceManifestVersion 
+       doivent correspondre aux attributs Name et Version de l'élément ServiceManifest défini dans le 
+       fichier ServiceManifest.xml. -->
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="AdaptativeStreamingServicePkg" ServiceManifestVersion="1.1.0" />
+    <ConfigOverrides />
+  </ServiceManifestImport>
+  <DefaultServices>
+    <!-- La section ci-dessous crée des instances de types de service, quand une instance de ce 
+         type d'application est créée. Vous pouvez également créer une ou plusieurs instances du type de service via le 
+         module ServiceFabric PowerShell.
+         
+         L'attribut ServiceTypeName ci-dessous doit correspondre au nom défini dans le fichier ServiceManifest.xml importé. -->
+    <!--<Service Name="AMS-HACKFEST" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="AdaptativeStreamingServiceType" 
+                        InstanceCount="[AdaptativeStreamingService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>-->
+  </DefaultServices>
+</ApplicationManifest>

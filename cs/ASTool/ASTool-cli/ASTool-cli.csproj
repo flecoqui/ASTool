@@ -5,4 +5,8 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ASTool.Core\ASTool.Core.csproj" />
+  </ItemGroup>
+
 </Project>
