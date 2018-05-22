@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --import --configfile c:\\temp\\astool.live.xml"
+      "commandLineArgs": "dotnet ASTool.dll --pullpush --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --minbitrate 300000   --maxbitrate 1000000  --output http://localhost/VideoApp/Live/_live1.isml"
     }
   }
 }

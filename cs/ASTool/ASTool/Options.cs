@@ -39,7 +39,16 @@ namespace ASTool
             [EnumMember]
             Import,
             [EnumMember]
-            Export
+            Export,
+            [EnumMember]
+            Install,
+            [EnumMember]
+            Uninstall,
+            [EnumMember]
+            Start,
+            [EnumMember]
+            Stop
+
         }
         [DataContract(Name = "LogLevel")]
         public enum LogLevel
@@ -105,6 +114,8 @@ namespace ASTool
         public int TraceSize { get; set; }
         [DataMember]
         public string ConfigFile { get; set; }
+
+        public bool ServiceMode { get; set; } 
 
         public TheadStatus Status { get; set; }
         public DateTime ThreadStartTime { get; set; }
@@ -189,14 +200,22 @@ namespace ASTool
         }
         public string GetInformationMessage(Int32 version)
         {
-            return string.Format(InformationMessage, ASVersion.GetVersionString(version));
+            bool IsWindows = System.Runtime.InteropServices.RuntimeInformation
+                               .IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+            if(IsWindows)
+                return string.Format(InformationMessagePrefix, ASVersion.GetVersionString(version)) +
+                   InformationMessageWindows + InformationMessageSuffix ;
+            else
+                return string.Format(InformationMessagePrefix, ASVersion.GetVersionString(version)) +
+                   InformationMessageSuffix;
+
         }
         public string GetErrorMessagePrefix()
         {
             return ErrorMessagePrefix;
         }
         private string ErrorMessagePrefix = "ASTool Error: \r\n";
-        private string InformationMessage = "ASTool:\r\n" + "Version: {0} \r\n"  + "Syntax:\r\n"+
+        private string InformationMessagePrefix = "ASTool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
             "ASTool --pullpush --input <inputLiveUri>      --output <outputLiveUri>  \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
@@ -204,22 +223,27 @@ namespace ASTool
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
-            "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" + 
+            "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
-            "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" + 
+            "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
             "                 [--name <service name>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  \r\n" +
-            "ASTool --import   --configfile <configFile> \r\n" +
-            "ASTool --export   --configfile <configFile> \r\n" +
-            "ASTool --help";
+            "ASTool --import    --configfile <configFile> \r\n" +
+            "ASTool --export    --configfile <configFile> \r\n";
+        private string InformationMessageWindows =
+            "ASTool --install   --configfile <configFile> \r\n" +
+            "ASTool --uninstall  \r\n" +
+            "ASTool --start \r\n" +
+            "ASTool --stop  \r\n";
+        private string InformationMessageSuffix = "ASTool --help\r\n";
         private string ErrorMessage = string.Empty;
 
 
@@ -414,11 +438,16 @@ namespace ASTool
             this.LiveOffset = 10;
             this.ASToolAction = Action.None;
             this.CounterPeriod = 20;
+            this.ServiceMode = false;
+
             this.ListCounters = new Dictionary<string, CounterDescription>();
         }
         public static Options CheckOptions(Options options)
         {
-            if (options.ASToolAction == Action.Help)
+            if( (options.ASToolAction == Action.Help) ||
+                 (options.ASToolAction == Action.Uninstall) ||
+                  (options.ASToolAction == Action.Stop) ||
+                   (options.ASToolAction == Action.Start))
             {
                 return options;
             }
@@ -534,6 +563,18 @@ namespace ASTool
                     return options;
                 }
             }
+            else if (options.ASToolAction == Action.Install)
+            {
+                if (!string.IsNullOrEmpty(options.ConfigFile))
+                {
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for Install feature";
+                    return options;
+                }
+            }
             else if (options.ASToolAction == Action.Export)
             {
                 if (!string.IsNullOrEmpty(options.ConfigFile))
@@ -591,8 +632,23 @@ namespace ASTool
                             case "--push":
                                 options.ASToolAction = Action.Push;
                                 break;
+                            case "--service":
+                                options.ServiceMode = true;
+                                break;
                             case "--parse":
                                 options.ASToolAction = Action.Parse;
+                                break;
+                            case "--install":
+                                options.ASToolAction = Action.Install;
+                                break;
+                            case "--uninstall":
+                                options.ASToolAction = Action.Uninstall;
+                                break;
+                            case "--start":
+                                options.ASToolAction = Action.Start;
+                                break;
+                            case "--stop":
+                                options.ASToolAction = Action.Stop;
                                 break;
                             case "--import":
                                 options.ASToolAction = Action.Import;
@@ -751,6 +807,12 @@ namespace ASTool
                                 options.ErrorMessage = "wrong parameter: " + args[i-1];
                                 return options;
                         }
+                    }
+
+                    if (options.ASToolAction == Action.None)
+                    {
+                        options.ErrorMessage = "No feature in the command line";
+                        return options;
                     }
                 }
             }

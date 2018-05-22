@@ -57,149 +57,203 @@ namespace ASTool
     public partial class Program
     {
         static Int32 Version = ASVersion.SetVersion(0x01, 0x00, 0x00, 0x00);
-
-        static void Main(string[] args)
+        static Options ParseCommandLine(string[] args)
         {
-
             Options opt = Options.InitializeOptions(args);
             if (opt == null)
             {
                 Options o = new Options();
                 o.LogInformation("ASTool: Internal Error");
-                return;
+                return null;
             }
-            List<Options> list = new List<Options>();
-            if (opt.ASToolAction == Options.Action.Import)
+            return opt;
+        }
+        static List<Options> LaunchServices(Options inputOption , out bool bContinued)
+        {
+            List<Options> list = null;
+            bContinued = false;
+
+            int ThreadLaunched = 0;
+            list = new List<Options>();
+            if (list != null)
             {
-                opt.LogInformation("Importing configuration file in " + opt.ConfigFile);
-                var result = Options.ReadConfigFile(opt.ConfigFile);
-                if (result != null)
+                if (inputOption.ASToolAction == Options.Action.Import)
                 {
-                    foreach(var c in result)
+                    inputOption.LogInformation("Importing configuration file in " + inputOption.ConfigFile);
+                    var result = Options.ReadConfigFile(inputOption.ConfigFile);
+                    if (result != null)
                     {
-                        if((c.ASToolAction == Options.Action.Pull) ||
-                            (c.ASToolAction == Options.Action.Push) ||
-                            (c.ASToolAction == Options.Action.PullPush))
+                        foreach (var c in result)
                         {
-                            var res = Options.CheckOptions(c);
-                            if (res != null)
+                            if ((c.ASToolAction == Options.Action.Pull) ||
+                                (c.ASToolAction == Options.Action.Push) ||
+                                (c.ASToolAction == Options.Action.PullPush))
                             {
-                                string errorMessage = res.GetErrorMessage();
-                                if (string.IsNullOrEmpty(errorMessage))
-                                    list.Add(c);
-                                else
-                                    c.LogError("Error for feature " + c.ASToolAction.ToString() + ": " + errorMessage);
+                                var res = Options.CheckOptions(c);
+                                if (res != null)
+                                {
+                                    string errorMessage = res.GetErrorMessage();
+                                    if (string.IsNullOrEmpty(errorMessage))
+                                        list.Add(c);
+                                    else
+                                        c.LogError("Error for feature " + c.ASToolAction.ToString() + ": " + errorMessage);
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        inputOption.LogError("Error while reading ConfigFile " + inputOption.ConfigFile);
+                        return null;
+                    }
+                    if (list.Count > 0)
+                    {
+                        inputOption.LogInformation("Importing configuration file done: " + list.Count.ToString() + " features imported");
+                    }
+                    else
+                    {
+                        inputOption.LogError("Importing configuration file done: 0 features imported");
+                        return null;
+                    }
+                }
+                else if (inputOption.ASToolAction == Options.Action.Export)
+                {
+                    bool IsWindows = System.Runtime.InteropServices.RuntimeInformation
+                   .IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+
+                    Options optPush = new Options();
+                    Options optPullDVR = new Options();
+                    Options optPullVOD = new Options();
+                    Options optPullPush = new Options();
+
+                    optPush.ASToolAction = Options.Action.Push;
+                    optPush.Name = "Service1";
+                    if(IsWindows) 
+                        optPush.InputUri = "C:\\folder\\asset\\asset.ism";
+                    else
+                        optPush.InputUri = "/folder/asset/asset.ism";
+                    optPush.OutputUri = "http://myserver/live/live1.isml";
+                    optPush.Loop = 0;
+
+                    optPullDVR.ASToolAction = Options.Action.Pull;
+                    optPullDVR.Name = "Service2";
+                    optPullDVR.InputUri = "http://3rdpartyserver/live/live1.isml/manifest";
+                    if (IsWindows)
+                        optPush.OutputUri = "C:\\folder\\asset\\assetdvr";
+                    else
+                        optPush.OutputUri = "/folder/asset/assetdvr";
+                    optPullDVR.MaxBitrate = 1000000;
+                    optPullDVR.MinBitrate = 100000;
+                    optPullDVR.LiveOffset = 10;
+                    optPullDVR.MaxDuration = 3600000;
+
+                    optPullVOD.ASToolAction = Options.Action.Pull;
+                    optPullVOD.Name = "Service3";
+                    optPullVOD.InputUri = "http://3rdpartyserver/vod/asset/asset.ism/manifest";
+                    if (IsWindows)
+                        optPush.OutputUri = "C:\\folder\\asset\\assetdvr";
+                    else
+                        optPush.OutputUri = "/folder/asset/assetdvr";
+                    optPullVOD.MaxBitrate = 1000000;
+                    optPullVOD.MinBitrate = 100000;
+                    optPullVOD.LiveOffset = 0;
+
+                    optPullPush.ASToolAction = Options.Action.PullPush;
+                    optPullPush.Name = "Service4";
+                    optPullPush.InputUri = "http://3rdpartyserver/live/live1.isml/manifest";
+                    optPullPush.OutputUri = "http://myserver/live/live1.isml";
+                    optPullPush.MaxBitrate = 1000000;
+                    optPullPush.MinBitrate = 100000;
+                    optPullPush.LiveOffset = 10;
+
+                    list.Add(optPush);
+                    list.Add(optPullDVR);
+                    list.Add(optPullVOD);
+                    list.Add(optPullPush);
+                    inputOption.LogInformation("Exporting a sample configuration file in " + inputOption.ConfigFile);
+                    Options.WriteConfigFile(inputOption.ConfigFile, list);
+                    inputOption.LogInformation("Exporting a sample configuration file done");
+                    return list;
                 }
                 else
+                    list.Add(inputOption);
+
+                foreach (Options option in list)
                 {
-                    opt.LogError("Error while reading ConfigFile " + opt.ConfigFile);
-                    return;
-                }
-                if (list.Count > 0)
-                {
-                    opt.LogInformation("Importing configuration file done: " + list.Count.ToString() + " features imported");
-                }
-                else
-                {
-                    opt.LogError("Importing configuration file done: 0 features imported");
-                    return;
+                    if (option.ASToolAction == Options.Action.Help)
+                    {
+                        option.LogInformation(option.GetInformationMessage(Version));
+                        return list;
+                    }
+                    else if (option.ASToolAction == Options.Action.PullPush)
+                    {
+                        OptionsLauncher.LaunchThread(PullPush, option);
+                        ThreadLaunched++;
+                    }
+                    if (option.ASToolAction == Options.Action.Pull)
+                    {
+                       
+                        OptionsLauncher.LaunchThread(Pull, option);
+                        ThreadLaunched++;
+
+                    }
+                    if (option.ASToolAction == Options.Action.Push)
+                    {
+                        OptionsLauncher.LaunchThread(Push, option);
+                        ThreadLaunched++;
+
+                    }
+                    if (option.ASToolAction == Options.Action.Parse)
+                    {
+                        OptionsLauncher.LaunchThread(Parse, option);
+                        ThreadLaunched++;
+
+                    }
+                    if (option.ASToolAction == Options.Action.Install)
+                    {
+                        option.LogInformation("Installing ASTOOL Service");
+                        if (InstallService(option) == true)
+                            option.LogInformation("Installing ASTOOL Service done");
+                        return list;
+                    }
+                    if (option.ASToolAction == Options.Action.Uninstall)
+                    {
+                        option.LogInformation("Uninstalling ASTOOL Service");
+                        if (UninstallService(option) == true)
+                            option.LogInformation("Uninstalling ASTOOL Service done");
+                        return list;
+                    }
+                    if (option.ASToolAction == Options.Action.Stop)
+                    {
+                        option.LogInformation("Stopping ASTOOL Service");
+                        if (StopService(option) == true)
+                            option.LogInformation("Stopping ASTOOL Service done");
+                        return list;
+                    }
+                    if (option.ASToolAction == Options.Action.Start)
+                    {
+                        option.LogInformation("Starting ASTOOL Service");
+                        if (StartService(option) == true)
+                            option.LogInformation("Starting ASTOOL Service done");
+                        return list;
+                    }
                 }
             }
-            else if (opt.ASToolAction == Options.Action.Export)
+            if (ThreadLaunched > 0)
             {
-                Options optPush = new Options();
-                Options optPullDVR = new Options();
-                Options optPullVOD = new Options();
-                Options optPullPush = new Options();
-
-                optPush.ASToolAction = Options.Action.Push;
-                optPush.Name = "Service1";
-                optPush.InputUri = "C:\\folder\\asset\\asset.ism";
-                optPush.OutputUri = "http://myserver/live/live1.isml";
-                optPush.Loop = 0;
-
-                optPullDVR.ASToolAction = Options.Action.Pull;
-                optPullDVR.Name = "Service2";
-                optPullDVR.InputUri = "http://3rdpartyserver/live/live1.isml/manifest";
-                optPullDVR.OutputUri = "C:\\folder\\asset\\assetdvr";
-                optPullDVR.MaxBitrate = 1000000;
-                optPullDVR.MinBitrate = 100000;
-                optPullDVR.LiveOffset = 10;
-                optPullDVR.MaxDuration = 3600000;
-
-                optPullVOD.ASToolAction = Options.Action.Pull;
-                optPullVOD.Name = "Service3";
-                optPullVOD.InputUri = "http://3rdpartyserver/vod/asset/asset.ism/manifest";
-                optPullVOD.OutputUri = "C:\\folder\\asset\\assetdvr";
-                optPullVOD.MaxBitrate = 1000000;
-                optPullVOD.MinBitrate = 100000;
-                optPullVOD.LiveOffset = 0;
-
-                optPullPush.ASToolAction = Options.Action.PullPush;
-                optPullPush.Name = "Service4";
-                optPullPush.InputUri = "http://3rdpartyserver/live/live1.isml/manifest";
-                optPullPush.OutputUri = "http://myserver/live/live1.isml";
-                optPullPush.MaxBitrate = 1000000;
-                optPullPush.MinBitrate = 100000;
-                optPullPush.LiveOffset = 10;
-
-                list.Add(optPush);
-                list.Add(optPullDVR);
-                list.Add(optPullVOD);
-                list.Add(optPullPush);
-                opt.LogInformation("Exporting a sample configuration file in " + opt.ConfigFile);
-                Options.WriteConfigFile(opt.ConfigFile, list);
-                opt.LogInformation("Exporting a sample configuration file done");
-                return;
+                bContinued = true;
+                return list;
             }
-            else
-                list.Add(opt);
-
-
-            if (list == null)
-            {
-                opt.LogError("ASTool: Internal Error");
-                return;
-            }
-
-            foreach (Options option in list)
-            {
-                if (!string.IsNullOrEmpty(option.GetErrorMessage()))
-                {
-                    option.LogInformation(opt.GetErrorMessagePrefix() + option.GetErrorMessage());
-                    option.LogInformation(opt.GetInformationMessage(Version));
-                    return;
-                }
-                if (option.ASToolAction == Options.Action.Help)
-                {
-                    option.LogInformation(option.GetInformationMessage(Version));
-                    return;
-                }
-                else if (option.ASToolAction == Options.Action.PullPush)
-                {
-                    OptionsLauncher.LaunchThread(PullPush, option);
-                }
-                if (option.ASToolAction == Options.Action.Pull)
-                {
-                    OptionsLauncher.LaunchThread(Pull, option);
-                }
-                if (option.ASToolAction == Options.Action.Push)
-                {
-                    OptionsLauncher.LaunchThread(Push, option);
-                }
-                if (option.ASToolAction == Options.Action.Parse)
-                {
-                    OptionsLauncher.LaunchThread(Parse, option);
-                }
-            }
+            return null;
+        }
+        static void WaitEndOfServices(List<Options> list)
+        {
+            
             bool bCompleted = false;
             while (bCompleted == false)
             {
                 int StoppedThreadCounter = 0;
-                foreach (Options option in list)
+                foreach (Options option in OptionsList)
                 {
                     if (option.Status == Options.TheadStatus.Stopped)
                     {
@@ -207,7 +261,7 @@ namespace ASTool
                     }
                     else
                     {
-                        if ((DateTime.Now - option.ThreadCounterTime).TotalSeconds > option.CounterPeriod)
+                        if ((option.ThreadCounterTime != DateTime.MinValue) && ((DateTime.Now - option.ThreadCounterTime).TotalSeconds > option.CounterPeriod))
                         {
                             option.ThreadCounterTime = DateTime.Now;
                             option.LogInformation("\r\nCounters for feature : " + option.ASToolAction.ToString() + " " + option.Name + "\r\n" + option.GetCountersInformation());
@@ -218,5 +272,79 @@ namespace ASTool
                     bCompleted = true;
             }
         }
+        static bool StopServices(TimeSpan span)
+        {
+            bool bCompleted = false;
+            foreach (Options option in OptionsList)
+            {
+                if (option.Status == Options.TheadStatus.Running)
+                {
+                    option.LogInformation("Stopping feature: " + option.ASToolAction.ToString() + " " + option.Name);
+                    option.Status = Options.TheadStatus.Stopping;
+                }
+            }
+            DateTime start = DateTime.Now;
+            while ((bCompleted == false)&&(DateTime.Now-start<span))
+            {
+                System.Threading.Thread.Sleep(500);
+                int StoppedThreadCounter = 0;
+                foreach (Options option in OptionsList)
+                {
+                    if (option.Status == Options.TheadStatus.Stopped)
+                    {
+                        StoppedThreadCounter++;
+                        option.LogInformation("Feature: " + option.ASToolAction.ToString() + " " + option.Name );
+                    }
+                    else
+                    {
+                        option.LogInformation("Feature: " + option.ASToolAction.ToString() + " " + option.Name);
+                    }
+                    option.LogInformation("Counter: " + StoppedThreadCounter.ToString() + " List.Count: " + OptionsList.Count.ToString());
+                }
+                if (StoppedThreadCounter >= OptionsList.Count)
+                    bCompleted = true;
+            }
+            return bCompleted;
+        }
+        //
+        // List of options
+        // Used in command line mode or in service mode
+        //
+        static List<Options> OptionsList = null;
+
+        static void Main(string[] args)
+        {
+            Options opt = Options.InitializeOptions(args);
+            if (opt == null)
+            {
+                Options o = new Options();
+                o.LogInformation("ASTool: Internal Error");
+                return;
+            }
+            string errorMessage = opt.GetErrorMessage();
+            if(!string.IsNullOrEmpty(errorMessage))
+            {
+                opt.LogError(errorMessage);
+                opt.LogInformation(opt.GetInformationMessage(Version));
+                return;
+            }
+            List<Options> list = null;
+            if (opt.ServiceMode == true)
+                RunAsService(opt);
+            else
+            {
+                bool bContinue = false;
+                list = LaunchServices(opt, out bContinue);
+                if((list !=null)&& (bContinue == true))
+                {
+                    OptionsList = list;
+                    // if a service is still running 
+                    // wait for the end of this service
+                    WaitEndOfServices(list);
+                }
+            }
+
+        }
     }
+
 }
