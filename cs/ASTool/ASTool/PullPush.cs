@@ -151,16 +151,15 @@ namespace ASTool
             SmoothLiveOutput d = new SmoothLiveOutput();
             if (d != null)
             {
-                var t = d.Initialize(opt);
-                t.Wait();
-                if(t.Result == true)
+                bool InitResult =  d.Initialize(opt);
+                if(InitResult == true)
                 {
                     ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.MaxDuration, (ulong)opt.BufferSize, opt.LiveOffset);
                     if (mc != null)
                     {
                         if (mc.SetManifestOutput(d) == true)
                         {
-                            t = mc.DownloadManifest();
+                            var t  =  mc.DownloadManifest();
                             t.Wait();
                             result = t.Result;
                             if (result == true)
@@ -170,11 +169,17 @@ namespace ASTool
                                 result = tt.Result;
                                 while (mc.GetAssetStatus() != AssetStatus.ChunksDownloaded)
                                 {
-                                    System.Threading.Tasks.Task.Delay(5000).Wait();
-                                    if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
-                                        CreatePullPushCounters(opt, mc);
+                                    if (opt.CounterPeriod > 0)
+                                    {
+                                        System.Threading.Tasks.Task.Delay(opt.CounterPeriod * 1000 / 10).Wait();
+                                        if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
+                                            CreatePullPushCounters(opt, mc);
+                                        else
+                                            UpdatePullPushCounters(opt, mc);
+                                    }
                                     else
-                                        UpdatePullPushCounters(opt, mc);
+                                        System.Threading.Tasks.Task.Delay(1000).Wait();
+
 
                                 }
                             }

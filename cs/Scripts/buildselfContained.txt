@@ -1,7 +1,32 @@
 dotnet publish --self-contained -c Release -r win10-x64
+dotnet publish --self-contained -c Release -r win10-x64 --output bin
 dotnet publish -c Release -r ubuntu.16.10-x64
 
+ASTool.exe --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
 
+Test: Play http://localhost/VideoApp/Live/_live1.isml/manifest
+
+ASTool.exe --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\temp\\astool\\testvod
+
+Test Play files under C:\\temp\\astool\\testvod 
+
+ASTool.exe --pull --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --maxduration 60000  --output  C:\\temp\\astool\\testdvr
+
+Test Play files under C:\\temp\\astool\\testdvr
+
+ASTool.exe --pullpush --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --minbitrate 300000   --maxbitrate 1000000  --output http://localhost/VideoApp/Live/_live1.isml
+
+Test Play http://localhost/VideoApp/Live/_live1.isml/manifest
+
+ASTool.exe --parse --input C:\temp\ASTool\testdvr\5f2ce531-d508-49fb-8152-647eba422aec\Audio_0.isma
+
+ASTool.exe --parse --input C:\temp\ASTool\testdvr\5f2ce531-d508-49fb-8152-647eba422aec\Video_0.ismv
+
+
+ASTool.exe --install --configfile C:\git\flecoqui\ASTool\Azure\101-vm-astool-universal\astool.windows.xml
+ASTool.exe --start
+ASTool.exe --stop
+ASTool.exe --uninstall
 
 dotnet ASTool.dll
 

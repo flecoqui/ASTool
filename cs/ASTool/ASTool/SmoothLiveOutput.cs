@@ -28,12 +28,12 @@ namespace ASTool
         public TcpClient NetworkClient { get; set; }
         public Stream NetworkStream { get; set; }
         public int StreamID { get; set; }
-        public static string GetKeyName(string trackName, int bitrate )
+        public static string GetKeyName(string trackName, int bitrate)
         {
             return trackName + "_" + bitrate.ToString();
         }
     }
-    public class SmoothLiveOutput:  ManifestOutput 
+    public class SmoothLiveOutput : ManifestOutput
     {
         static Guid kTrackFragExtHeaderBoxGuid = new Guid("{6D1D9B05-42D5-44E6-80E2-141DAFF757B2}");
         static Guid LiveServerManBoxGuid = new Guid("{A5D40B30-E814-11DD-BA2F-0800200C9A66}");
@@ -56,14 +56,14 @@ namespace ASTool
                 manifest = manifest.Replace("<trackname>", TrackName.ToString());
                 manifest = manifest.Replace("<timescale>", TimeScale.ToString());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
             }
             return manifest;
         }
-        public string GetAudioManifest(int TrackID, string TrackName, int Bitrate, string source, string Lang, int TimeScale, string FourCC, string CodecPrivateData, string AudioTag, int Channels,int SamplingRate, int BitsPerSample, int PacketSize )
+        public string GetAudioManifest(int TrackID, string TrackName, int Bitrate, string source, string Lang, int TimeScale, string FourCC, string CodecPrivateData, string AudioTag, int Channels, int SamplingRate, int BitsPerSample, int PacketSize)
         {
             string manifest = string.Empty;
 
@@ -86,7 +86,7 @@ namespace ASTool
                 manifest = manifest.Replace("<bitpersample>", BitsPerSample.ToString());
                 manifest = manifest.Replace("<packetsize>", PacketSize.ToString());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
@@ -106,11 +106,11 @@ namespace ASTool
                 manifest = manifest.Replace("<trackname>", TrackName.ToString());
                 manifest = manifest.Replace("<timescale>", TimeScale.ToString());
                 manifest = manifest.Replace("<fourcc>", FourCC.ToString());
-                manifest = manifest.Replace("<codecprivatedata>",CodecPrivateData.ToString());
+                manifest = manifest.Replace("<codecprivatedata>", CodecPrivateData.ToString());
                 manifest = manifest.Replace("<width>", MaxWidth.ToString());
                 manifest = manifest.Replace("<height>", MaxHeight.ToString());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
@@ -132,7 +132,7 @@ namespace ASTool
         /// Initialize
         /// Initialize the output uri
         /// </summary>
-        public  async  Task<bool> Initialize(Options opt)
+        public bool Initialize(Options opt)
         {
             bool result = false;
             if (opt != null)
@@ -145,18 +145,15 @@ namespace ASTool
                 options = opt;
                 result = true;
             }
-            await System.Threading.Tasks.Task.Delay(1);
             return result;
         }
         /// <summary>
         /// ProcessManifest
         /// Initialize the output to receive the audio/video/text chunks based on the manifest content
         /// </summary>
-        public async Task<bool> ProcessManifest(ManifestManager manifest)
+        public Task<bool> ProcessManifest(ManifestManager manifest)
         {
-            bool result = false;
-            await System.Threading.Tasks.Task.Delay(1);
-            return result;
+            return Task.FromResult(false);
         }
         /// <summary>
         /// ProcessChunks
@@ -165,20 +162,18 @@ namespace ASTool
         public async Task<bool> ProcessChunks(ManifestManager cache)
 
         {
-
-            await System.Threading.Tasks.Task.Delay(1);
             bool bResult = true;
-            if (!(SendAudioChunks(cache)))
+            if (!(await SendAudioChunks(cache)))
             {
                 bResult = false;
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending audio chunks for url: " + cache.ManifestUri.ToString());
             }
-            if (!(SendVideoChunks(cache)))
+            if (!(await SendVideoChunks(cache)))
             {
                 bResult = false;
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending video chunks for url: " + cache.ManifestUri.ToString());
             }
-            if (!(SendTextChunks(cache)))
+            if (!(await SendTextChunks(cache)))
             {
                 bResult = false;
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending text chunks for url: " + cache.ManifestUri.ToString());
@@ -186,7 +181,7 @@ namespace ASTool
             return bResult;
 
         }
-        bool SendBuffer(Stream stm, byte[] buffer, string source)
+        async Task<bool> SendBuffer(Stream stm, byte[] buffer, string source)
         {
             bool result = false;
 
@@ -195,9 +190,9 @@ namespace ASTool
             {
                 int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, offset);
                 string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, offset);
-                if (SendBoxFromBuffer(stm, buffer,offset, BoxLen) == true)
+                if (await SendBoxFromBuffer(stm, buffer, offset, BoxLen) == true)
                 {
-                   // Console.WriteLine("Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                    // Console.WriteLine("Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                     offset += BoxLen;
                 }
                 else
@@ -211,22 +206,22 @@ namespace ASTool
                 result = true;
             return result;
         }
-        bool SendTextLoop(Stream stm, ChunkList cl, ManifestManager cache)
+        async Task<bool> SendTextLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
             ChunkBuffer cc;
             while (cl.ChunksQueue.TryDequeue(out cc) == true)
-//                foreach (var cc in cl.ChunksQueue)
+            //                foreach (var cc in cl.ChunksQueue)
             //for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-              //  var cc = cl.ChunksList.Values.ElementAt(Index);
+                //  var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
 
                     if (res > 0)
                     {
-                        if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
+                        if (await SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
 
                             // Free buffer
@@ -251,23 +246,23 @@ namespace ASTool
             }
             return result;
         }
-        bool SendAudioLoop(Stream stm, ChunkList cl, ManifestManager cache)
+        async Task<bool> SendAudioLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
 
             ChunkBuffer cc;
-            while (cl.ChunksQueue.TryDequeue(out cc)==true)
+            while (cl.ChunksQueue.TryDequeue(out cc) == true)
             //foreach (var cc in cl.ChunksQueue)
-//                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+            //                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-  //              var cc = cl.ChunksList.Values.ElementAt(Index);
+                //              var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
 
                     if (res > 0)
                     {
-                        if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
+                        if (await SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
 
                             // Free buffer
@@ -292,22 +287,22 @@ namespace ASTool
             }
             return result;
         }
-        bool SendVideoLoop(Stream stm, ChunkList cl, ManifestManager cache)
+        async Task<bool> SendVideoLoop(Stream stm, ChunkList cl, ManifestManager cache)
         {
             bool result = true;
             ChunkBuffer cc;
             while (cl.ChunksQueue.TryDequeue(out cc) == true)
-//                foreach (var cc in cl.ChunksQueue)
-//                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
+            //                foreach (var cc in cl.ChunksQueue)
+            //                for (int Index = (int)cl.OutputChunks; Index < (int)cl.InputChunks; Index++)
             {
-  //              var cc = cl.ChunksList.Values.ElementAt(Index);
+                //              var cc = cl.ChunksList.Values.ElementAt(Index);
                 if ((cc != null) && (cc.GetLength() > 0))
                 {
                     ulong res = cc.GetLength();
 
                     if (res > 0)
                     {
-                        if (SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
+                        if (await SendBuffer(stm, cc.chunkBuffer, cl.Configuration.GetSourceName()) == true)
                         {
 
                             // Free buffer
@@ -332,58 +327,29 @@ namespace ASTool
             }
             return result;
         }
-        bool SendBox(Stream stm, byte[] buffer)
+        Task<bool> SendBox(Stream stm, byte[] buffer)
         {
-            if ((buffer != null) && (buffer.Length > 0))
-            {
-                try
-                {
-                    string StringLength = String.Format("{0:X}", buffer.Length) + "\r\n";
-                    byte[] sb = UTF8Encoding.UTF8.GetBytes(StringLength);
-                    stm.Write(sb, 0, sb.Length);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
-
-                    stm.Write(buffer, 0, buffer.Length);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
-
-                    StringLength = "\r\n";
-                    sb = UTF8Encoding.UTF8.GetBytes(StringLength);
-                    stm.Write(sb, 0, sb.Length);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
-                }
-                catch(Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Exception while sending box: " + ex.Message);
-                    return false;
-                }
-                return true;
-            }
-            return false;
+            return SendBoxFromBuffer(stm, buffer, 0, buffer.Length);
         }
-        bool SendBoxFromBuffer(Stream stm, byte[] buffer, int offset, int len)
+
+        private static byte[] endBuffer = UTF8Encoding.ASCII.GetBytes("\r\n");
+
+        async Task<bool> SendBoxFromBuffer(Stream stm, byte[] buffer, int offset, int len)
         {
             if ((buffer != null) && (buffer.Length >= (offset + len)))
             {
                 try
                 {
-                    string StringLength = String.Format("{0:X}", len) + "\r\n";
+                    string StringLength = String.Format("{0:X}\r\n", len);
                     byte[] sb = UTF8Encoding.UTF8.GetBytes(StringLength);
-                    stm.Write(sb, 0, sb.Length);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
+                    await stm.WriteAsync(sb, 0, sb.Length);
+                    await stm.FlushAsync();
 
-                    stm.Write(buffer, offset, len);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
+                    await stm.WriteAsync(buffer, offset, len);
+                    await stm.FlushAsync();
 
-                    StringLength = "\r\n";
-                    sb = UTF8Encoding.UTF8.GetBytes(StringLength);
-                    stm.Write(sb, 0, sb.Length);
-                    stm.Flush();
-                    System.Threading.Thread.Sleep(0);
+                    await stm.WriteAsync(endBuffer, 0, endBuffer.Length);
+                    await stm.FlushAsync();
                 }
                 catch (Exception ex)
                 {
@@ -394,6 +360,8 @@ namespace ASTool
             }
             return false;
         }
+
+
         bool IsResponseOk(Stream stm)
         {
             bool rok = false;
@@ -421,7 +389,7 @@ namespace ASTool
         /// SendTextChunks
         /// Send text chunks on disk 
         /// </summary>
-        public bool SendTextChunks(ManifestManager cache)
+        public async Task<bool> SendTextChunks(ManifestManager cache)
         {
             bool bResult = false;
 
@@ -441,8 +409,8 @@ namespace ASTool
                             spm.NetworkClient = new TcpClient();
                             Uri u = new Uri(pushurl);
                             spm.NetworkClient.NoDelay = true;
-                            spm.NetworkClient.Connect(u.Host, 80);
-                            
+                            await spm.NetworkClient.ConnectAsync(u.Host, 80);
+
                             if (spm.NetworkClient.Connected == true)
                             {
                                 string FirstPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nContent-Length: 0\r\nHost: " + u.Host + "\r\n\r\n";
@@ -452,16 +420,15 @@ namespace ASTool
                                     byte[] sb = UTF8Encoding.UTF8.GetBytes(FirstPostData);
                                     if (sb != null)
                                     {
-                                        spm.NetworkStream.Write(sb, 0, sb.Length);
+                                        await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
                                         if (IsResponseOk(spm.NetworkStream) == true)
                                         {
                                             string url = string.Format("{0}/Streams({1}-stream{2})", pushurl, AssetID, StreamID);
                                             u = new Uri(url);
                                             string NextPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection : Keep-Alive\r\nTransfer-Encoding: Chunked\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nHost: " + u.Host + "\r\n\r\n";
                                             sb = UTF8Encoding.UTF8.GetBytes(NextPostData);
-                                            spm.NetworkStream.Write(sb, 0, sb.Length);
-                                            spm.NetworkStream.Flush();
-                                            System.Threading.Thread.Sleep(1);
+                                            await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
+                                            await spm.NetworkStream.FlushAsync();
 
                                             // Initialization Done
                                             spm.TrackName = cl.Configuration.TrackName;
@@ -472,9 +439,9 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            
-                                            if(options!=null)options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.ftypData) == false)
+
+                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            if ((await SendBox(spm.NetworkStream, cl.ftypData)) == false)
                                                 return false;
                                             // Sending Live Manifest
                                             int uuidHeaderSize = 4 + 4 + 16 + 4;
@@ -504,7 +471,7 @@ namespace ASTool
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
                                                     if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
-                                                    if (SendBox(spm.NetworkStream, buffer) == false)
+                                                    if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
                                                 }
                                             }
@@ -513,10 +480,10 @@ namespace ASTool
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
                                             if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.moovData) == false)
+                                            if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
-                                            if (SendTextLoop(spm.NetworkStream, cl, cache) == false)
+                                            if (await SendTextLoop(spm.NetworkStream, cl, cache) == false)
                                                 return false;
                                         }
                                     }
@@ -532,7 +499,7 @@ namespace ASTool
                         SmoothPushManager spm = ListPushManager[SmoothPushManager.GetKeyName(cl.Configuration.TrackName, cl.Configuration.Bitrate)];
                         if (spm != null)
                         {
-                            if (SendTextLoop(spm.NetworkStream, cl, cache) == false)
+                            if (await SendTextLoop(spm.NetworkStream, cl, cache) == false)
                                 return false;
                         }
                     }
@@ -550,7 +517,7 @@ namespace ASTool
         /// SendAudioChunks
         /// Send audio chunks on disk 
         /// </summary>
-        public bool SendAudioChunks(ManifestManager cache)
+        public async Task<bool> SendAudioChunks(ManifestManager cache)
         {
             bool bResult = false;
 
@@ -570,26 +537,25 @@ namespace ASTool
                             spm.NetworkClient = new TcpClient();
                             Uri u = new Uri(pushurl);
                             spm.NetworkClient.NoDelay = true;
-                            spm.NetworkClient.Connect(u.Host, 80);
+                            await spm.NetworkClient.ConnectAsync(u.Host, 80);
                             if (spm.NetworkClient.Connected == true)
                             {
                                 string FirstPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nContent-Length: 0\r\nHost: " + u.Host + "\r\n\r\n";
                                 spm.NetworkStream = spm.NetworkClient.GetStream();
-                                if(spm.NetworkStream!=null)
+                                if (spm.NetworkStream != null)
                                 {
                                     byte[] sb = UTF8Encoding.UTF8.GetBytes(FirstPostData);
                                     if (sb != null)
                                     {
-                                        spm.NetworkStream.Write(sb, 0, sb.Length);
+                                        await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
                                         if (IsResponseOk(spm.NetworkStream) == true)
                                         {
                                             string url = string.Format("{0}/Streams({1}-stream{2})", pushurl, AssetID, StreamID);
                                             u = new Uri(url);
                                             string NextPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection : Keep-Alive\r\nTransfer-Encoding: Chunked\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nHost: " + u.Host + "\r\n\r\n";
                                             sb = UTF8Encoding.UTF8.GetBytes(NextPostData);
-                                            spm.NetworkStream.Write(sb, 0, sb.Length);
-                                            spm.NetworkStream.Flush();
-                                            System.Threading.Thread.Sleep(1);
+                                            await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
+                                            await spm.NetworkStream.FlushAsync();
 
                                             // Initialization Done
                                             spm.TrackName = cl.Configuration.TrackName;
@@ -601,7 +567,7 @@ namespace ASTool
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
                                             if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.ftypData) == false)
+                                            if (await SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
                                             // Sending Live Manifest
@@ -638,7 +604,7 @@ namespace ASTool
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
                                                     if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
-                                                    if (SendBox(spm.NetworkStream, buffer) == false)
+                                                    if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
                                                 }
                                             }
@@ -647,10 +613,10 @@ namespace ASTool
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
                                             if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.moovData) == false)
+                                            if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
-                                            if (SendAudioLoop(spm.NetworkStream, cl, cache) == false)
+                                            if (await SendAudioLoop(spm.NetworkStream, cl, cache) == false)
                                                 return false;
                                         }
                                     }
@@ -661,12 +627,12 @@ namespace ASTool
                 }
                 else
                 {
-                    if(ListPushManager.ContainsKey(SmoothPushManager.GetKeyName(cl.Configuration.TrackName, cl.Configuration.Bitrate)))
+                    if (ListPushManager.ContainsKey(SmoothPushManager.GetKeyName(cl.Configuration.TrackName, cl.Configuration.Bitrate)))
                     {
                         SmoothPushManager spm = ListPushManager[SmoothPushManager.GetKeyName(cl.Configuration.TrackName, cl.Configuration.Bitrate)];
-                        if(spm!=null)
+                        if (spm != null)
                         {
-                            if (SendAudioLoop(spm.NetworkStream, cl, cache) == false)
+                            if (await SendAudioLoop(spm.NetworkStream, cl, cache) == false)
                                 return false;
                         }
                     }
@@ -675,7 +641,7 @@ namespace ASTool
                     bResult = true;
                 AudioTrack++;
             }
- 
+
 
             return bResult;
         }
@@ -685,7 +651,7 @@ namespace ASTool
         /// SendVideoChunks
         /// Send video chunks  
         /// </summary>
-        public bool SendVideoChunks(ManifestManager cache)
+        public async Task<bool> SendVideoChunks(ManifestManager cache)
         {
             bool bResult = false;
 
@@ -705,7 +671,7 @@ namespace ASTool
                             spm.NetworkClient = new TcpClient();
                             Uri u = new Uri(pushurl);
                             spm.NetworkClient.NoDelay = true;
-                            spm.NetworkClient.Connect(u.Host, 80);
+                            await spm.NetworkClient.ConnectAsync(u.Host, 80);
                             if (spm.NetworkClient.Connected == true)
                             {
                                 string FirstPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nContent-Length: 0\r\nHost: " + u.Host + "\r\n\r\n";
@@ -715,16 +681,16 @@ namespace ASTool
                                     byte[] sb = UTF8Encoding.UTF8.GetBytes(FirstPostData);
                                     if (sb != null)
                                     {
-                                        spm.NetworkStream.Write(sb, 0, sb.Length);
+                                        await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
                                         if (IsResponseOk(spm.NetworkStream) == true)
                                         {
                                             string url = string.Format("{0}/Streams({1}-stream{2})", pushurl, AssetID, StreamID);
                                             u = new Uri(url);
                                             string NextPostData = "POST " + u.LocalPath + " HTTP/1.1\r\nConnection : Keep-Alive\r\nTransfer-Encoding: Chunked\r\nUser-Agent: NSPlayer/7.0 IIS-LiveStream/7.0\r\nHost: " + u.Host + "\r\n\r\n";
                                             sb = UTF8Encoding.UTF8.GetBytes(NextPostData);
-                                            spm.NetworkStream.Write(sb, 0, sb.Length);
-                                            spm.NetworkStream.Flush();
-                                            System.Threading.Thread.Sleep(1);
+                                            await spm.NetworkStream.WriteAsync(sb, 0, sb.Length);
+                                            await spm.NetworkStream.FlushAsync();
+
 
                                             // Initialization Done
                                             spm.TrackName = cl.Configuration.TrackName;
@@ -736,7 +702,7 @@ namespace ASTool
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
                                             if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.ftypData) == false)
+                                            if (await SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
                                             // Sending Live Manifest
@@ -769,7 +735,7 @@ namespace ASTool
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
                                                     if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
-                                                    if (SendBox(spm.NetworkStream, buffer) == false)
+                                                    if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
                                                 }
                                             }
@@ -778,11 +744,11 @@ namespace ASTool
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
                                             if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
-                                            if (SendBox(spm.NetworkStream, cl.moovData) == false)
+                                            if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
 
                                             // Sending the other boxes
-                                            if (SendVideoLoop(spm.NetworkStream, cl, cache) == false)
+                                            if (await SendVideoLoop(spm.NetworkStream, cl, cache) == false)
                                                 return false;
                                         }
                                     }
@@ -798,7 +764,7 @@ namespace ASTool
                         SmoothPushManager spm = ListPushManager[SmoothPushManager.GetKeyName(cl.Configuration.TrackName, cl.Configuration.Bitrate)];
                         if (spm != null)
                         {
-                            if (SendVideoLoop(spm.NetworkStream, cl, cache) == false)
+                            if (await SendVideoLoop(spm.NetworkStream, cl, cache) == false)
                                 return false;
                         }
                     }

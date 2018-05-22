@@ -115,7 +115,8 @@ namespace ASTool
         [DataMember]
         public string ConfigFile { get; set; }
 
-        public bool ServiceMode { get; set; } 
+        public bool ServiceMode { get; set; }
+        public System.Threading.Tasks.Task Task { get; set; }
 
         public TheadStatus Status { get; set; }
         public DateTime ThreadStartTime { get; set; }
@@ -220,19 +221,19 @@ namespace ASTool
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
-            "                 [--name <service name>]\r\n" +
+            "                 [--name <service name> --counterperiod <periodinseconds>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
             "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
-            "                 [--name <service name>]\r\n" +
+            "                 [--name <service name> --counterperiod <periodinseconds>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]\r\n" +
-            "                 [--name <service name>]\r\n" +
+            "                 [--name <service name> --counterperiod <periodinseconds>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]\r\n" +
             "                 [--consolelevel <none|error|warning|verbose>]\r\n" +
             "ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  \r\n" +
@@ -439,7 +440,7 @@ namespace ASTool
             this.ASToolAction = Action.None;
             this.CounterPeriod = 20;
             this.ServiceMode = false;
-
+            this.Task = null;
             this.ListCounters = new Dictionary<string, CounterDescription>();
         }
         public static Options CheckOptions(Options options)
@@ -694,6 +695,18 @@ namespace ASTool
                                 }
                                 else
                                     options.ErrorMessage = "Loop not set";
+                                break;
+                            case "--counterperiod":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                {
+                                    int counterperiod = 20;
+                                    if (int.TryParse(args[i++], out counterperiod))
+                                        options.CounterPeriod = counterperiod;
+                                    else
+                                        options.ErrorMessage = "Counter Period value incorrect";
+                                }
+                                else
+                                    options.ErrorMessage = "Counter Period not set";
                                 break;
                             case "--maxduration":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))

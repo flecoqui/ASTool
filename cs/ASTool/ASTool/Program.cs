@@ -17,6 +17,7 @@ using ASTool;
 using ASTool.CacheHelper;
 namespace ASTool
 {
+    /*
     public class OptionsLauncher
     {
         public delegate bool OptionsThread(Options opt);
@@ -53,7 +54,7 @@ namespace ASTool
         }
 
     }
-
+    */
     public partial class Program
     {
         static Int32 Version = ASVersion.SetVersion(0x01, 0x00, 0x00, 0x00);
@@ -187,25 +188,30 @@ namespace ASTool
                     }
                     else if (option.ASToolAction == Options.Action.PullPush)
                     {
-                        OptionsLauncher.LaunchThread(PullPush, option);
+                        //OptionsLauncher.LaunchThread(PullPush, option);
+                        option.Task = System.Threading.Tasks.Task.Run(() => PullPush(option));
                         ThreadLaunched++;
                     }
                     if (option.ASToolAction == Options.Action.Pull)
                     {
                        
-                        OptionsLauncher.LaunchThread(Pull, option);
+                        //OptionsLauncher.LaunchThread(Pull, option);
+                        option.Task = System.Threading.Tasks.Task.Run(() => Pull(option));
+
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Push)
                     {
-                        OptionsLauncher.LaunchThread(Push, option);
+                        //OptionsLauncher.LaunchThread(Push, option);
+                        option.Task = System.Threading.Tasks.Task.Run(() => Push(option));
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Parse)
                     {
-                        OptionsLauncher.LaunchThread(Parse, option);
+                        //OptionsLauncher.LaunchThread(Parse, option);
+                        option.Task = System.Threading.Tasks.Task.Run(() => Parse(option));
                         ThreadLaunched++;
 
                     }
@@ -252,6 +258,7 @@ namespace ASTool
             bool bCompleted = false;
             while (bCompleted == false)
             {
+                System.Threading.Tasks.Task.Delay(1000).Wait();
                 int StoppedThreadCounter = 0;
                 foreach (Options option in OptionsList)
                 {
@@ -261,10 +268,13 @@ namespace ASTool
                     }
                     else
                     {
-                        if ((option.ThreadCounterTime != DateTime.MinValue) && ((DateTime.Now - option.ThreadCounterTime).TotalSeconds > option.CounterPeriod))
+                        if (option.CounterPeriod > 0)
                         {
-                            option.ThreadCounterTime = DateTime.Now;
-                            option.LogInformation("\r\nCounters for feature : " + option.ASToolAction.ToString() + " " + option.Name + "\r\n" + option.GetCountersInformation());
+                            if ((option.ThreadCounterTime != DateTime.MinValue) && ((DateTime.Now - option.ThreadCounterTime).TotalSeconds > option.CounterPeriod))
+                            {
+                                option.ThreadCounterTime = DateTime.Now;
+                                option.LogInformation("\r\nCounters for feature : " + option.ASToolAction.ToString() + " " + option.Name + "\r\n" + option.GetCountersInformation());
+                            }
                         }
                     }
                 }

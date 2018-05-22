@@ -164,14 +164,16 @@ namespace ASTool
                 result = tt.Result;
                 while (mc.GetAssetStatus() != AssetStatus.ChunksDownloaded)
                 {
-                    System.Threading.Tasks.Task.Delay(5000).Wait();
-
-                    if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
-                        CreatePullCounters(opt, mc);
+                    if (opt.CounterPeriod > 0)
+                    {
+                        System.Threading.Tasks.Task.Delay(opt.CounterPeriod * 1000 / 10).Wait();
+                        if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
+                            CreatePullCounters(opt, mc);
+                        else
+                            UpdatePullCounters(opt, mc);
+                    }
                     else
-                        UpdatePullCounters(opt, mc);
-
-
+                        System.Threading.Tasks.Task.Delay(1000).Wait();
                 }
             }
 

@@ -117,11 +117,17 @@ namespace ASTool
             bool IsRunning = true;
             while (IsRunning)
             {
-                System.Threading.Tasks.Task.Delay(5000).Wait();
-                if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
-                    CreatePushCounters(opt,pushers, ism.IsmcFilePath);
+                if (opt.CounterPeriod > 0)
+                {
+                    System.Threading.Tasks.Task.Delay(opt.CounterPeriod * 1000 / 10).Wait();
+                    if ((opt.ListCounters == null) || (opt.ListCounters.Count == 0))
+                        CreatePushCounters(opt, pushers, ism.IsmcFilePath);
+                    else
+                        UpdatePushCounters(opt, pushers, ism.IsmcFilePath);
+                }
                 else
-                    UpdatePushCounters(opt,pushers, ism.IsmcFilePath);
+                    System.Threading.Tasks.Task.Delay(1000).Wait();
+
                 IsRunning = false;
                 foreach (IsmPushEncoder pusher in pushers)
                 {
