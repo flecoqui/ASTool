@@ -60,13 +60,13 @@ wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu
 dpkg -i packages-microsoft-prod.deb
 apt-get -y install apt-transport-https
 apt-get -y update
-apt-get -y install dotnet-sdk-2.1.201
+apt-get -y install dotnet-sdk-2.1.200
 }
 install_netcore_centos(){
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
 yum -y update
 yum -y install libunwind libicu
-yum -y install dotnet-sdk-2.1.201
+yum -y install dotnet-sdk-2.1.200
 }
 install_netcore_redhat(){
 yum -y install rh-dotnet20 -y
@@ -78,7 +78,7 @@ mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
 wget -q https://packages.microsoft.com/config/debian/8/prod.list
 mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
 apt-get update
-apt-get install dotnet-sdk-2.1.201
+apt-get install dotnet-sdk-2.1.200
 }
 #############################################################################
 install_git_ubuntu(){

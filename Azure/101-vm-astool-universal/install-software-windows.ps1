@@ -169,7 +169,7 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-& "C:\source\dotnet-install.ps1" --version 2.1.201
+& "C:\source\dotnet-install.ps1" --version 2.1.200
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
