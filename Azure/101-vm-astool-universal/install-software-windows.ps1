@@ -216,13 +216,11 @@ Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -A
 WriteLog "ASTOOL built" 
 
 WriteLog "Installing ASTOOL as a service" 
-ASTool.exe --install --configfile c:\git\config\astool.windows.xml
+Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--install", "--configfile", "c:\git\config\astool.windows.xml"
 WriteLog "ASTOOL Installed" 
 
 WriteLog "Starting ASTOOL as a service" 
-ASTool.exe --start
+Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--start"
 WriteLog "ASTOOL started" 
 
 WriteLog "Initialization completed !" 
-WriteLog "Rebooting !" 
-Restart-Computer -Force       
