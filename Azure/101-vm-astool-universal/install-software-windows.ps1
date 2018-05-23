@@ -169,7 +169,7 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-& "C:\source\dotnet-install.ps1" --version 2.1.200
+& "C:\source\dotnet-install.ps1" --version 2.1.201
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
@@ -209,15 +209,19 @@ cd c:\git
 Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/ASTool.git"
 
 cd ASTool\cs\ASTool\ASTool
-Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "--self-contained", "-c", "Release", "-r", "win10-x64"
-cd bin\Release\netcoreapp2.0\win10-x64\publish
-astool --help
-Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\win10-x64\publish\ASTool.exe" -Wait -ArgumentList "--help"
+Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "c:\git\ASTool\cs\ASTool\ASTool","--self-contained", "-c", "Release", "-r", "win10-x64","--output","c:\git\ASTool\cs\ASTool\ASTool\bin"
+cd c:\git\ASTool\cs\ASTool\ASTool\bin
+#astool --help
+Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--help"
 WriteLog "ASTOOL built" 
 
 WriteLog "Installing ASTOOL as a service" 
-sc.exe create ASTOOL binpath= "cmd.exe /c c:\git\ASTool\cs\ASTool\ASTool\bin\Release\netcoreapp2.0\win10-x64\publish\ASTool.exe --import --configfile \git\config\astool.windows.xml" type= own start= auto DisplayName= "ASTOOL"
+ASTool.exe --install --configfile c:\git\config\astool.windows.xml
 WriteLog "ASTOOL Installed" 
+
+WriteLog "Starting ASTOOL as a service" 
+ASTool.exe --start
+WriteLog "ASTOOL started" 
 
 WriteLog "Initialization completed !" 
 WriteLog "Rebooting !" 

@@ -60,13 +60,13 @@ wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu
 dpkg -i packages-microsoft-prod.deb
 apt-get -y install apt-transport-https
 apt-get -y update
-apt-get -y install dotnet-sdk-2.1.200
+apt-get -y install dotnet-sdk-2.1.201
 }
 install_netcore_centos(){
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
 yum -y update
 yum -y install libunwind libicu
-yum -y install dotnet-sdk-2.1.200
+yum -y install dotnet-sdk-2.1.201
 }
 install_netcore_redhat(){
 yum -y install rh-dotnet20 -y
@@ -78,7 +78,7 @@ mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
 wget -q https://packages.microsoft.com/config/debian/8/prod.list
 mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
 apt-get update
-apt-get install dotnet-sdk-2.1.200
+apt-get install dotnet-sdk-2.1.201
 }
 #############################################################################
 install_git_ubuntu(){
@@ -99,18 +99,38 @@ cd /git/config
 wget $astool_configfile
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
-cd ASTool/cs/ASTool/ASTool
 log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
 export HOME=/root
 env  > /source/env.log
-
-/usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 > /source/dotnet1.log 2> /source/dotneterror1.log
-/usr/bin/dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin > /source/dotnet2.log 2> /source/dotneterror2.log
+/usr/bin/dotnet --help > /source/dotnet0.log 2> /source/dotneterror0.log
+/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /source/dotnet1.log 2> /source/dotneterror1.log
+/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /source/dotnet2.log 2> /source/dotneterror2.log
 
 
 log "dotnet publish done"
 
 
+}
+build_astool_post(){
+
+log "installing the service which will build astool after VM reboot"
+
+cat <<EOF > /etc/systemd/system/buildastool.service
+[Unit]
+Description=build astool 
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin 
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable buildastool.service
+log "Rebooting"
+reboot
 }
 install_astool(){
 cd /git/ASTool/cs/ASTool/ASTool/bin
@@ -240,7 +260,7 @@ else
 	log "Start ASTOOL service"
 	systemctl enable astool
 	systemctl start astool  
-
+	build_astool_post
 fi
 exit 0 
 
