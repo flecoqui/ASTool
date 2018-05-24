@@ -116,23 +116,6 @@ function Expand-ZIPFile($file, $destination)
 } 
 
 
-WriteDateLog
-WriteLog "Downloading dotnet-install.ps1" 
-$url = 'https://dot.net/v1/dotnet-install.ps1' 
-$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
-if (($EditionId -eq "ServerStandardNano") -or
-    ($EditionId -eq "ServerDataCenterNano") -or
-    ($EditionId -eq "NanoServer") -or
-    ($EditionId -eq "ServerTuva")) {
-	Download $url $source 
-	WriteLog "dotnet-install.ps1 copied" 
-}
-else
-{
-	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
-	WriteLog "dotnet-install.ps1 copied" 
-}
 
 
 
@@ -177,6 +160,7 @@ if (($EditionId -eq "ServerStandardNano") -or
 }
 else
 {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	$webClient = New-Object System.Net.WebClient  
 	$webClient.DownloadFile($url,"\astool\release\latestRelease.win10.zip" )  
 	WriteLog "Installing ASTOOL"  
@@ -199,6 +183,7 @@ if (($EditionId -eq "ServerStandardNano") -or
 }
 else
 {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	$webClient = New-Object System.Net.WebClient  
 	$webClient.DownloadFile($url, "\astool\config\astool.windows.xml" )  
 	WriteLog "astool.windows.xml copied" 
