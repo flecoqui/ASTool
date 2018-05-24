@@ -142,7 +142,7 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool --import --configfile /git/config/astool.linux.xml
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool --import --configfile /astool/config/astool.linux.xml
 Restart=on-abort
 
 [Install]
@@ -163,7 +163,7 @@ Description=astool Service
 [Service]
 WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool  --import --configfile /git/config/astool.linux.xml'
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool  --import --configfile /astool/config/astool.linux.xml'
 Restart=always
 RestartSec=10
 SyslogIdentifier=ASTool

@@ -207,13 +207,16 @@ else
 	WriteLog "astool.windows.xml copied" 
 }
 
-
+WriteLog "Getting ASTOOL source code" 
 cd c:\git
 Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/ASTool.git"
 
+WriteLog "Building ASTOOL" 
 cd ASTool\cs\ASTool\ASTool
 Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "c:\git\ASTool\cs\ASTool\ASTool","--self-contained", "-c", "Release", "-r", "win10-x64","--output","c:\git\ASTool\cs\ASTool\ASTool\bin"
 cd c:\git\ASTool\cs\ASTool\ASTool\bin
+
+
 #astool --help
 Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--help"
 WriteLog "ASTOOL built" 
