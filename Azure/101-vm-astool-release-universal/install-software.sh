@@ -196,6 +196,8 @@ else
 	log "Start ASTOOL service"
 	systemctl enable astool
 	systemctl start astool 
+	log "Rebooting"
+	reboot
 fi
 exit 0 
 
