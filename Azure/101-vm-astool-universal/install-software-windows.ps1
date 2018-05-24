@@ -8,7 +8,7 @@ param
 )
 
 
-#Create Source folder
+#Create folders
 mkdir \git
 mkdir \astool\dvr
 mkdir \astool\dvr\test1
@@ -176,11 +176,11 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-& "C:\source\dotnet-install.ps1" --version 2.1.200
+& "C:\astool\log\dotnet-install.ps1" --version 2.1.200
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
-Start-Process -FilePath "c:\source\Git-2.17.0-64-bit.exe" -Wait -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/NOCANCEL","/SP-","/LOG"
+Start-Process -FilePath "c:\astool\log\Git-2.17.0-64-bit.exe" -Wait -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/NOCANCEL","/SP-","/LOG"
 
 $count=0
 while ((!(Test-Path "C:\Program Files\Git\bin\git.exe"))-and($count -lt 20)) { Start-Sleep 10; $count++}
