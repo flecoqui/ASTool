@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a simple VM (Linux or Windows) with software components",
+  "description": "This template allows you to deploy a simple VM  (Linux or Windows) with software components (Web Server + iperf)",
+  "summary": "This template takes a minimum amount of parameters and deploys a VM (Linux or Windows) , using the latest patched version.",
+  "githubUsername": "flecoqui",
+  "dateUpdated": "2016-05-16"
+}

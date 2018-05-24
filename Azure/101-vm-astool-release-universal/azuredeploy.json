@@ -28,7 +28,6 @@
         "ubuntu",
         "centos",
         "redhat",
-        "nanoserver2016",
         "windowsserver2016"
       ],
       "metadata": {
