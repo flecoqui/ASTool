@@ -265,8 +265,7 @@ else
 	log "Start ASTOOL service"
 	systemctl enable astool
 	systemctl start astool 
-	if[ -f /git/ASTool/cs/ASTool/ASTool/bin/ASTool]
-	then
+	if [ -f /git/ASTool/cs/ASTool/ASTool/bin/ASTool ] ; then
 		log "Installation successful, ASTOOL correctly generated"
 	else	
 		log "Installation not successful, reboot required to build ASTOOL"
