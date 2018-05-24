@@ -13,9 +13,9 @@
     <MaxDuration>3600000</MaxDuration>
     <MinBitrate>100000</MinBitrate>
     <Name>PullService1</Name>
-    <OutputUri>\git\dvr\test1</OutputUri>
+    <OutputUri>\astool\dvr\test1</OutputUri>
     <TextTrackName/>
-    <TraceFile>TracePullService1.log</TraceFile>
+    <TraceFile>\astool\log\TracePullService1.log</TraceFile>
     <TraceLevel>Information</TraceLevel>
     <TraceSize>524280</TraceSize>
   </Options>
@@ -34,9 +34,9 @@
     <MaxDuration>3600000</MaxDuration>
     <MinBitrate>100000</MinBitrate>
     <Name>PullService2</Name>
-    <OutputUri>\git\dvr\test2</OutputUri>
+    <OutputUri>\astool\dvr\test2</OutputUri>
     <TextTrackName/>
-    <TraceFile>TracePullService2.log</TraceFile>
+    <TraceFile>\astool\log\TracePullService2.log</TraceFile>
     <TraceLevel>Information</TraceLevel>
     <TraceSize>524280</TraceSize>
   </Options>

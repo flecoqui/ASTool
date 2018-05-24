@@ -9,16 +9,23 @@ param
 
 
 #Create Source folder
-$source = 'C:\source' 
+mkdir \git
+mkdir \astool\dvr
+mkdir \astool\dvr\test1
+mkdir \astool\dvr\test2
+mkdir \astool\config
+mkdir \astool\log
+$source = 'C:\astool\log' 
 If (!(Test-Path -Path $source -PathType Container)) {New-Item -Path $source -ItemType Directory | Out-Null} 
+
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> c:\source\install.log
+$msg >> C:\astool\log\install.log
 }
 function WriteDateLog
 {
-date >> c:\source\install.log
+date >> C:\astool\log\install.log
 }
 if(!$dnsName) {
  WriteLog "DNSName not specified" 
@@ -180,8 +187,7 @@ while ((!(Test-Path "C:\Program Files\Git\bin\git.exe"))-and($count -lt 20)) { S
 WriteLog "git Installed" 
 
 WriteLog "Building ASTOOL" 
-mkdir \git
-mkdir \git\config
+
 
 WriteDateLog
 WriteLog "Downloading astool.xml" 
@@ -191,20 +197,17 @@ if (($EditionId -eq "ServerStandardNano") -or
     ($EditionId -eq "ServerDataCenterNano") -or
     ($EditionId -eq "NanoServer") -or
     ($EditionId -eq "ServerTuva")) {
-	Download $url "\git\config"
+	Download $url "\astool\config"
 	WriteLog "astool.windows.xml copied" 
 }
 else
 {
 	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url, "\git\config\astool.windows.xml" )  
+	$webClient.DownloadFile($url, "\astool\config\astool.windows.xml" )  
 	WriteLog "astool.windows.xml copied" 
 }
 
-mkdir \git\dvr
-mkdir \git\dvr\test1
-mkdir \git\dvr\test2
-cd \git
+
 cd c:\git
 Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/ASTool.git"
 
@@ -216,7 +219,7 @@ Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -A
 WriteLog "ASTOOL built" 
 
 WriteLog "Installing ASTOOL as a service" 
-Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--install", "--configfile", "c:\git\config\astool.windows.xml"
+Start-Process -FilePath "c:\git\ASTool\cs\ASTool\ASTool\bin\ASTool.exe" -Wait -ArgumentList "--install", "--configfile", "c:\astool\config\astool.windows.xml"
 WriteLog "ASTOOL Installed" 
 
 WriteLog "Starting ASTOOL as a service" 

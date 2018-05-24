@@ -9,7 +9,7 @@ log()
 	# If you want to enable this logging, uncomment the line below and specify your logging key 
 	#curl -X POST -H "content-type:text/plain" --data-binary "$(date) | ${HOSTNAME} | $1" https://logs-01.loggly.com/inputs/${LOGGING_KEY}/tag/redis-extension,${HOSTNAME}
 	echo "$1"
-	echo "$1" >> /source/install.log
+	echo "$1" >> /astool/log/install.log
 }
 #############################################################################
 check_os() {
@@ -90,31 +90,23 @@ yum -y install git
 #############################################################################
 
 build_astool(){
-mkdir /git
-mkdir /git/config
-mkdir /git/dvr
-mkdir /git/dvr/test1
-mkdir /git/dvr/test2
-cd /git/config
+# Download config file
+cd /astool/config
 wget $astool_configfile
+# Download source code
 cd /git
 git clone https://github.com/flecoqui/ASTool.git
 log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
 export HOME=/root
-env  > /source/env.log
-/usr/bin/dotnet --help > /source/dotnet0.log 2> /source/dotneterror0.log
-/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /source/dotnet1.log 2> /source/dotneterror1.log
-/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /source/dotnet2.log 2> /source/dotneterror2.log
-
-
+env  > /astool/log/env.log
+# the generation of ASTOOL build could fail (dotnet bug)
+/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /astool/log/dotnet.log 2> /astool/log/dotneterror.log
 log "dotnet publish done"
 
-
 }
+#############################################################################
 build_astool_post(){
-
 log "installing the service which will build astool after VM reboot"
-
 cat <<EOF > /etc/systemd/system/buildastool.service
 [Unit]
 Description=build astool 
@@ -132,11 +124,14 @@ systemctl enable buildastool.service
 log "Rebooting"
 reboot
 }
+
+#############################################################################
 install_astool(){
 cd /git/ASTool/cs/ASTool/ASTool/bin
 export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
 echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
-./ASTool --help
+
+chmod +x  /git/ASTool/cs/ASTool/ASTool/bin/ASTool
 
 adduser astool --disabled-login
 cat <<EOF > /etc/systemd/system/astool.service
@@ -147,19 +142,19 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/usr/bin/dotnet /git/ASTool/cs/ASTool/ASTool/bin/ASTool.dll --import --configfile /git/config/astool.linux.xml
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool --import --configfile /git/config/astool.linux.xml
 Restart=on-abort
 
 [Install]
 WantedBy=multi-user.target
 EOF
 }
+#############################################################################
 install_astool_centos(){
 cd /git/ASTool/cs/ASTool/ASTool/bin
 export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
 echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
-./ASTool --help
-
+chmod +x  /git/ASTool/cs/ASTool/ASTool/bin/ASTool
 adduser astool -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/astool.service
 [Unit]
@@ -168,7 +163,7 @@ Description=astool Service
 [Service]
 WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin
 User=astool
-ExecStart=/usr/bin/dotnet /git/ASTool/cs/ASTool/ASTool/bin/ASTool.dll  --import --configfile /git/config/astool.linux.xml'
+ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool  --import --configfile /git/config/astool.linux.xml'
 Restart=always
 RestartSec=10
 SyslogIdentifier=ASTool
@@ -198,8 +193,18 @@ firewall-cmd --reload
 #############################################################################
 
 environ=`env`
-# Create folder source to store local logs
-mkdir /source
+# Create folders
+mkdir /git
+mkdir /astool
+mkdir /astool/log
+mkdir /astool/config
+mkdir /astool/dvr
+mkdir /astool/dvr/test1
+mkdir /astool/dvr/test2
+# Write access in dvr subfolder
+chmod -R a+rw /astool/dvr
+# Write access in log subfolder
+chmod -R a+rw /astool/log
 log "Environment before installation: $environ"
 
 log "Installation script start : $(date)"
@@ -259,8 +264,14 @@ else
 	fi
 	log "Start ASTOOL service"
 	systemctl enable astool
-	systemctl start astool  
-	build_astool_post
+	systemctl start astool 
+	if[ -f /git/ASTool/cs/ASTool/ASTool/bin/ASTool]
+	then
+		log "Installation successful, ASTOOL correctly generated"
+	else	
+		log "Installation not successful, reboot required to build ASTOOL"
+		build_astool_post
+	fi
 fi
 exit 0 
 
