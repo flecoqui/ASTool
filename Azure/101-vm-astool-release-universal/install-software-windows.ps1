@@ -165,7 +165,7 @@ else
 	$webClient.DownloadFile($url,"\astool\release\latestRelease.win10.zip" )  
 	WriteLog "Installing ASTOOL"  
 	# Function to unzip file contents 
-	Expand-ZIPFile -file "\astool\release\latestRelease.win10.zip" -destination "\astool\release\" 
+	Expand-ZIPFile -file "c:\astool\release\latestRelease.win10.zip" -destination "c:\astool\release" 
 	WriteLog "ASTOOL Installed" 
 }
 
