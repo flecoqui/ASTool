@@ -1,0 +1,45 @@
+<ArrayOfOptions xmlns="http://schemas.datacontract.org/2004/07/ASTool" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <Options>
+    <ASToolAction>Pull</ASToolAction>
+    <AudioTrackName/>
+    <BufferSize>1000000</BufferSize>
+    <ConfigFile/>
+    <ConsoleLevel>Information</ConsoleLevel>
+    <CounterPeriod>300</CounterPeriod>
+    <InputUri>http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest</InputUri>
+    <LiveOffset>10</LiveOffset>
+    <Loop>0</Loop>
+    <MaxBitrate>10000000</MaxBitrate>
+    <MaxDuration>3600000</MaxDuration>
+    <MinBitrate>100000</MinBitrate>
+    <Name>PullService1</Name>
+    <OutputUri>/astool/dvr/test1</OutputUri>
+    <TextTrackName/>
+    <TraceFile>/astool/log/TracePullService1.log</TraceFile>
+    <TraceLevel>Information</TraceLevel>
+    <TraceSize>524280</TraceSize>
+  </Options>
+
+  <Options>
+    <ASToolAction>Pull</ASToolAction>
+    <AudioTrackName/>
+    <BufferSize>1000000</BufferSize>
+    <ConfigFile/>
+    <ConsoleLevel>Information</ConsoleLevel>
+    <CounterPeriod>300</CounterPeriod>
+    <InputUri>http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest</InputUri>
+    <LiveOffset>0</LiveOffset>
+    <Loop>0</Loop>
+    <MaxBitrate>10000000</MaxBitrate>
+    <MaxDuration>3600000</MaxDuration>
+    <MinBitrate>100000</MinBitrate>
+    <Name>PullService2</Name>
+    <OutputUri>/astool/dvr/test2</OutputUri>
+    <TextTrackName/>
+    <TraceFile>/astool/log/TracePullService2.log</TraceFile>
+    <TraceLevel>Information</TraceLevel>
+    <TraceSize>524280</TraceSize>
+  </Options>
+  
+
+</ArrayOfOptions>

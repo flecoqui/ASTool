@@ -1,0 +1,21 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "VMAdmin"
+    },
+    "adminPassword": {
+      "value": "VMP@ssw0rd"
+    },
+    "dnsLabelPrefix": {
+      "value": "vmubus001"
+    },
+    "configurationOS": {
+      "value": "ubuntu"
+    },
+    "configurationSize": {
+      "value": "Small"
+    }
+  }
+}
