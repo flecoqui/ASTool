@@ -1,6 +1,15 @@
 dotnet publish --self-contained -c Release -r win10-x64
 dotnet publish --self-contained -c Release -r win10-x64 --output bin
-dotnet publish -c Release -r ubuntu.16.10-x64
+dotnet publish --self-contained -c Release -r debian-x64
+dotnet publish --self-contained -c Release -r ubuntu.16.10-x64
+
+dotnet publish --self-contained -c Release -r win-x64
+dotnet publish --self-contained -c Release -r centos-x64
+dotnet publish --self-contained -c Release -r rhel-x64
+dotnet publish --self-contained -c Release -r ubuntu-x64
+dotnet publish --self-contained -c Release -r osx-x64
+dotnet publish --self-contained -c Release -r debian-x64
+
 
 ASTool.exe --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
 

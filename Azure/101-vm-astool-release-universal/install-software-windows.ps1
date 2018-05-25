@@ -149,7 +149,7 @@ WriteLog "Firewall configured"
 
 WriteDateLog
 WriteLog "Downloading ASTOOL"  
-$url = 'https://github.com/flecoqui/ASTool/raw/master/Releases/latestRelease.win10.zip' 
+$url = 'https://github.com/flecoqui/ASTool/raw/master/Releases/latestRelease.win.zip' 
 $EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
 if (($EditionId -eq "ServerStandardNano") -or
     ($EditionId -eq "ServerDataCenterNano") -or
@@ -162,10 +162,10 @@ else
 {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url,"\astool\release\latestRelease.win10.zip" )  
+	$webClient.DownloadFile($url,"\astool\release\latestRelease.win.zip" )  
 	WriteLog "Installing ASTOOL"  
 	# Function to unzip file contents 
-	Expand-ZIPFile -file "c:\astool\release\latestRelease.win10.zip" -destination "c:\astool\release" 
+	Expand-ZIPFile -file "c:\astool\release\latestRelease.win.zip" -destination "c:\astool\release" 
 	WriteLog "ASTOOL Installed" 
 }
 
