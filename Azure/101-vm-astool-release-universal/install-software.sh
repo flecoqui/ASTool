@@ -60,6 +60,25 @@ iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 
 download_astool(){
 
+# Install pre-requisites
+apt-get -y install apt-transport-https
+apt-get -y update
+
+apt-get -y install libunwind8 
+apt-get -y install libuuid1 
+
+apt-get -y install liblttng-ust0
+apt-get -y install libcurl3
+apt-get -y install libssl1.0.0
+apt-get -y install libkrb5-3
+apt-get -y install zlib1g
+apt-get -y install libicu52 
+apt-get -y install libicu55 
+apt-get -y install libicu57 
+apt-get -y install libicu60 
+apt-get -y install libc-bin 
+
+
 # Download config file
 cd /astool/config
 wget $astool_configfile
@@ -68,6 +87,91 @@ wget $astool_configfile
 cd /astool/release
 wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
 tar  -xzvf LatestRelease.ubuntu.tar.gz
+
+}
+#############################################################################
+
+download_astool_centos(){
+
+# Install pre-requisites
+yum -y install libunwind libicu
+yum -y install libuuid
+
+yum -y install lttng-ust
+yum -y install libcurl
+yum -y install openssl-libs
+yum -y install krb5-libs
+yum -y install libicu
+yum -y install zlib
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
+tar  -xzvf LatestRelease.centos.tar.gz
+
+}
+#############################################################################
+
+download_astool_redhat(){
+
+# Install pre-requisites
+yum -y install libunwind libicu
+yum -y install libuuid
+
+yum -y install lttng-ust
+yum -y install libcurl
+yum -y install openssl-libs
+yum -y install krb5-libs
+yum -y install libicu
+yum -y install zlib
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz
+tar  -xzvf LatestRelease.rhel.tar.gz
+
+}
+#############################################################################
+
+download_astool_debian(){
+
+# Install pre-requisites
+apt-get -y install apt-transport-https
+apt-get -y update
+
+apt-get -y install libunwind8 
+apt-get -y install libuuid1 
+
+apt-get -y install liblttng-ust0
+apt-get -y install libcurl3
+apt-get -y install libssl1.0.0
+apt-get -y install libkrb5-3
+apt-get -y install zlib1g
+apt-get -y install libicu52 
+apt-get -y install libicu55 
+apt-get -y install libicu57 
+apt-get -y install libicu60 
+apt-get -y install libc-bin 
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
+tar  -xzvf LatestRelease.debian.tar.gz
 
 }
 
@@ -167,15 +271,23 @@ else
 	if [ $iscentos -eq 0 ] ; then
 	    log "configure network centos"
 		configure_network_centos
+		log "Download ASTool centos"
+		download_astool_centos
 	elif [ $isredhat -eq 0 ] ; then
 	    log "configure network redhat"
 		configure_network_centos
+		log "Download ASTool redhat"
+		download_astool_redhat
 	elif [ $isubuntu -eq 0 ] ; then
 	    log "configure network ubuntu"
 		configure_network
+		log "Download ASTool ubuntu"
+		download_astool
 	elif [ $isdebian -eq 0 ] ; then
 	    log "configure network"
 		configure_network
+		log "Download ASTool debian"
+		download_astool_debian
 	fi
 	log "Download ASTool"
 	download_astool
@@ -196,8 +308,6 @@ else
 	log "Start ASTOOL service"
 	systemctl enable astool
 	systemctl start astool 
-	log "Rebooting"
-	reboot
 fi
 exit 0 
 
