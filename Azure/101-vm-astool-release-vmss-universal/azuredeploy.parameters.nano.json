@@ -8,6 +8,9 @@
     "adminPassword": {
       "value": "VMP@ssw0rd"
     },
+    "instanceCount": {
+      "value": 2
+    },
     "dnsLabelPrefix": {
       "value": "vmnanos001"
     },

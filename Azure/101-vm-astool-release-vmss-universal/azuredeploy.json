@@ -14,6 +14,14 @@
         "description": "Password for the Virtual Machine."
       }
     },
+    "instanceCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of VM instances (100 or less)."
+      },
+      "maxValue": 10
+    },
     "dnsLabelPrefix": {
       "type": "string",
       "metadata": {
@@ -49,8 +57,8 @@
     }
   },
   "variables": {
-    "astoolConfigFileLinux": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.xml",
-    "astoolConfigFileWindows": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.xml",
+    "astoolConfigFileLinux": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/astool.linux.xml",
+    "astoolConfigFileWindows": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/astool.windows.xml",
     "configurationSizeSmall": {
       "vmSize": "Standard_F1",
       "diskSize": "128"
@@ -73,7 +81,7 @@
         "offer": "Debian",
         "sku": "8",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\" \"',variables('astoolConfigFileLinux'),'\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -81,14 +89,15 @@
         "extensionTypeHandlerVersion": "2.0",
         "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]"
+        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
+        "natBackendPort":  22
       },
       "ubuntu": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
         "sku": "16.04.0-LTS",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\" \"',variables('astoolConfigFileLinux'),'\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -96,14 +105,15 @@
         "extensionTypeHandlerVersion": "2.0",
         "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]"
+        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
+        "natBackendPort": 22
       },
       "centos": {
         "publisher": "openlogic",
         "offer": "centos",
         "sku": "7.2",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\" \"',variables('astoolConfigFileLinux'),'\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -111,14 +121,15 @@
         "extensionTypeHandlerVersion": "2.0",
         "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]"
+        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
+        "natBackendPort": 22
       },
       "redhat": {
         "publisher": "RedHat",
         "offer": "RHEL",
         "sku": "7.2",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\" \"',variables('astoolConfigFileLinux'),'\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -126,14 +137,15 @@
         "extensionTypeHandlerVersion": "2.0",
         "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]"
+        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
+        "natBackendPort": 22
       },
       "windowsserver2016": {
         "publisher": "MicrosoftWindowsServer",
         "offer": "WindowsServer",
         "sku": "2016-Datacenter",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software-windows.ps1",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-vmss-universal/install-software-windows.ps1",
         "installScriptFileName": "install-software-windows.ps1",
         "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"  \"', variables('astoolConfigFileWindows'), '\"' )]",
         "extensionPublisher": "Microsoft.Compute",
@@ -141,22 +153,8 @@
         "extensionTypeHandlerVersion": "1.7",
         "remoteCommand": "[concat('mstsc /admin /v:', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "type c:\\source\\install.log",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
-      },
-      "nanoserver2016": {
-        "publisher": "MicrosoftWindowsServer",
-        "offer": "WindowsServer",
-        "sku": "2016-Nano-Server",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/install-software-windows.ps1",
-        "installScriptFileName": "install-software-windows.ps1",
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com','\"  \"', variables('astoolConfigFileWindows'), '\"' )]",
-        "extensionPublisher": "Microsoft.Compute",
-        "extensionType": "CustomScriptExtension",
-        "extensionTypeHandlerVersion": "1.7",
-        "remoteCommand": "[concat('Set-Item WSMan:\\localhost\\Client\\TrustedHosts ', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com',' Enter-PSSession -ComputerName  \"', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com', '\"  -Credential ', parameters('adminUsername') )]",
-        "logInformation": "type c:\\source\\install.log",
-        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+        "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "natBackendPort": 3389
       }
     },
     "configurationSize": "[variables(concat('configurationSize', parameters('configurationSize')))]",
@@ -181,6 +179,18 @@
     "virtualNetworkName": "[concat(parameters('dnsLabelPrefix'), 'vnet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+
+    "namingInfix": "[toLower(substring(concat(variables('vmName'), uniqueString(resourceGroup().id)), 0, 9))]",
+    "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
+    "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
+    "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
+    "natStartPort": 50000,
+    "natEndPort": 50010,
+    "natBackendPort": 22,
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -193,12 +203,12 @@
         "accountType": "[variables('storageAccountType')]"
       }
     },
-    { 
-       "apiVersion": "[variables('apiVersion')]", 
-       "type": "Microsoft.Network/networkSecurityGroups", 
-       "name": "[variables('networkSecurityGroupName')]", 
-       "location": "[resourceGroup().location]", 
-       "properties": {
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
         "securityRules": [
           {
             "name": "ssh",
@@ -269,38 +279,50 @@
               "priority": 104,
               "direction": "Inbound"
             }
-          },
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[variables('loadBalancerName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
           {
-            "name": "iperf3-udp",
+            "name": "LoadBalancerFrontEnd",
             "properties": {
-              "description": "iperf3 udp port",
-              "protocol": "Udp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5201",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 110,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "iperf3-tcp",
-            "properties": {
-              "description": "iperf3 tcp port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5201",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 111,
-              "direction": "Inbound"
+              "publicIPAddress": {
+                "id": "[variables('publicIPAddressID')]"
+              }
             }
           }
-        ] 
-       } 
-     },     
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('bePoolName')]"
+          }
+        ],
+        "inboundNatPools": [
+          {
+            "name": "[variables('natPoolName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPortRangeStart": "[variables('natStartPort')]",
+              "frontendPortRangeEnd": "[variables('natEndPort')]",
+              "backendPort": "[variables('configurationOS')[parameters('configurationOS')].natBackendPort]"             
+            }
+          }
+        ]
+      }
+    },
     {
       "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -318,9 +340,9 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [ 
-     "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]" 
-       ], 
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+      ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -331,10 +353,10 @@
           {
             "name": "[variables('subnetName')]",
             "properties": {
-            "addressPrefix": "[variables('subnetPrefix')]",
-            "networkSecurityGroup": { 
-                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]" 
-               }               
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
             }
           }
         ]

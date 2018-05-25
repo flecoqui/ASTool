@@ -54,84 +54,135 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 }
 
-#############################################################################
-install_netcore(){
-wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-apt-get -y install apt-transport-https
-apt-get -y update
-apt-get -y install dotnet-sdk-2.1.200
-}
-install_netcore_centos(){
-rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
-yum -y update
-yum -y install libunwind libicu
-yum -y install dotnet-sdk-2.1.200
-}
-install_netcore_redhat(){
-yum -y install rh-dotnet20 -y
-scl enable rh-dotnet20 bash
-}
-install_netcore_debian(){
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
-mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-wget -q https://packages.microsoft.com/config/debian/8/prod.list
-mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
-apt-get update
-apt-get install dotnet-sdk-2.1.200
-}
-#############################################################################
-install_git_ubuntu(){
-apt-get -y install git
-}
-install_git_centos(){
-yum -y install git
-}
+
+
 #############################################################################
 
-build_astool(){
+download_astool(){
+
+# Install pre-requisites
+apt-get -y install apt-transport-https
+apt-get -y update
+
+apt-get -y install libunwind8 
+apt-get -y install libuuid1 
+
+apt-get -y install liblttng-ust0
+apt-get -y install libcurl3
+apt-get -y install libssl1.0.0
+apt-get -y install libkrb5-3
+apt-get -y install zlib1g
+apt-get -y install libicu52 
+apt-get -y install libicu55 
+apt-get -y install libicu57 
+apt-get -y install libicu60 
+apt-get -y install libc-bin 
+
+
 # Download config file
 cd /astool/config
 wget $astool_configfile
-# Download source code
-cd /git
-git clone https://github.com/flecoqui/ASTool.git
-log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
-export HOME=/root
-env  > /astool/log/env.log
-# the generation of ASTOOL build could fail (dotnet bug)
-/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin > /astool/log/dotnet.log 2> /astool/log/dotneterror.log
-log "dotnet publish done"
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
+tar  -xzvf LatestRelease.ubuntu.tar.gz
 
 }
 #############################################################################
-build_astool_post(){
-log "installing the service which will build astool after VM reboot"
-cat <<EOF > /etc/systemd/system/buildastool.service
-[Unit]
-Description=build astool 
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/bin/dotnet publish /git/ASTool/cs/ASTool/ASTool --self-contained -c Release -r ubuntu.16.10-x64 --output /git/ASTool/cs/ASTool/ASTool/bin 
+download_astool_centos(){
 
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload
-systemctl enable buildastool.service
-log "Rebooting"
-reboot
+# Install pre-requisites
+yum -y install libunwind libicu
+yum -y install libuuid
+
+yum -y install lttng-ust
+yum -y install libcurl
+yum -y install openssl-libs
+yum -y install krb5-libs
+yum -y install libicu
+yum -y install zlib
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
+tar  -xzvf LatestRelease.centos.tar.gz
+
 }
+#############################################################################
+
+download_astool_redhat(){
+
+# Install pre-requisites
+yum -y install libunwind libicu
+yum -y install libuuid
+
+yum -y install lttng-ust
+yum -y install libcurl
+yum -y install openssl-libs
+yum -y install krb5-libs
+yum -y install libicu
+yum -y install zlib
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz
+tar  -xzvf LatestRelease.rhel.tar.gz
+
+}
+#############################################################################
+
+download_astool_debian(){
+
+# Install pre-requisites
+apt-get -y install apt-transport-https
+apt-get -y update
+
+apt-get -y install libunwind8 
+apt-get -y install libuuid1 
+
+apt-get -y install liblttng-ust0
+apt-get -y install libcurl3
+apt-get -y install libssl1.0.0
+apt-get -y install libkrb5-3
+apt-get -y install zlib1g
+apt-get -y install libicu52 
+apt-get -y install libicu55 
+apt-get -y install libicu57 
+apt-get -y install libicu60 
+apt-get -y install libc-bin 
+
+
+# Download config file
+cd /astool/config
+wget $astool_configfile
+
+# Download astool binary
+cd /astool/release
+wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
+tar  -xzvf LatestRelease.debian.tar.gz
+
+}
+
 
 #############################################################################
 install_astool(){
-cd /git/ASTool/cs/ASTool/ASTool/bin
-export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
-echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
+cd /astool/release/publish
+export PATH=$PATH:/astool/release/publish
+echo "export PATH=$PATH:/astool/release/publish" >> /etc/profile
 
-chmod +x  /git/ASTool/cs/ASTool/ASTool/bin/ASTool
+chmod +x  /astool/release/publish/ASTool
 
 adduser astool --disabled-login
 cat <<EOF > /etc/systemd/system/astool.service
@@ -142,7 +193,7 @@ After=network.target
 [Service]
 Type=simple
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool --import --configfile /astool/config/astool.linux.xml
+ExecStart=/astool/release/publish/ASTool --import --configfile /astool/config/astool.linux.xml
 Restart=on-abort
 
 [Install]
@@ -151,19 +202,19 @@ EOF
 }
 #############################################################################
 install_astool_centos(){
-cd /git/ASTool/cs/ASTool/ASTool/bin
-export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin
-echo "export PATH=$PATH:/git/ASTool/cs/ASTool/ASTool/bin" >> /etc/profile
-chmod +x  /git/ASTool/cs/ASTool/ASTool/bin/ASTool
+cd /astool/release/publish
+export PATH=$PATH:/astool/release/publish
+echo "export PATH=$PATH:/astool/release/publish" >> /etc/profile
+chmod +x  /astool/release/publish/ASTool
 adduser astool -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/astool.service
 [Unit]
 Description=astool Service
 
 [Service]
-WorkingDirectory=/git/ASTool/cs/ASTool/ASTool/bin
+WorkingDirectory=/astool/release/publish
 User=astool
-ExecStart=/git/ASTool/cs/ASTool/ASTool/bin/ASTool  --import --configfile /astool/config/astool.linux.xml'
+ExecStart=/astool/release/publish/ASTool  --import --configfile /astool/config/astool.linux.xml'
 Restart=always
 RestartSec=10
 SyslogIdentifier=ASTool
@@ -194,8 +245,8 @@ firewall-cmd --reload
 
 environ=`env`
 # Create folders
-mkdir /git
 mkdir /astool
+mkdir /astool/release
 mkdir /astool/log
 mkdir /astool/config
 mkdir /astool/dvr
@@ -220,34 +271,26 @@ else
 	if [ $iscentos -eq 0 ] ; then
 	    log "configure network centos"
 		configure_network_centos
-	    log "install netcore centos"
-		install_netcore_centos
-	    log "install git centos"
-		install_git_centos
+		log "Download ASTool centos"
+		download_astool_centos
 	elif [ $isredhat -eq 0 ] ; then
 	    log "configure network redhat"
 		configure_network_centos
-	    log "install netcore redhat"
-		install_netcore_redhat
-	    log "install git redhat"
-		install_git_centos
+		log "Download ASTool redhat"
+		download_astool_redhat
 	elif [ $isubuntu -eq 0 ] ; then
 	    log "configure network ubuntu"
 		configure_network
-		log "install netcore ubuntu"
-		install_netcore
-	    log "install git ubuntu"
-		install_git_ubuntu
+		log "Download ASTool ubuntu"
+		download_astool
 	elif [ $isdebian -eq 0 ] ; then
 	    log "configure network"
 		configure_network
-		log "install netcore debian"
-		install_netcore_debian
-	    log "install git debian"
-		install_git_ubuntu
+		log "Download ASTool debian"
+		download_astool_debian
 	fi
-	log "build ASTool"
-	build_astool
+	log "Download ASTool"
+	download_astool
 
 	if [ $iscentos -eq 0 ] ; then
 	    log "install astool centos"
@@ -265,12 +308,6 @@ else
 	log "Start ASTOOL service"
 	systemctl enable astool
 	systemctl start astool 
-	if [ -f /git/ASTool/cs/ASTool/ASTool/bin/ASTool ] ; then
-		log "Installation successful, ASTOOL correctly generated"
-	else	
-		log "Installation not successful, reboot required to build ASTOOL"
-		build_astool_post
-	fi
 fi
 exit 0 
 
