@@ -20,7 +20,7 @@
       "metadata": {
         "description": "Number of VM instances (100 or less)."
       },
-      "maxValue": 10
+      "maxValue": 5
     },
     "dnsLabelPrefix": {
       "type": "string",
@@ -90,7 +90,7 @@
         "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
-        "natBackendPort":  22
+        "natBackendPort": 22
       },
       "ubuntu": {
         "publisher": "Canonical",
@@ -181,16 +181,18 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
 
     "namingInfix": "[toLower(substring(concat(variables('vmName'), uniqueString(resourceGroup().id)), 0, 9))]",
+    "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
     "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
     "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
     "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
     "natStartPort": 50000,
-    "natEndPort": 50010,
-    "natBackendPort": 22,
+    "natEndPort": 50005,
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
 
+    "computeApiVersion": "2016-03-30",
+    "networkApiVersion": "2016-03-30",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -284,7 +286,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('networkApiVersion')]",
       "type": "Microsoft.Network/loadBalancers",
       "name": "[variables('loadBalancerName')]",
       "location": "[resourceGroup().location]",
@@ -317,7 +319,7 @@
               "protocol": "tcp",
               "frontendPortRangeStart": "[variables('natStartPort')]",
               "frontendPortRangeEnd": "[variables('natEndPort')]",
-              "backendPort": "[variables('configurationOS')[parameters('configurationOS')].natBackendPort]"             
+              "backendPort": "[variables('configurationOS')[parameters('configurationOS')].natBackendPort]"
             }
           }
         ]
@@ -389,90 +391,100 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "[variables('namingInfix')]",
       "location": "[resourceGroup().location]",
+      "apiVersion": "[variables('computeApiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('configurationOS')[parameters('configurationOS')].publisher]",
-            "offer": "[variables('configurationOS')[parameters('configurationOS')].offer]",
-            "sku": "[variables('configurationOS')[parameters('configurationOS')].sku]",
-            "version": "[variables('configurationOS')[parameters('configurationOS')].version]"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "name": "datadisk1",
-              "diskSizeGB": "[variables('vmDataDiskSize')]",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('dataDisk1VhdName'),'.vhd')]"
-              },
-              "createOption": "Empty"
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
-          }
-        }
+      "sku": {
+        "name": "[variables('configurationOS')[parameters('configurationOS')].sku]",
+        "tier": "Standard",
+        "capacity": "[parameters('instanceCount')]"
       },
-      "resources": [
-        {
-          "name": "init",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "tags": {
-            "displayName": "init"
-          },
-          "properties": {
-            "publisher": "[variables('configurationOS')[parameters('configurationOS')].extensionPublisher]",
-            "type": "[variables('configurationOS')[parameters('configurationOS')].extensionType]",
-            "typeHandlerVersion": "[variables('configurationOS')[parameters('configurationOS')].extensionTypeHandlerVersion]",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "fileUris": [
-                "[variables('configurationOS')[parameters('configurationOS')].installScriptUrl]"
+      "properties": {
+        "overprovision": "true",
+        "upgradePolicy": {
+          "mode": "Manual"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "osDisk": {
+              "vhdContainers": [
+                "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
               ],
-              "commandToExecute": "[variables('configurationOS')[parameters('configurationOS')].commandToExecute]"
+              "name": "[variables('osDiskName')]",
+              "caching": "ReadOnly",
+              "createOption": "FromImage"
+            },
+
+            "imageReference": {
+              "publisher": "[variables('configurationOS')[parameters('configurationOS')].publisher]",
+              "offer": "[variables('configurationOS')[parameters('configurationOS')].offer]",
+              "sku": "[variables('configurationOS')[parameters('configurationOS')].sku]",
+              "version": "[variables('configurationOS')[parameters('configurationOS')].version]"
             }
-          }
+          },
+          "osProfile": {
+            "computerNamePrefix": "[variables('namingInfix')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "networkProfile": {
+            "networkInterfaceConfigurations": [
+              {
+                "name": "[variables('nicName')]",
+                "properties": {
+                  "primary": "true",
+                  "ipConfigurations": [
+                    {
+                      "name": "[variables('ipConfigName')]",
+                      "properties": {
+                        "subnet": {
+                          "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+                        },
+                        "loadBalancerBackendAddressPools": [
+                          {
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/', variables('bePoolName'))]"
+                          }
+                        ],
+                        "loadBalancerInboundNatPools": [
+                          {
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/', variables('natPoolName'))]"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "extensionProfile": {
+            "extensions": [
+              {
+                "name": "init",
+                "properties": {
+              "publisher": "[variables('configurationOS')[parameters('configurationOS')].extensionPublisher]",
+              "type": "[variables('configurationOS')[parameters('configurationOS')].extensionType]",
+              "typeHandlerVersion": "[variables('configurationOS')[parameters('configurationOS')].extensionTypeHandlerVersion]",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                  "[variables('configurationOS')[parameters('configurationOS')].installScriptUrl]"
+                ],
+                "commandToExecute": "[variables('configurationOS')[parameters('configurationOS')].commandToExecute]"
+              }
+                  }
+                }
+              ]
+            }
+
         }
-      ]
+      }
     }
   ],
   "outputs": {
