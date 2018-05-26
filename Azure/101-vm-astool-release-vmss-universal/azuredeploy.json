@@ -401,7 +401,7 @@
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "sku": {
-        "name": "[variables('configurationOS')[parameters('configurationOS')].sku]",
+        "name": "[variables('vmSize')]",
         "tier": "Standard",
         "capacity": "[parameters('instanceCount')]"
       },
