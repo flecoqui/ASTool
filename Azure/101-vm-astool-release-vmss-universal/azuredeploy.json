@@ -193,6 +193,7 @@
 
     "computeApiVersion": "2016-03-30",
     "networkApiVersion": "2016-03-30",
+    "insightsApiVersion": "2015-04-01",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -468,24 +469,50 @@
               {
                 "name": "init",
                 "properties": {
-              "publisher": "[variables('configurationOS')[parameters('configurationOS')].extensionPublisher]",
-              "type": "[variables('configurationOS')[parameters('configurationOS')].extensionType]",
-              "typeHandlerVersion": "[variables('configurationOS')[parameters('configurationOS')].extensionTypeHandlerVersion]",
-              "autoUpgradeMinorVersion": true,
-              "settings": {
-                "fileUris": [
-                  "[variables('configurationOS')[parameters('configurationOS')].installScriptUrl]"
-                ],
-                "commandToExecute": "[variables('configurationOS')[parameters('configurationOS')].commandToExecute]"
-              }
+                  "publisher": "[variables('configurationOS')[parameters('configurationOS')].extensionPublisher]",
+                  "type": "[variables('configurationOS')[parameters('configurationOS')].extensionType]",
+                  "typeHandlerVersion": "[variables('configurationOS')[parameters('configurationOS')].extensionTypeHandlerVersion]",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "fileUris": [
+                      "[variables('configurationOS')[parameters('configurationOS')].installScriptUrl]"
+                    ],
+                    "commandToExecute": "[variables('configurationOS')[parameters('configurationOS')].commandToExecute]"
                   }
                 }
-              ]
-            }
+              }
+            ]
+          }
 
         }
       }
+    },
+    {
+      "type": "Microsoft.Insights/autoscaleSettings",
+      "apiVersion": "[variables('insightsApiVersion')]",
+      "name": "autoscalewad",
+      "location": "[resourceGroup().location]",
+      "scale":  null,
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('namingInfix'))]"
+      ],
+      "properties": {
+        "name": "autoscalewad",
+        "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('namingInfix'))]",
+        "enabled": true,
+        "profiles": [
+          {
+            "name": "Profile1",
+            "capacity": {
+              "minimum": "1",
+              "maximum": "5",
+              "default": "1"
+            }    
+          }
+        ]
+      }
     }
+
   ],
   "outputs": {
     "hostname": {
