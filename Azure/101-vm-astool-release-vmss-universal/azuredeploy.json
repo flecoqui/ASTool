@@ -87,7 +87,7 @@
         "extensionPublisher": "Microsoft.Azure.Extensions",
         "extensionType": "CustomScript",
         "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "remoteCommand": "[concat('ssh -p 5000X X: 0 to 1 ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
         "natBackendPort": 22
@@ -103,7 +103,7 @@
         "extensionPublisher": "Microsoft.Azure.Extensions",
         "extensionType": "CustomScript",
         "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "remoteCommand": "[concat('ssh -p 5000X X: 0 to 1 ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
         "natBackendPort": 22
@@ -119,7 +119,7 @@
         "extensionPublisher": "Microsoft.Azure.Extensions",
         "extensionType": "CustomScript",
         "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "remoteCommand": "[concat('ssh -p 5000X X: 0 to 1 ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
         "natBackendPort": 22
@@ -135,7 +135,7 @@
         "extensionPublisher": "Microsoft.Azure.Extensions",
         "extensionType": "CustomScript",
         "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "remoteCommand": "[concat('ssh -p 5000X X: 0 to 1 ', parameters('adminUsername'), '@', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com/index.php')]",
         "natBackendPort": 22
@@ -151,7 +151,7 @@
         "extensionPublisher": "Microsoft.Compute",
         "extensionType": "CustomScriptExtension",
         "extensionTypeHandlerVersion": "1.7",
-        "remoteCommand": "[concat('mstsc /admin /v:', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+        "remoteCommand": "[concat('mstsc /admin /v:', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com:5000X X:0 to 1')]",
         "logInformation": "type c:\\source\\install.log",
         "httpUrl": "[concat('http://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
         "natBackendPort": 3389
