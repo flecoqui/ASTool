@@ -1,6 +1,11 @@
 <img src="Docs/ASTOOL_logo.png">
 
-# Welcome to ASTool Github Home Page
+
+# What is ASTOOL?
+
+<img src="Docs/ASTOOL_architecture.png" width="600">
+
+# Features area
 
 The Adaptive Streaming Tool (ASTool) is an Open Source tool supporting several features:
 ####  Push: 
@@ -30,3 +35,17 @@ azure group create "ResourceGroupName" "DataCenterName"
 For instance:
 
     azure group create astoolgrpeu2 eastus2
+
+# Getting Started
+
+
+https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x
+
+
+https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x 
+
+
+https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x
+
+
+
