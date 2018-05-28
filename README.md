@@ -1,13 +1,39 @@
 <img src="Docs/ASTOOL_logo.png">
 
-
 # What is ASTOOL?
+Adaptive Streaming Tool is an application supporting several features related to Adaptive Streaming. The first version is specifically dedicated to Smooth Streaming.
+For instance, with ASTool version 1.0 you can
+- Push a Smooth Streaming towards a Live Smooth  Streaming Ingestion Point in order to emulate a Live TV channel,
+- Pull a Smooth Streaming asset (Live or VOD) from an existing service towards ismv and isma file on the local disk,
+- Pull and Push a Live Smooth Streaming channel towards another Live Smooth Streaming Ingestion Point
+- Parse isma and ismv files
+
+As ASTool is based on .Net Core, the application can be installed on any operating system supporting .Net Core (Windows, Mac OS, Ubuntu, Debian, Centos, Red Hat).
 
 <img src="Docs/ASTOOL_Architecture.png" width="600">
 
+
+The latest releases are available [here](https://github.com/flecoqui/ASTool/tree/master/Releases)
+
+
+- [Windows latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip) </p>
+- [Ubuntu  latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz)</p>
+- [Debian latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz)</p>
+- [Centos latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz)</p>
+- [Red Hat latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz)</p>
+- [Mac OS latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.osx.tar.gz)</p>
+
+
+
+# Required Software
+|[![Windows](Docs/windows_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x)[Windows pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x)|[![Linux](Docs/linux_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x) [Linux pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x)|[![MacOS](Docs/macos_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x)  [Mac OS pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x)|
+| :--- | :--- | :--- |
+| To develop apps for mixed reality headsets, you need the Windows 10 Fall Creators Update | The Unity 3D engine provides support for building mixed reality projects in Windows 10 | Visual Studio is used for code editing, deploying and building UWP app packages |
+
+
 # Features area
 
-The Adaptive Streaming Tool (ASTool) is an Open Source tool supporting several features:
+The Adaptive Streaming Tool (ASTool) is an Open Source command line tool supporting several features:
 ####  Push: 
 push VOD asset towards Live ingestion point to emulate a Live Channel based on VOD Asset
 ####  Pull: 
@@ -47,5 +73,7 @@ https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x
 
 https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x
 
+
+# Useful resources
 
 
