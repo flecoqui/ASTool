@@ -1,3 +1,5 @@
+<img src="Docs/ASTOOL_logo.png">
+
 # Welcome to ASTool Github Home Page
 
 The Adaptive Streaming Tool (ASTool) is an Open Source tool supporting several features:
