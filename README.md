@@ -44,8 +44,8 @@ This feature pushes a Smooth Streaming VOD asset towards Live ingestion point to
     ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
             [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
             [--name <service name> --counterperiod <periodinseconds>]
-            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]
-            [--consolelevel <none|error|warning|verbose>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|information|error|warning|verbose>]
+            [--consolelevel <none|information|error|warning|verbose>]
 
 | option | value type | default value | Description | 
 | :--- | :--- | :--- |  :--- | 
@@ -54,23 +54,122 @@ This feature pushes a Smooth Streaming VOD asset towards Live ingestion point to
 |--loop| int |0  | number of live loop when the value is 0, infinite loop|
 |--minbitrate| int |0  | minimum bitrate of the video tracks to select|
 |--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
-|--name| string | null  | name of the service |
+|--name| string | null  | name of the service, used for the traces |
 |--counterperiod| int |0  | period in seconds used to display the counters|
 |--tracefile| string | null  | path of the file where the trace will be stored |
-|--tracesize| int |0  | maximum size of the trace file, period in seconds used to display the counters|
-
+|--tracesize| int |0  | maximum size of the trace file|
+|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
 
 ##  Pull feature: 
-Create VOD asset from an existing VOD asset already online.
+Create VOD asset from an existing Smooth Streaming VOD asset or a Live Smooth Streaming channel already online.
+
+
+### Syntax
+
+    ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
+            [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+            [--name <service name> --counterperiod <periodinseconds>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|information|error|warning|verbose>]
+            [--consolelevel <none|information|error|warning|verbose>]
+
+| option | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|--input| string | null | Path to the local ISM file on the disk|
+|--ouput| string | null | Uri of the ingestion point|
+|--loop| int |0  | number of live loop when the value is 0, infinite loop|
+|--minbitrate| int |0  | minimum bitrate of the video tracks to select|
+|--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|--name| string | null  | name of the service, used for the traces |
+|--counterperiod| int |0  | period in seconds used to display the counters|
+|--tracefile| string | null  | path of the file where the trace will be stored |
+|--tracesize| int |0  | maximum size of the trace file|
+|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+
+
 ##  PullPush feature: 
 Route an existing Live Stream towards Azure Media Service Live ingestion point.
+
+### Syntax
+
+    ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
+            [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+            [--name <service name> --counterperiod <periodinseconds>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|information|error|warning|verbose>]
+            [--consolelevel <none|information|error|warning|verbose>]
+
+| option | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|--input| string | null | Path to the local ISM file on the disk|
+|--ouput| string | null | Uri of the ingestion point|
+|--loop| int |0  | number of live loop when the value is 0, infinite loop|
+|--minbitrate| int |0  | minimum bitrate of the video tracks to select|
+|--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|--name| string | null  | name of the service, used for the traces |
+|--counterperiod| int |0  | period in seconds used to display the counters|
+|--tracefile| string | null  | path of the file where the trace will be stored |
+|--tracesize| int |0  | maximum size of the trace file|
+|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+
 
 ##  Parse feature: 
 Fmp4 parser
 
+### Syntax
+
+    ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
+            [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+            [--name <service name> --counterperiod <periodinseconds>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|information|error|warning|verbose>]
+            [--consolelevel <none|information|error|warning|verbose>]
+
+| option | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|--input| string | null | Path to the local ISM file on the disk|
+|--ouput| string | null | Uri of the ingestion point|
+|--loop| int |0  | number of live loop when the value is 0, infinite loop|
+|--minbitrate| int |0  | minimum bitrate of the video tracks to select|
+|--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|--name| string | null  | name of the service, used for the traces |
+|--counterperiod| int |0  | period in seconds used to display the counters|
+|--tracefile| string | null  | path of the file where the trace will be stored |
+|--tracesize| int |0  | maximum size of the trace file|
+|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+
+
 ##  Service feature (Windows Platform only): 
 Fmp4 parser
 
+
+### Syntax
+
+    ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
+            [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+            [--name <service name> --counterperiod <periodinseconds>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|information|error|warning|verbose>]
+            [--consolelevel <none|information|error|warning|verbose>]
+
+| option | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|--input| string | null | Path to the local ISM file on the disk|
+|--ouput| string | null | Uri of the ingestion point|
+|--loop| int |0  | number of live loop when the value is 0, infinite loop|
+|--minbitrate| int |0  | minimum bitrate of the video tracks to select|
+|--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|--name| string | null  | name of the service, used for the traces |
+|--counterperiod| int |0  | period in seconds used to display the counters|
+|--tracefile| string | null  | path of the file where the trace will be stored |
+|--tracesize| int |0  | maximum size of the trace file|
+|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+
+# Building ASTOOL
+
+
+# Deploying ASTOOL in Azure
 
 This template allows you to deploy a simple VM running: </p>
 #### Debian: .Net Core and ASTOOL,
