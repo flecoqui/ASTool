@@ -27,8 +27,8 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 # Required Software
 |[![Windows](Docs/windows_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x)[Windows pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x)|[![Linux](Docs/linux_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x) [Linux pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x)|[![MacOS](Docs/macos_logo.png)](https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x)  [Mac OS pre-requisites](https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x)|
-| :--- | :--- | :--- |
-| .NET Core is supported on the following versions of Windows 7 SP1, Windows 8.1, Windows 10 Anniversary Update (version 1607) or later versions, Windows Server 2008 R2 SP1 (Full Server or Server Core),Windows Server 2012 SP1 (Full Server or Server Core), Windows Server 2012 R2 (Full Server or Server Core), Windows Server 2016 or later versions (Full Server, Server Core, or Nano Server) | The Linux pre-requisites depends on the Linux distribution. Click on the link above to get further information | .NET Core 2.x is supported on the following versions of macOS macOS 10.12 "Sierra" and later versions |
+| :--- | :--- | :--- | 
+| .NET Core is supported on the following versions of Windows 7 SP1, Windows 8.1, Windows 10 (version 1607) or later versions, Windows Server 2008 R2 SP1, Windows Server 2012 SP1, Windows Server 2012 R2, Windows Server 2016 or later versions | The Linux pre-requisites depends on the Linux distribution. Click on the link above to get further information | .NET Core 2.x is supported on the following versions of macOS macOS 10.12 "Sierra" and later versions |
 
 
 # Features area
