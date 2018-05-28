@@ -3,7 +3,7 @@
 
 # What is ASTOOL?
 
-<img src="Docs/ASTOOL_architecture.png" width="600">
+<img src="Docs/ASTOOL_Architecture.png" width="600">
 
 # Features area
 
