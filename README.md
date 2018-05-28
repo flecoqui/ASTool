@@ -34,14 +34,41 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 # Features area
 
-The Adaptive Streaming Tool (ASTool) is an Open Source command line tool supporting several features:
-####  Push: 
-push VOD asset towards Live ingestion point to emulate a Live Channel based on VOD Asset
-####  Pull: 
+The Adaptive Streaming Tool (ASTool) is an Open Source command line tool supporting several features. This chapter describes how to launch a feature from a command line.
+
+##  Push feature: 
+This feature pushes a Smooth Streaming VOD asset towards Live ingestion point to emulate a Live Channel based on VOD Asset. The Live ingestion point can be either an IIS Media Services or an Azure Media Services ingestion point.
+
+### Syntax
+
+    ASTool --push     --input <inputLocalISMFile> --output <outputLiveUri>
+            [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --loop <loopCounter>]
+            [--name <service name> --counterperiod <periodinseconds>]
+            [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|warning|debug>]
+            [--consolelevel <none|error|warning|verbose>]
+
+| option | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|--input| string | null | Path to the local ISM file on the disk|
+|--ouput| string | null | Uri of the ingestion point|
+|--loop| int |0  | number of live loop when the value is 0, infinite loop|
+|--minbitrate| int |0  | minimum bitrate of the video tracks to select|
+|--maxbitrate| int |0  | maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|--name| string | null  | name of the service |
+|--counterperiod| int |0  | period in seconds used to display the counters|
+|--tracefile| string | null  | path of the file where the trace will be stored |
+|--tracesize| int |0  | maximum size of the trace file, period in seconds used to display the counters|
+
+
+##  Pull feature: 
 Create VOD asset from an existing VOD asset already online.
-####  PullPush: 
+##  PullPush feature: 
 Route an existing Live Stream towards Azure Media Service Live ingestion point.
-####  Parse: 
+
+##  Parse feature: 
+Fmp4 parser
+
+##  Service feature (Windows Platform only): 
 Fmp4 parser
 
 
