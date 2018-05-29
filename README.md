@@ -228,7 +228,8 @@ Once all the pre-requsites are installed, the installation program will:
 
 The configuration files ([astool.linux.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.xml) for Linux and [astool.windows.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.xml) for Windows) will be stored under: /astool/config
 
-The audio and video chunks will be stored under /astool/dvr/test1
+This service will run simulatenously 2 captures, storing the audio and video chunks under /astool/dvr/test1 and /astool/dvr/test2.
+The logs files will be available under /astool/log.
 
 
 # Deploying ASTOOL in Azure
