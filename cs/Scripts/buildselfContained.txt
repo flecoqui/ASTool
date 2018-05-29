@@ -37,6 +37,9 @@ ASTool.exe --start
 ASTool.exe --stop
 ASTool.exe --uninstall
 
+http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/preview.isml/manifest
+
+
 dotnet ASTool.dll
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0

@@ -491,7 +491,7 @@ namespace ASTool
             opt.ThreadStartTime = DateTime.Now;
             opt.LogInformation("Parsing file: " + opt.InputUri);
 
-            if(opt.TraceLevel>= Options.LogLevel.Verbose)
+            if(((opt.TraceLevel>= Options.LogLevel.Verbose)&&(!string.IsNullOrEmpty(opt.TraceFile)))||(opt.ConsoleLevel >= Options.LogLevel.Verbose))
                 opt.LogVerbose(Mp4Box.ParseFileVerbose(opt.InputUri));
             else
                 opt.LogInformation(Mp4Box.ParseFile(opt.InputUri));

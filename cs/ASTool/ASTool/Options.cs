@@ -226,7 +226,7 @@ namespace ASTool
             "                 [--consolelevel <none|error|information|warning|verbose>]\r\n" +
             "ASTool --pull     --input <inputVODUri>       --output <outputLocalDirectory> \r\n" +
             "                 [--minbitrate <bitrate b/s>  --maxbitrate <bitrate b/s> --maxduration <duration ms>]\r\n" +
-            "                 [--audiotrackname <name>  --texttrackname <name>\r\n" +
+            "                 [--audiotrackname <name>  --texttrackname <name>]\r\n" +
             "                 [--liveoffset <value in seconds>]\r\n" +
             "                 [--name <service name> --counterperiod <periodinseconds>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|information|warning|verbose>]\r\n" +
