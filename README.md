@@ -16,12 +16,56 @@ As ASTool is based on .Net Core, the application can be installed on any operati
 The latest releases are available [here](https://github.com/flecoqui/ASTool/tree/master/Releases)
 
 
+
+
+
 - [Windows latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip) </p>
+
+    [win-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][win-download]
+
+
 - [Ubuntu  latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz)</p>
+
+    [ubuntu-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][ubuntu-download]
+
+
 - [Debian latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz)</p>
+
+
+    [debian-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][debian-download]
+
+
+
 - [Centos latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz)</p>
+
+
+    [centos-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][centos-download]
+
+
 - [Red Hat latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz)</p>
+
+
+    [rhel-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][rhel-download]
+
+
 - [Mac OS latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.osx.tar.gz)</p>
+
+
+    [osx-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.osx.tar.gz
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/build_1.0.0.0.svg
+    [![Github Release][astool-version-badge]][osx-download]
+
+
 
 
 
@@ -165,6 +209,39 @@ Fmp4 parser
 |--tracesize| int |0  | maximum size of the trace file|
 |--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
 |--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+
+
+
+ASTool.exe --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
+
+Test: Play http://localhost/VideoApp/Live/_live1.isml/manifest
+
+ASTool.exe --pull --input http://localhost/VideoApp/metisser/metisser.ism/manifest --output C:\\temp\\astool\\testvod
+
+Test Play files under C:\\temp\\astool\\testvod 
+
+ASTool.exe --pull --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --maxduration 60000  --output  C:\\temp\\astool\\testdvr
+
+Test Play files under C:\\temp\\astool\\testdvr
+
+ASTool.exe --pullpush --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --minbitrate 300000   --maxbitrate 1000000  --output http://localhost/VideoApp/Live/_live1.isml
+
+Test Play http://localhost/VideoApp/Live/_live1.isml/manifest
+
+ASTool.exe --parse --input C:\temp\ASTool\testdvr\5f2ce531-d508-49fb-8152-647eba422aec\Audio_0.isma
+
+ASTool.exe --parse --input C:\temp\ASTool\testdvr\5f2ce531-d508-49fb-8152-647eba422aec\Video_0.ismv
+
+
+ASTool.exe --install --configfile C:\git\flecoqui\ASTool\Azure\101-vm-astool-universal\astool.windows.xml
+ASTool.exe --start
+ASTool.exe --stop
+ASTool.exe --uninstall
+
+
+
+
+
 
 # Building ASTOOL
 If you want to build ASTOOL on your machine, you need first to install all the pre-requisites to run .Net Core on your machine, check in the table below based on your current Operating System:
