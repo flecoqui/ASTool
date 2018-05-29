@@ -103,8 +103,8 @@ This feature pushes a Smooth Streaming VOD asset towards Live ingestion point to
 |--counterperiod &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;| int |0  | period in seconds used to display the counters|
 |--tracefile| string | null  | path of the file where the trace will be stored |
 |--tracesize| int |0  | maximum size of the trace file|
-|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
-|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+|--tracelevel| string | information  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | information  | console level: none (no log in the console), information, error, warning, verbose |
 
 
 ### Examples
@@ -154,8 +154,8 @@ Create VOD asset from an existing Smooth Streaming VOD asset or a Live Smooth St
 |--counterperiod| int |0  | period in seconds used to display the counters|
 |--tracefile| string | null  | path of the file where the trace will be stored |
 |--tracesize| int |0  | maximum size of the trace file|
-|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
-|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+|--tracelevel| string | information  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | information  | console level: none (no log in the console), information, error, warning, verbose |
 
 ### Examples
 
@@ -206,8 +206,8 @@ Route an existing Live Stream towards an Azure Media Service Live ingestion poin
 |--counterperiod| int |0  | period in seconds used to display the counters|
 |--tracefile| string | null  | path of the file where the trace will be stored |
 |--tracesize| int |0  | maximum size of the trace file|
-|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
-|--consolelevel| string | null  | console level: none (no log in the console), information, error, warning, verbose |
+|--tracelevel| string | information  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel| string | information  | console level: none (no log in the console), information, error, warning, verbose |
 
 ### Examples
 
@@ -228,6 +228,29 @@ The live stream can be played opening the url: http://testsmoothlive-testamsmedi
 ## Running several features simultaneously: 
 With ASTool it's possible with a single command line to instantiate several features simultaneously. In that case, the features are defined in an XML config file.
 For instance a [Windows Configuration File](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-universal/astool.windows.xml) a  [Linux Configuration File](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-universal/astool.linux.xml)
+
+This XML file contains an ArrayOfOptions, each Options is defined with the following attributes:
+
+| Attribute name | value type | default value | Description | 
+| :--- | :--- | :--- |  :--- | 
+|ASToolAction| string | null | Name of the feature to activate: Pull, Push PullPush |
+|InputUri| string | null | Input Uri used by the feature |
+|OutputUri| string | null | Output Uri used by the feature |
+|LiveOffset| int | null |The offset in seconds with the live position. If this value is not set, ASTool will start to capture the audio and video chunk at the beginning of the Live buffer defined in the smooth Streaming manifest. Used by Pull and PullPush feature |
+|Loop| int | 0 |Number of live loop when the value is 0, infinite loop. Used by Push feature|
+|MinBitrate| int |0  | Minimum bitrate of the video tracks to select|
+|MaxBitrate| int |0  | Maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
+|MaxDuration| int |0  | Maximum duration of the capture in milliseconds |
+|AudioTrackName&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| string |null  | Name of the audio track to capture, if this value is not set all the audio tracks are captured|
+|TextTrackName| string |null  | Name of the text track to capture, if this value is not set all the text tracks are captured|
+|BufferSize| int | 1000000 | Maximum size of the buffer containing the audio and video chunks in memory   |
+|ConfigFile| string | null | Not used currently |
+|Name| string | null  | Name of the service, used for the traces |
+|CounterPeriod| int |0  | Period in seconds used to display the counters|
+|TraceFile| string | null  | Path of the file where the trace will be stored |
+|TraceSize| int |0  | Maximum size of the trace file|
+|TraceLevel| string | information  | Trace level: None (no log in the trace file), Information, Error, Warning, Verbose |
+|ConsoleLevel| string | information  | Console level: None (no log in the console), Information, Error, Warning, Verbose |
 
 
 Below the content of such file:
@@ -276,7 +299,6 @@ Below the content of such file:
     </ArrayOfOptions>
 
 
-
 ### Syntax
 
 Launching ASTool to run several features defined in the XML configuration file.
@@ -319,8 +341,8 @@ Parsing isma and ismv files
 |--input| string | null | Path to the local ISMV or ISMA file on the disk|
 |--tracefile| string | null  | path of the file where the trace will be stored |
 |--tracesize| int |0  | maximum size of the trace file|
-|--tracelevel| string | null  | trace level: none (no log in the trace file), information, error, warning, verbose |
-|--consolelevel&nbsp;  &nbsp; &nbsp;&nbsp; | string | null  | console level: none (no log in the console), information, error, warning, verbose |
+|--tracelevel| string | information  | trace level: none (no log in the trace file), information, error, warning, verbose |
+|--consolelevel&nbsp;  &nbsp; &nbsp;&nbsp; | string | information  | console level: none (no log in the console), information, error, warning, verbose |
 
 
 ### Examples
@@ -422,6 +444,10 @@ the binaries will be available under:
 
 If you don't have a local machine to generate the binaries, you can use a virtual Machine running in Azure
 
+
+![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/buildvm.png)
+
+
 This [Azure Resource Manager template](https://github.com/flecoqui/ASTool/tree/master/Azure/101-vm-astool-universal) allow you to deploy a virtual machine in Azure. You can select the operating system running on this virtual machine, it can be Windows Server 2016, Ubuntu, Debian, Centos or Redhat.
 During the installation of the virtual machine, git and .Net Core SDK version 2.1 will be installed. 
 Once all the pre-requsites are installed, the installation program will:
@@ -446,6 +472,18 @@ This template allows you to deploy a simple VM running: </p>
 #### Windows Server 2016: .Net Core and ASTOOL,
 This will VM will be deployed in the region associated with Resource Group and the VM Size is one of the parameter.
 With Azure CLI you can deploy this VM with 2 command lines:
+
+
+
+![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/singlevm.png)
+
+
+
+
+![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/vmscaleset.png)
+
+
+
 
 ![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-universal/Docs/1-architecture.png)
 
