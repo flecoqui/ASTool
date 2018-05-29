@@ -442,7 +442,7 @@ the binaries will be available under:
 
 ## Building the self-contained binaries on Azure
 
-If you don't have a local machine to generate the binaries, you can use a virtual Machine running in Azure
+If you don't have a local machine to generate the binaries, you can use a virtual Machine running in Azure.
 
 
 ![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/buildvm.png)
@@ -464,48 +464,40 @@ The logs files will be available under /astool/log.
 
 # Deploying ASTOOL in Azure
 
-This template allows you to deploy a simple VM running: </p>
-#### Debian: .Net Core and ASTOOL,
-#### Ubuntu: .Net Core and ASTOOL, 
-#### Centos: .Net Core and ASTOOL, 
-#### Red Hat: .Net Core and ASTOOL,
-#### Windows Server 2016: .Net Core and ASTOOL,
-This will VM will be deployed in the region associated with Resource Group and the VM Size is one of the parameter.
-With Azure CLI you can deploy this VM with 2 command lines:
+## Deploying ASTOOL in a single Virtual Machine
 
+This [Azure Resource Manager template](https://github.com/flecoqui/ASTool/tree/master/Azure/101-vm-astool-release-universal) allow you to deploy a single virtual machine in Azure. You can select the operating system running on this virtual machine, it can be Windows Server 2016, Ubuntu, Debian, Centos or Redhat.
+During the installation of the virtual machine, ASTOOL will be installed as a service, if the virtual machine reboots it will start  the ASTOOL feature define in the configuration associated with the deployment.
+By default this service will launch the 2 Pull features to capture the audio and video chunks of this sample Live asset: http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest during 3600 seconds.
 
 
 ![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/singlevm.png)
 
 
 
+The configuration files ([astool.linux.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.xml) for Linux and [astool.windows.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.xml) for Windows) will be stored under: /astool/config
+
+This service will run simulatenously 2 captures, storing the audio and video chunks under /astool/dvr/test1 and /astool/dvr/test2.
+The logs files will be available under /astool/log.
+
+## Deploying ASTOOL in  Virtual Machine Scale Set
+
+This [Azure Resource Manager template](https://github.com/flecoqui/ASTool/tree/master/Azure/101-vm-astool-release-vmss-universal) allow you to deploy by default 2 virtual machines in the same scale set in Azure. You can select the operating system running on this virtual machine, it can be Windows Server 2016, Ubuntu, Debian, Centos or Redhat.
+During the installation of the virtual machine, ASTOOL will be installed as a service, if the virtual machine reboots it will start  the ASTOOL feature define in the configuration associated with the deployment.
+By default on each virtual machine, this service will launch the 2 Pull features to capture the audio and video chunks of this sample Live asset: http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest during 3600 seconds.
+
 
 ![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/vmscaleset.png)
 
 
 
+The configuration files ([astool.linux.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.linux.xml) for Linux and [astool.windows.xml](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-universal/astool.windows.xml) for Windows) will be stored under: /astool/config
 
-![](https://raw.githubusercontent.com/flecoqui/ASTool/master/Azure/101-vm-astool-release-universal/Docs/1-architecture.png)
+This service will run simulatenously 2 captures, storing the audio and video chunks under /astool/dvr/test1 and /astool/dvr/test2.
+The logs files will be available under /astool/log.
 
-## CREATE RESOURCE GROUP:
-azure group create "ResourceGroupName" "DataCenterName"
+# Next Steps
 
-For instance:
-
-    azure group create astoolgrpeu2 eastus2
-
-# Getting Started
-
-
-https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x
-
-
-https://docs.microsoft.com/en-us/dotnet/core/macos-prerequisites?tabs=netcore2x 
-
-
-https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x
-
-
-# Useful resources
-
-
+1. Deploy ASTool as Micro Service in Service Fabric
+2. Deploy ASTool in Docker Containers
+3. Support incoming streams protected with PlayReady 
