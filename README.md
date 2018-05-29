@@ -22,14 +22,14 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 - [Windows latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip) </p>
 
     [win-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][win-download]
 
 
 - [Ubuntu  latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz)</p>
 
     [ubuntu-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][ubuntu-download]
 
 
@@ -37,7 +37,7 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 
     [debian-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][debian-download]
 
 
@@ -46,7 +46,7 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 
     [centos-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][centos-download]
 
 
@@ -54,7 +54,7 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 
     [rhel-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][rhel-download]
 
 
@@ -62,7 +62,7 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
 
 
     [osx-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.osx.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/latest_build_1.0.0.0.svg
+    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
     [![Github Release][astool-version-badge]][osx-download]
 
 
@@ -420,7 +420,7 @@ Once the pre-requisites are installed, you need to install:
 
 You are now ready to build ASTool binaries, as ASTool needs to be easy to install and doesn't require the installation before of .Net Core, you can build Self Contained binaries of ASTool which doesn't require the installation of .Net Core.
 
-For instance you can run the following commands to build the different flavor of ASTool:
+For instance you can run the following commands to build the different flavors of ASTool:
 
     cd /git/ASTool/cs/ASTool/ASTool/
     dotnet publish --self-contained -c Release -r win-x64
