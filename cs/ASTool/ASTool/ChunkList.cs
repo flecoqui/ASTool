@@ -18,11 +18,26 @@ using System.Collections.Concurrent;
 namespace ASTool
 {
 
-
+    // class used to store the offset of each moof box in the file 
+    // based on the  time associated with the moof box
+    public class TimeMoofOffset
+    {
+        public TimeMoofOffset(ulong Time, ulong Offset)
+        {
+            time = Time;
+            offset = Offset;
+        }
+        public ulong time;
+        public ulong offset;
+    }
 
     [DataContract(Name = "ChunkListConfiguration")]
     public class ChunkListConfiguration 
     {
+        public ChunkListConfiguration()
+        {
+            CreateTimeOffsetList();
+        }
         [DataMember]
         public int TrackID { get; set; }
         [DataMember]
@@ -64,6 +79,32 @@ namespace ASTool
         public virtual string GetSourceName()
         {
             return Source + "_" + Bitrate.ToString() + "_" + TrackName.ToString() ;
+        }
+        protected List<TimeMoofOffset> ListTimeOffset;
+        public bool CreateTimeOffsetList()
+        {
+            ListTimeOffset = new List<TimeMoofOffset>();
+            return ListTimeOffset != null;
+        }
+        public bool AddTimeOffset(ulong Time, ulong Offset)
+        {
+            try
+            {
+                if (ListTimeOffset != null)
+                    ListTimeOffset.Add(new TimeMoofOffset(Time, Offset));
+            }
+            catch(Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+        public virtual byte[] GetMFRAData()
+        {
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateMFRABox((Int16)TrackID,ListTimeOffset);
+            if (box != null)
+                return box.GetBoxBytes();
+            return null;
         }
     }
     [DataContract(Name = "VideoChunkListConfiguration")]
@@ -126,6 +167,11 @@ namespace ASTool
     public class ChunkList : IDisposable
     {
         public object ListLock;
+        /// <summary>
+        /// LastDataOffset
+        /// Last Data Offset used to build the mfra box
+        /// </summary>
+        public ulong LastDataOffset { get; set; }
 
         /// <summary>
         /// Chunks 
@@ -161,13 +207,6 @@ namespace ASTool
         /// </summary>
         [DataMember]
         public ulong OutputBytes { get; set; }
-
-        /// <summary>
-        /// ChunksList 
-        /// List of the chunks to download  
-        /// </summary>
-        //[DataMember]
-        //public SortedList<UInt64,ChunkBuffer> ChunksList { get; set; }
 
 
         /// <summary>
@@ -225,13 +264,20 @@ namespace ASTool
         public byte[] moovData;
 
         /// <summary>
-        /// moovData 
+        /// ftypData 
         /// Contains the ftyp box for this chunk list
         /// </summary>
-       
+
         public byte[] ftypData;
 
 
+        /// <summary>
+        /// mfraData 
+        /// Contains the mfra box for this chunk list, the mfra box is inserted at the end of the chunk list.
+        /// </summary>
+        public byte[] mfraData;
+
+        
         /// <summary>
         /// GetType
         /// Get Type from the url template.

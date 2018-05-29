@@ -221,6 +221,15 @@ namespace ASTool.ISMHelper
             }
             return false;
         }
+        static public bool WriteMp4BoxInt8(byte[] buffer, int offset, Int16 value)
+        {
+            if (buffer != null)
+            {
+                buffer[offset++] = (byte)(value >> 0);
+                return true;
+            }
+            return false;
+        }
         static public bool WriteMp4BoxByte(byte[] buffer, int offset, byte value)
         {
             if (buffer != null)
@@ -938,6 +947,29 @@ namespace ASTool.ISMHelper
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        public static Mp4BoxMFRA CreateMFRABox(Int16 TrackID, List<TimeMoofOffset> listTimeOffset)
+        {
+            if (listTimeOffset != null)
+            {
+                List<Mp4Box> list = new List<Mp4Box>();
+                if (list != null)
+                {
+                    Mp4BoxTFRA boxtfra = Mp4BoxTFRA.CreateTFRABox(TrackID, listTimeOffset);
+                    if (boxtfra != null)
+                    {
+
+                        Mp4BoxMFRO boxmfro = Mp4BoxMFRO.CreateMFROBox(boxtfra.Length + 8 + 16);
+                        if (boxmfro != null)
+                        {
+                            list.Add(boxtfra);
+                            list.Add(boxmfro);
+                            return Mp4BoxMFRA.CreateMFRABox(list);
                         }
                     }
                 }

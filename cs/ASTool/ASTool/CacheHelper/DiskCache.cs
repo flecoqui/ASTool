@@ -249,12 +249,19 @@ namespace ASTool.CacheHelper
                                     break;
                             }
                         }
+
+                        if (cl.mfraData != null)
+                        {
+                            Append(FilePath, cl.mfraData);
+                            AudioOffset = GetFileSize(FilePath);
+                            cl.mfraData = null;
+                        }
                         if (InitialAudioOffset < AudioOffset)
-                            bResult = true;
-                        if (cache.GetOutputAudioSize() == cache.GetInputAudioSize())
                             bResult = true;
                         AudioTrack++;
                     }
+                    if (cache.GetOutputAudioSize() == cache.GetInputAudioSize())
+                        bResult = true;
                 }
             }
 
@@ -343,10 +350,17 @@ namespace ASTool.CacheHelper
                         }
                         if (InitialTextOffset < TextOffset)
                             bResult = true;
-                        if (cache.GetOutputTextSize() == cache.GetInputTextSize())
-                            bResult = true;
+                        if (cl.mfraData != null)
+                        {
+                            Append(FilePath, cl.mfraData);
+                            TextOffset = GetFileSize(FilePath);
+                            cl.mfraData = null;
+                        }
+
                         TextTrack++;
                     }
+                    if (cache.GetOutputTextSize() == cache.GetInputTextSize())
+                        bResult = true;
                 }
             }
 
@@ -434,11 +448,17 @@ namespace ASTool.CacheHelper
                             }
                         }
                         VideoTrack++;
+                        if (cl.mfraData != null)
+                        {
+                            Append(FilePath, cl.mfraData);
+                            VideoOffset = GetFileSize(FilePath);
+                            cl.mfraData = null;
+                        }
                         if (InitialVideoOffset < VideoOffset)
                             bResult = true;
-                        if (cache.GetOutputVideoSize() == cache.GetInputVideoSize())
-                            bResult = true;
                     }
+                    if (cache.GetOutputVideoSize() == cache.GetInputVideoSize())
+                        bResult = true;
                 }
             }
 

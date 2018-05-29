@@ -1719,6 +1719,23 @@ namespace ASTool
             return true ;
         }
         /// <summary>
+        /// CreateMFRABuffer
+        /// .
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns>return true if nothing to download</returns>
+        public bool CreateMFRABuffer(List<ChunkList> list)
+        {
+            if (list == null)
+                return false;
+            foreach (var cl in list)
+            {
+                cl.mfraData = cl.Configuration.GetMFRAData();
+            }
+            return true;
+        }
+
+        /// <summary>
         /// IsArchiveCompleted
         /// .
         /// </summary>
@@ -1817,7 +1834,7 @@ namespace ASTool
         /// </summary>
         /// <param name=""></param>
         /// <returns>return the lenght of the downloaded chunk</returns>
-        async Task<long> DownloadCurrentChunks(List<ChunkList> list)
+        async Task<long> DownloadCurrentChunks(List<ChunkList> list,bool bCreateMFRA)
         {
             long len = 0;
             foreach (var cl in list)
@@ -1836,6 +1853,8 @@ namespace ASTool
                             // Now the TrackID is available, we can build ftyp and moov boxes
                             cl.ftypData = cl.Configuration.GetFTYPData();
                             cl.moovData = cl.Configuration.GetMOOVData();
+                            if(bCreateMFRA)
+                                cl.LastDataOffset = (ulong) (cl.ftypData.Length + cl.moovData.Length);
                         }
 
                     }
@@ -1845,9 +1864,12 @@ namespace ASTool
                         cl.InputBytes += l;
                         len += (long)l;
                         cl.InputChunks++;
+                        if (bCreateMFRA)
+                        {
+                            cl.Configuration.AddTimeOffset(cb.Time, cl.LastDataOffset);
+                            cl.LastDataOffset += l;
+                        }
                         cl.ChunksQueue.Enqueue(cb);
-                    //    ChunkBuffer dummy;
-                     //   cl.ChunksToReadQueue.TryDequeue(out dummy);
 
                     }
                     else
@@ -1970,7 +1992,7 @@ namespace ASTool
             DownloadThreadVideoCount = 0;
 
 
-
+            bool bCreateMFRA = !(this.IsLive && (this.MaxDuration == 0));
             ManifestStatus = AssetStatus.DownloadingChunks;
             int error = 0;
             while (downloadTaskRunning)
@@ -1992,7 +2014,7 @@ namespace ASTool
                     if(!IsDownloadCompleted(VideoChunkListList))
                     {
                         System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading video chunks for Uri: " + ManifestUri.ToString());
-                        long len = await DownloadCurrentChunks(VideoChunkListList);
+                        long len = await DownloadCurrentChunks(VideoChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
                             DownloadThreadVideoCount += (ulong)len;
@@ -2021,7 +2043,7 @@ namespace ASTool
                     if (!IsDownloadCompleted(AudioChunkListList))
                     {
                         System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading audio chunks for Uri: " + ManifestUri.ToString());
-                        long len = await DownloadCurrentChunks(AudioChunkListList);
+                        long len = await DownloadCurrentChunks(AudioChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
                             DownloadThreadAudioCount += (ulong)len;
@@ -2049,7 +2071,7 @@ namespace ASTool
                     if (!IsDownloadCompleted(TextChunkListList))
                     {
                         System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading text chunks for Uri: " + ManifestUri.ToString());
-                        long len = await DownloadCurrentChunks(TextChunkListList);
+                        long len = await DownloadCurrentChunks(TextChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
                             DownloadThreadTextCount += (ulong)len;
@@ -2091,6 +2113,12 @@ namespace ASTool
                         (!this.IsLive))
                 {
                     DateTime time = DateTime.Now;
+                    if (bCreateMFRA)
+                    {
+                        CreateMFRABuffer(TextChunkListList);
+                        CreateMFRABuffer(VideoChunkListList);
+                        CreateMFRABuffer(AudioChunkListList);
+                    }
                     System.Diagnostics.Debug.WriteLine("Download done at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time));
                     System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");
                     double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
@@ -2110,6 +2138,12 @@ namespace ASTool
                  ((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration)) 
                 {
                     DateTime time = DateTime.Now;
+                    if (bCreateMFRA)
+                    {
+                        CreateMFRABuffer(TextChunkListList);
+                        CreateMFRABuffer(VideoChunkListList);
+                        CreateMFRABuffer(AudioChunkListList);
+                    }
                     System.Diagnostics.Debug.WriteLine("Download stopped at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time) + " at MaxDuration: " + MaxDuration.ToString());
                     System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");
                     double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
