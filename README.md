@@ -236,7 +236,7 @@ This XML file contains an ArrayOfOptions, each Options is defined with the follo
 |ASToolAction| string | null | Name of the feature to activate: Pull, Push PullPush |
 |InputUri| string | null | Input Uri used by the feature |
 |OutputUri| string | null | Output Uri used by the feature |
-|LiveOffset| int | null |The offset in seconds with the live position. If this value is not set, ASTool will start to capture the audio and video chunk at the beginning of the Live buffer defined in the smooth Streaming manifest. Used by Pull and PullPush feature |
+|LiveOffset| int | 0 |The offset in seconds with the live position. If this value is not set, ASTool will start to capture the audio and video chunk at the beginning of the Live buffer defined in the smooth Streaming manifest. Used by Pull and PullPush feature |
 |Loop| int | 0 |Number of live loop when the value is 0, infinite loop. Used by Push feature|
 |MinBitrate| int |0  | Minimum bitrate of the video tracks to select|
 |MaxBitrate| int |0  | Maximum bitrate of the video tracks to select. When the value is 0, all the video tracks with a bitrate over minbitrate value are selected |
