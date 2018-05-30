@@ -188,30 +188,31 @@ namespace ASTool
                     }
                     else if (option.ASToolAction == Options.Action.PullPush)
                     {
-                        //OptionsLauncher.LaunchThread(PullPush, option);
                         option.Task = System.Threading.Tasks.Task.Run(() => PullPush(option));
                         ThreadLaunched++;
                     }
                     if (option.ASToolAction == Options.Action.Pull)
                     {
                        
-                        //OptionsLauncher.LaunchThread(Pull, option);
                         option.Task = System.Threading.Tasks.Task.Run(() => Pull(option));
-
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Push)
                     {
-                        //OptionsLauncher.LaunchThread(Push, option);
                         option.Task = System.Threading.Tasks.Task.Run(() => Push(option));
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Parse)
                     {
-                        //OptionsLauncher.LaunchThread(Parse, option);
                         option.Task = System.Threading.Tasks.Task.Run(() => Parse(option));
+                        ThreadLaunched++;
+
+                    }
+                    if (option.ASToolAction == Options.Action.Decrypt)
+                    {
+                        option.Task = System.Threading.Tasks.Task.Run(() => Decrypt(option));
                         ThreadLaunched++;
 
                     }

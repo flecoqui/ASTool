@@ -47,8 +47,9 @@ namespace ASTool
             [EnumMember]
             Start,
             [EnumMember]
-            Stop
-
+            Stop,
+            [EnumMember]
+            Decrypt
         }
         [DataContract(Name = "LogLevel")]
         public enum LogLevel
@@ -114,6 +115,16 @@ namespace ASTool
         public int TraceSize { get; set; }
         [DataMember]
         public string ConfigFile { get; set; }
+
+        // Decrypt attributes
+        [DataMember]
+        public int TrackID { get; set; }
+        [DataMember]
+        public string KeyID { get; set; }
+        [DataMember]
+        public string KeySeed { get; set; }
+        [DataMember]
+        public string ContentKey { get; set; }
 
         public bool ServiceMode { get; set; }
         public System.Threading.Tasks.Task Task { get; set; }
@@ -236,6 +247,10 @@ namespace ASTool
             "                 [--name <service name> --counterperiod <periodinseconds>]\r\n" +
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|information|warning|verbose>]\r\n" +
             "                 [--consolelevel <none|error|information|warning|verbose>]\r\n" +
+            "ASTool --decrypt  --input <inputLocalISMV|inputLocalISMA> --output  <outputLocalISMV|outputLocalISMA> \r\n" +
+            "                  --trackid <TrackID>  \r\n" +
+            "                 [[--contentkey <ContentKey>] | \r\n" +
+            "                  [--keyid <KeyID> --keyseed <KeySeed> ]]\r\n" +
             "ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  \r\n" +
             "ASTool --import    --configfile <configFile> \r\n" +
             "ASTool --export    --configfile <configFile> \r\n";
@@ -441,6 +456,10 @@ namespace ASTool
             this.CounterPeriod = 20;
             this.ServiceMode = false;
             this.Task = null;
+            this.ContentKey = string.Empty;
+            this.KeyID = string.Empty;
+            this.KeySeed = string.Empty;
+            this.TrackID = 0;
             this.ListCounters = new Dictionary<string, CounterDescription>();
         }
         public static Options CheckOptions(Options options)
@@ -552,6 +571,44 @@ namespace ASTool
                     return options;
                 }
             }
+            else if (options.ASToolAction == Action.Decrypt)
+            {
+                if ((!string.IsNullOrEmpty(options.InputUri))&&
+                    (!string.IsNullOrEmpty(options.OutputUri)))
+                {
+                    bool bFileExists = false;
+                    try
+                    {
+                        bFileExists = System.IO.File.Exists(options.InputUri);
+                    }
+                    catch (Exception)
+                    {
+                        bFileExists = false;
+                    }
+                    if (bFileExists == false)
+                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
+                    if(options.TrackID>0)
+                    {
+                        if (string.IsNullOrEmpty(options.ContentKey))
+                        {
+                            if ((string.IsNullOrEmpty(options.KeyID)) ||
+                                (string.IsNullOrEmpty(options.KeySeed)))
+                            {
+                                options.ErrorMessage = "KeyID or KeySeed not set to decrypt the input ISMA or ISMV file :" + options.InputUri;
+                            }
+                        }
+                    }
+                    else
+                        options.ErrorMessage = "TrackID not set to decrypt the input ISMA or ISMV file :" + options.InputUri;
+
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for Parse feature";
+                    return options;
+                }
+            }
             else if (options.ASToolAction == Action.Import)
             {
                 if (!string.IsNullOrEmpty(options.ConfigFile))
@@ -639,6 +696,9 @@ namespace ASTool
                             case "--parse":
                                 options.ASToolAction = Action.Parse;
                                 break;
+                            case "--decrypt":
+                                options.ASToolAction = Action.Decrypt;
+                                break;
                             case "--install":
                                 options.ASToolAction = Action.Install;
                                 break;
@@ -695,6 +755,39 @@ namespace ASTool
                                 }
                                 else
                                     options.ErrorMessage = "Loop not set";
+                                break;
+                            case "--trackid":
+                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
+                                {
+                                    int trackid = 0;
+                                    if (int.TryParse(args[i++], out trackid))
+                                        options.TrackID = trackid;
+                                    else
+                                        options.ErrorMessage = "TrackID value incorrect";
+                                }
+                                else
+                                    options.ErrorMessage = "TrackID not set";
+                                break;
+                            case "--keyid":
+                                if ((i < args.Length) &&
+                                    (!string.IsNullOrEmpty(args[i])))
+                                    options.KeyID = args[i++];
+                                else
+                                    options.ErrorMessage = "KeyID not set";
+                                break;
+                            case "--keyseed":
+                                if ((i < args.Length) &&
+                                    (!string.IsNullOrEmpty(args[i])))
+                                    options.KeySeed = args[i++];
+                                else
+                                    options.ErrorMessage = "KeySeed not set";
+                                break;
+                            case "--contentkey":
+                                if ((i < args.Length) &&
+                                    (!string.IsNullOrEmpty(args[i])))
+                                    options.ContentKey = args[i++];
+                                else
+                                    options.ErrorMessage = "ContentKey not set";
                                 break;
                             case "--counterperiod":
                                 if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))

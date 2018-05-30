@@ -21,18 +21,18 @@ namespace ASTool
 
 
 
-        static bool Parse(Options opt)
+        static bool Decrypt(Options opt)
         {
             bool result = true;
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
-            opt.LogInformation("Parsing file: " + opt.InputUri);
+            opt.LogInformation("Decrypting file: " + opt.InputUri);
 
             if(((opt.TraceLevel>= Options.LogLevel.Verbose)&&(!string.IsNullOrEmpty(opt.TraceFile)))||(opt.ConsoleLevel >= Options.LogLevel.Verbose))
                 opt.LogVerbose(Mp4Box.ParseFileVerbose(opt.InputUri));
             else
                 opt.LogInformation(Mp4Box.ParseFile(opt.InputUri));
-            opt.LogInformation("Parsing file: " + opt.InputUri + " done");
+            opt.LogInformation("Decrypting file: " + opt.InputUri + " done");
             opt.Status = Options.TheadStatus.Stopped;
             return result;
         }
