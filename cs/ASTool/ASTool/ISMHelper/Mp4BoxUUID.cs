@@ -56,5 +56,30 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
+        static public Mp4BoxUUID CreateUUIDBox(Guid ExtendedGuid, int AlgorithmID, int SampleIDSize, Guid KID)
+        {
+            byte version = 0x00;
+            Int32 flag = 0;
+            Mp4BoxUUID box = new Mp4BoxUUID();
+            if (box != null)
+            {
+                box.Length = 8 + 16 + 4 + 4 + 16  ;
+                box.Type = "uuid";
+                byte[] Buffer = new byte[box.Length - 8];
+                if (Buffer != null)
+                {
+                    System.Buffer.BlockCopy(GuidToNetworkOrderArray(ExtendedGuid), 0, Buffer, 0, 16);
+                    WriteMp4BoxByte(Buffer, 16, version);
+                    WriteMp4BoxInt24(Buffer, 17, flag);
+                    WriteMp4BoxInt24(Buffer, 20, AlgorithmID);
+                    WriteMp4BoxByte(Buffer, 23, (byte) SampleIDSize);
+                    System.Buffer.BlockCopy(GuidToNetworkOrderArray(KID), 0, Buffer, 24, 16);
+
+                    box.Data = Buffer;
+                    return box;
+                }
+            }
+            return null;
+        }
     }
 }

@@ -227,6 +227,8 @@ namespace ASTool.SmoothHelper
                         if (reader.Name == ManifestProtectionElement && reader.NodeType == XmlNodeType.Element)
                         {
                             reader.Read();
+                            while ((reader.Name == "") && (reader.NodeType == XmlNodeType.Whitespace))
+                                reader.Read();
                             if (reader.Name == ManifestProtectionHeaderElement && reader.NodeType == XmlNodeType.Element)
                             {
                                 protectionGuid = new Guid(reader.GetValue(ManifestProtectionSystemIDElement));

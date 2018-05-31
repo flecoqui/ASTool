@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --decrypt --input C:\\temp\\astool\\testvod\\playready\\Audio_0.isma --output C:\\temp\\astool\\testvod\\playready\\decrypt\\Audio_0.isma --trackid 1 --keyid 2 --keyseed 2"
+      "commandLineArgs": "dotnet ASTool.dll --decrypt --input C:\\temp\\astool\\testvod\\metisser_encrypted\\metisser\\Audio_0.isma  --output C:\\temp\\astool\\testvod\\metisser_encrypted\\metisser\\Audio_0_dec.isma --keyseed 00 --keyid 00 --trackid 1"
     }
   }
 }

@@ -859,6 +859,8 @@ namespace ASTool
                                     }
                                     l.LastTimeChunksToRead += (ulong)duration;
                                 }
+                                // Set Duration using the duration information in the chuncks
+                                Configuration.Duration = (long) l.LastTimeChunksToRead;
                                 l.Bitrate = Bitrate;
                                 l.TotalChunks = (ulong)l.ChunksToReadQueue.Count;
                                 l.TemplateUrl = UrlTemplate;
