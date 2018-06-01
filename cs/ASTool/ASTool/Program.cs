@@ -216,6 +216,12 @@ namespace ASTool
                         ThreadLaunched++;
 
                     }
+                    if (option.ASToolAction == Options.Action.Encrypt)
+                    {
+                        option.Task = System.Threading.Tasks.Task.Run(() => Decrypt(option,false));
+                        ThreadLaunched++;
+
+                    }
                     if (option.ASToolAction == Options.Action.Install)
                     {
                         option.LogInformation("Installing ASTOOL Service");

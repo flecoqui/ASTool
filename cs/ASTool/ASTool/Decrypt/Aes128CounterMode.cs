@@ -43,6 +43,11 @@ namespace ASTool.Decrypt
         {
             // IV not needed in Counter Mode
         }
+        protected override void Dispose(bool b)
+        {
+            if (_aes != null)
+                _aes.Dispose();
+        }
     }
 
 

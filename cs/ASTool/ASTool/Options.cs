@@ -49,7 +49,9 @@ namespace ASTool
             [EnumMember]
             Stop,
             [EnumMember]
-            Decrypt
+            Decrypt,
+            [EnumMember]
+            Encrypt
         }
         [DataContract(Name = "LogLevel")]
         public enum LogLevel
@@ -146,6 +148,84 @@ namespace ASTool
             }
             return result;
         }
+        public static string ConvertGuidStringToHexaString(string s)
+        {
+            string result = string.Empty;
+            if (string.IsNullOrEmpty(s))
+                return result;
+            try
+            {
+                Guid g = new Guid(s);
+                byte[] array = g.ToByteArray();
+                if (array != null)
+                {
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        result += array[i].ToString("X2");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+            return result;
+
+        }
+        public static bool IsGuidString(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return false;
+            try
+            {
+                string[] array = s.Split('-');
+                if (array == null)
+                    return false;
+                if (array.Length != 5)
+                    return false;
+                Guid g = new Guid(s);
+            }
+            catch(Exception)
+            {
+                return false;
+            }
+            return true;
+
+        }
+        public static bool IsHexaString(string s, int Len)
+        {
+            if (string.IsNullOrEmpty(s))
+                return false;
+
+
+            for(int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                if (((c < '0') || (c > '9')) &&
+                     ((c < 'A') || (c > 'F')) &&
+                      ((c < 'a') || (c > 'f')))
+                    return false;                    
+            }
+            if (((Len == 0)&&(s.Length % 2 == 0)) || (s.Length == Len) )
+                return true;
+            return false;
+        }
+        public static string ConvertBase64StringToHexaString(string s)
+        {
+            string result = string.Empty;
+            if (string.IsNullOrEmpty(s))
+                return string.Empty;
+            var base64EncodedBytes = System.Convert.FromBase64String(s);
+            if(base64EncodedBytes != null)
+            {
+                for (int i = 0; i < base64EncodedBytes.Length ; i++)
+                {
+                    result += base64EncodedBytes[i].ToString("X2");
+                }
+            }
+            return result;
+        }
+
         public bool SetCounter(string key, string name, object value, string unit, string description )
         {
             bool result = false;
@@ -248,6 +328,10 @@ namespace ASTool
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|information|warning|verbose>]\r\n" +
             "                 [--consolelevel <none|error|information|warning|verbose>]\r\n" +
             "ASTool --decrypt  --input <inputLocalISMV|inputLocalISMA> --output  <outputLocalISMV|outputLocalISMA> \r\n" +
+            "                  --trackid <TrackID>  \r\n" +
+            "                 [[--contentkey <ContentKey>] | \r\n" +
+            "                  [--keyid <KeyID> --keyseed <KeySeed> ]]\r\n" +
+            "ASTool --encrypt  --input <inputLocalISMV|inputLocalISMA> --output  <outputLocalISMV|outputLocalISMA> \r\n" +
             "                  --trackid <TrackID>  \r\n" +
             "                 [[--contentkey <ContentKey>] | \r\n" +
             "                  [--keyid <KeyID> --keyseed <KeySeed> ]]\r\n" +
@@ -571,6 +655,44 @@ namespace ASTool
                     return options;
                 }
             }
+            else if (options.ASToolAction == Action.Encrypt)
+            {
+                if ((!string.IsNullOrEmpty(options.InputUri)) &&
+                    (!string.IsNullOrEmpty(options.OutputUri)))
+                {
+                    bool bFileExists = false;
+                    try
+                    {
+                        bFileExists = System.IO.File.Exists(options.InputUri);
+                    }
+                    catch (Exception)
+                    {
+                        bFileExists = false;
+                    }
+                    if (bFileExists == false)
+                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
+                    if (options.TrackID > 0)
+                    {
+                        if (string.IsNullOrEmpty(options.ContentKey))
+                        {
+                            if ((string.IsNullOrEmpty(options.KeyID)) ||
+                                (string.IsNullOrEmpty(options.KeySeed)))
+                            {
+                                options.ErrorMessage = "KeyID or KeySeed not set to encrypt the input ISMA or ISMV file :" + options.InputUri;
+                            }
+                        }
+                    }
+                    else
+                        options.ErrorMessage = "TrackID not set to encrypt the input ISMA or ISMV file :" + options.InputUri;
+
+                    return options;
+                }
+                else
+                {
+                    options.ErrorMessage = "Missing parameters for encrypt feature";
+                    return options;
+                }
+            }
             else if (options.ASToolAction == Action.Decrypt)
             {
                 if ((!string.IsNullOrEmpty(options.InputUri))&&
@@ -605,7 +727,7 @@ namespace ASTool
                 }
                 else
                 {
-                    options.ErrorMessage = "Missing parameters for Parse feature";
+                    options.ErrorMessage = "Missing parameters for decrypt feature";
                     return options;
                 }
             }
@@ -699,6 +821,9 @@ namespace ASTool
                             case "--decrypt":
                                 options.ASToolAction = Action.Decrypt;
                                 break;
+                            case "--encrypt":
+                                options.ASToolAction = Action.Encrypt;
+                                break;
                             case "--install":
                                 options.ASToolAction = Action.Install;
                                 break;
@@ -771,21 +896,82 @@ namespace ASTool
                             case "--keyid":
                                 if ((i < args.Length) &&
                                     (!string.IsNullOrEmpty(args[i])))
-                                    options.KeyID = args[i++];
+                                {
+                                    bool bCorrectString = false;
+                                    string hs = args[i++];
+
+                                    if (IsGuidString(hs) == true)
+                                    {
+                                        hs = ConvertGuidStringToHexaString(hs);
+                                        bCorrectString = true;
+                                    }
+                                    else if (IsHexaString(hs, 32) == true)
+                                        bCorrectString = true;
+                                    else
+                                    {
+                                        hs = ConvertBase64StringToHexaString(hs);
+                                        if (IsHexaString(hs, 32) == true)
+                                            bCorrectString = true;
+                                    }
+                                    if(bCorrectString == true)
+                                    {
+                                        options.KeyID = hs;
+                                    }
+                                    else
+                                        options.ErrorMessage = "KeyID not correctly formatted - expected formats: Guid, 32 digit hexa string or Base64 string";
+                                }
                                 else
                                     options.ErrorMessage = "KeyID not set";
                                 break;
                             case "--keyseed":
                                 if ((i < args.Length) &&
                                     (!string.IsNullOrEmpty(args[i])))
-                                    options.KeySeed = args[i++];
+                                    {
+                                        bool bCorrectString = false;
+                                        string hs = args[i++];
+
+                                        if (IsHexaString(hs, 0) == true)
+                                            bCorrectString = true;
+                                        else
+                                        {
+                                            hs = ConvertBase64StringToHexaString(hs);
+                                            if (IsHexaString(hs, 0) == true)
+                                                bCorrectString = true;
+                                        }
+                                        if (bCorrectString == true)
+                                        {
+                                            options.KeySeed = hs;
+                                        }
+                                        else
+                                            options.ErrorMessage = "KeySeed not correctly formatted - expected formats: hexa string or Base64 string";
+
+                                    }
                                 else
                                     options.ErrorMessage = "KeySeed not set";
                                 break;
                             case "--contentkey":
                                 if ((i < args.Length) &&
                                     (!string.IsNullOrEmpty(args[i])))
-                                    options.ContentKey = args[i++];
+                                {
+                                    bool bCorrectString = false;
+                                    string hs = args[i++];
+
+                                    if (IsHexaString(hs, 32) == true)
+                                        bCorrectString = true;
+                                    else
+                                    {
+                                        hs = ConvertBase64StringToHexaString(hs);
+                                        if (IsHexaString(hs, 32) == true)
+                                            bCorrectString = true;
+                                    }
+                                    if (bCorrectString == true)
+                                    {
+                                        options.ContentKey = hs;
+                                    }
+                                    else
+                                        options.ErrorMessage = "ContentKey not correctly formatted - expected formats: 32 digit hexa string or Base64 string";
+                                }
+
                                 else
                                     options.ErrorMessage = "ContentKey not set";
                                 break;
