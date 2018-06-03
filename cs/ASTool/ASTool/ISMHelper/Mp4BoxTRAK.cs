@@ -16,6 +16,19 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxTRAK : Mp4Box
     {
+        public int GetTrackID()
+        {
+            Mp4Box box = FindChildBox("tkhd");
+            if(box!=null)
+            {
+                Mp4BoxTKHD tkhdbox = box as Mp4BoxTKHD;
+                if(tkhdbox!=null)
+                {
+                    return tkhdbox.GetTrackID();
+                }
+            }
+            return 0;
+        }
         static public Mp4BoxTRAK CreateTRAKBox(List<Mp4Box> listChild)
         {
            

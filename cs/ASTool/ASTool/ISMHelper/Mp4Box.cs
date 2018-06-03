@@ -50,6 +50,26 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
+        public Mp4Box FindChildBox(string BoxType)
+        {
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == BoxType)
+                    {
+                        return box;
+                    }
+                    else
+                    {
+                        Mp4Box ChildBox = box.FindChildBox(BoxType);
+                        if (ChildBox != null)
+                            return ChildBox;
+                    }
+                }
+            }
+            return null;
+        }
         public bool AddMp4Box(Mp4Box box, bool bAddInData = false)
         {
             if (Children == null)
@@ -77,13 +97,39 @@ namespace ASTool.ISMHelper
             }
             return false;
         }
+        public static Mp4Box CreateMp4BoxFromType(string BoxType)
+        {
+            switch(BoxType)
+            {
+                case "ftyp":
+                    return new Mp4BoxFTYP();
+                case "moov":
+                    return new Mp4BoxMOOV();
+                case "mvhd":
+                    return new Mp4BoxMVHD();
+                case "uuid":
+                    return new Mp4BoxUUID();
+                case "trak":
+                    return new Mp4BoxTRAK();
+                case "tkhd":
+                    return new Mp4BoxTKHD();
+                case "mdia":
+                    return new Mp4BoxMDIA();
+                case "mdhd":
+                    return new Mp4BoxMDHD();
+                case "hdlr":
+                    return new Mp4BoxHDLR();
+                default:
+                    return new Mp4Box();
+            }
+        }
         public static Mp4Box CreateMp4Box(byte[] buffer, int offset)
         {
             if((buffer != null)&&
                 (offset+8 < buffer.Length))
             {
-                Mp4Box box = new Mp4Box();
-                if(box!=null)
+                Mp4Box box = CreateMp4BoxFromType(ReadMp4BoxType(buffer, offset));
+                if (box!=null)
                 {
                     box.Length = ReadMp4BoxLength(buffer, offset);
                     if ((offset + box.Length <= buffer.Length)&&(box.Length>8))
@@ -94,7 +140,7 @@ namespace ASTool.ISMHelper
                         if((list!=null)&&(list.Count>0))
                         {
                             foreach (var b in list)
-                                box.AddMp4Box(box);
+                                box.AddMp4Box(b);
                         }
                         return box;
                     }
@@ -328,11 +374,9 @@ namespace ASTool.ISMHelper
                                 WriteMp4BoxInt32(buffer, 0, mp4BoxLen);
                                 if (fs.Read(buffer, 4, mp4BoxLen-4) == (mp4BoxLen - 4))
                                 {
-
                                     return CreateMp4Box(buffer, 0);
                                 }
                             }
-
                         }
                     }
                 }
@@ -366,6 +410,10 @@ namespace ASTool.ISMHelper
             if ((list!=null)&&(Data!=null))
             {
                 int offset = 0;
+                if (this.GetBoxType() == "stsd")
+                    offset = 8;
+                else if (this.GetBoxType() == "dref")
+                    offset = 8;
                 while (offset < Data.Length)
                 {
                     Mp4Box box = CreateMp4Box(Data, offset);

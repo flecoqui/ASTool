@@ -16,6 +16,39 @@ namespace ASTool.ISMHelper
 {
     public class Mp4BoxMOOV : Mp4Box
     {
+        public List<int> GetListTrackToDecrypt()
+        {
+            List<int> result = new List<int>();
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if(box.GetBoxType()=="trak")
+                    {
+                        Mp4Box encbox = box.FindChildBox("encv");
+                        if (encbox == null)
+                        {
+                            encbox = box.FindChildBox("enca");
+                            if (encbox == null)
+                                encbox = box.FindChildBox("enct");
+                        }
+                        if (encbox != null)
+                        {
+                            Mp4BoxTRAK trakbox = box as Mp4BoxTRAK;
+                            if (trakbox != null)
+                                result.Add(trakbox.GetTrackID());
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        
+        public List<int> GetListTrackToEncrypt(bool bProtectCaption)
+        {
+            List<int> result = new List<int>();
+            return result;
+        }
         static public Mp4BoxMOOV CreateMOOVBox(List<Mp4Box> listChild)
         {
            

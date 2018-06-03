@@ -16,6 +16,11 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxTKHD : Mp4Box
     {
+        public int GetTrackID()
+        {
+            return ReadMp4BoxInt32(Data, 20);
+        }
+
         static public Mp4BoxTKHD CreateTKHDBox(Int32 Flag, DateTime CreationTime, DateTime ModificationTime, Int32 TrackID, Int64 duration, bool IsAudioTrack, Int32 width, Int32 height)
         {
             byte version = 0x01;

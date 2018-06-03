@@ -25,6 +25,7 @@ namespace ASTool
         {
             bool bResult = true;
             string log = string.Empty;
+            List<int> ListTrackID = null;
             try
             {
                 FileStream fsi = new FileStream(InputPath, FileMode.Open, FileAccess.Read);
@@ -40,7 +41,7 @@ namespace ASTool
                         {
                             log += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
 
-                            if (box.GetBoxType() != "ftyp\0")
+                            if (box.GetBoxType() == "ftyp")
                             {
                                 // No modification required
                                 // Copy the box into the new file
@@ -52,7 +53,7 @@ namespace ASTool
                                 }
                                 offset += box.GetBoxLength();
                             }
-                            else if (box.GetBoxType() != "moov\0")
+                            else if (box.GetBoxType() == "moov")
                             {
                                 // Get the list of tracks which are encrypted
                                 // Remove uuid box DO8A...83D3 which contains the protection header
@@ -60,6 +61,13 @@ namespace ASTool
                                 // Remove sinf box
                                 // Calculate the new lenght and keep the difference with the previous lenght
                                 // Copy the new box into the new file
+                                Mp4BoxMOOV moov = box as Mp4BoxMOOV;
+                                if (moov != null)
+                                {
+                                    ListTrackID = moov.GetListTrackToDecrypt();
+
+
+                                }
                                 if (Mp4Box.WriteMp4Box(box, fso) != true)
                                 {
                                     bResult = false;
@@ -69,7 +77,7 @@ namespace ASTool
 
                                 offset += box.GetBoxLength();
                             }
-                            else if (box.GetBoxType() != "moof\0")
+                            else if (box.GetBoxType() == "moof")
                             {
                                 // Remove uuid box A239...8DF4 which contains the IV (initialisation vectors for the encryption)
                                 // Keep the list of IV (initialisation vectors for the encryption) included in this box
@@ -80,7 +88,7 @@ namespace ASTool
                                 Mp4Box mdatbox = Mp4Box.ReadMp4Box(fsi);
                                 if (mdatbox != null)
                                 {
-                                    if (mdatbox.GetBoxType() != "mdat\0")
+                                    if (mdatbox.GetBoxType() != "mdat")
                                     {
                                         bResult = false;
                                         opt.LogError("Unexpected box read in the input file after a moof box: " + InputPath + " box: " + mdatbox.GetBoxType());
@@ -110,7 +118,7 @@ namespace ASTool
                                 else
                                     opt.LogError("Error while reading the mdat box in the input file after a moof box: " + InputPath );
                             }
-                            else if (box.GetBoxType() != "mfra\0")
+                            else if (box.GetBoxType() == "mfra")
                             {
                                 // Update each tfra boxes with the new offset of each moof box
                                 // Copy the new mfra box into the new file
