@@ -60,9 +60,10 @@ namespace ASTool
             return result;
         }
 
-        public static string ParseFileVerbose(string Path, Options opt, CallBack callback)
+        public static bool ParseFile(string Path, Options opt)
         {
-            string result = "\r\n";
+            bool result = false;
+            string log = "\r\n";
             try
             {
                 FileStream fs = new FileStream(Path, FileMode.Open, FileAccess.Read);
@@ -75,35 +76,35 @@ namespace ASTool
                         Mp4Box box = Mp4Box.ReadMp4Box(fs);
                         if (box != null)
                         {
-                            result += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
+                            log += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
                             if (box.GetBoxType()!= "mdat\0")
-                                result += Mp4Box.GetBoxChildrenString(0, box);
-                            result += Options.DumpHex(box.GetBoxBytes());
+                                log += Mp4Box.GetBoxChildrenString(0, box);
+                            if (((opt.TraceLevel >= Options.LogLevel.Verbose) && (!string.IsNullOrEmpty(opt.TraceFile))) || (opt.ConsoleLevel >= Options.LogLevel.Verbose))
+                                log += Options.DumpHex(box.GetBoxBytes());
                             offset += box.GetBoxLength();
-                            if (callback != null)
-                                callback(opt,result);
-                            result = "\r\n";
+                            opt.LogInformation(log);
+                            log = "\r\n";
                         }
                         else
                             break;
                     }
                     fs.Close();
-
+                    result = true;
                 }
 
             }
             catch (Exception ex)
             {
-                result += "ERROR: Exception while parsing the file: " + ex.Message;
+                opt.LogError("ERROR: Exception while parsing the file: " + ex.Message);
             }
             return result;
         }
-        static bool DisplayInformation(Options opt, string message)
+        static bool DisplayParseInformation(Options opt, string message)
         {
             opt.LogInformation(message);
             return true;
         }
-        static bool DisplayVerbose(Options opt, string message)
+        static bool DisplayParseVerbose(Options opt, string message)
         {
             opt.LogVerbose(message);
             return true;
@@ -114,11 +115,7 @@ namespace ASTool
             opt.Status = Options.TheadStatus.Running;
             opt.ThreadStartTime = DateTime.Now;
             opt.LogInformation("Parsing file: " + opt.InputUri);
-
-            if(((opt.TraceLevel>= Options.LogLevel.Verbose)&&(!string.IsNullOrEmpty(opt.TraceFile)))||(opt.ConsoleLevel >= Options.LogLevel.Verbose))
-                opt.LogVerbose(ParseFileVerbose(opt.InputUri, opt, DisplayVerbose));
-            else
-                opt.LogInformation(ParseFile(opt.InputUri, opt, DisplayInformation));
+            ParseFile(opt.InputUri, opt);
             opt.LogInformation("Parsing file: " + opt.InputUri + " done");
             opt.Status = Options.TheadStatus.Stopped;
             return result;

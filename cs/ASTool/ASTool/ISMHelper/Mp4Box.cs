@@ -339,6 +339,27 @@ namespace ASTool.ISMHelper
             }
             return box;
         }
+        public static bool WriteMp4Box(Mp4Box box, FileStream fs)
+        {
+            bool result = false;
+            if ((box != null)&&(fs != null))
+            {
+                try
+                {
+                    byte[] header = new byte[8];
+                    Mp4Box.WriteMp4BoxInt32(header, 0, box.Length);
+                    Mp4Box.WriteMp4BoxString(header, 4, box.GetBoxType());
+                    fs.Write(header, 0, 8);
+                    fs.Write(box.Data, 0, box.Data.Length);
+                    result = true;
+                }
+                catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.Write("Exception while writing box in file: " + ex.Message);
+                }
+            }
+            return result;
+        }
         public List<Mp4Box> GetChildren()
         {
             List<Mp4Box> list = new List<Mp4Box>();
