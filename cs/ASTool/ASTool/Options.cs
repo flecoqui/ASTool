@@ -120,8 +120,6 @@ namespace ASTool
 
         // Decrypt attributes
         [DataMember]
-        public int TrackID { get; set; }
-        [DataMember]
         public string KeyID { get; set; }
         [DataMember]
         public string KeySeed { get; set; }
@@ -328,11 +326,9 @@ namespace ASTool
             "                 [--tracefile <path> --tracesize <size in bytes> --tracelevel <none|error|information|warning|verbose>]\r\n" +
             "                 [--consolelevel <none|error|information|warning|verbose>]\r\n" +
             "ASTool --decrypt  --input <inputLocalISMV|inputLocalISMA> --output  <outputLocalISMV|outputLocalISMA> \r\n" +
-            "                  --trackid <TrackID>  \r\n" +
             "                 [[--contentkey <ContentKey>] | \r\n" +
             "                  [--keyid <KeyID> --keyseed <KeySeed> ]]\r\n" +
             "ASTool --encrypt  --input <inputLocalISMV|inputLocalISMA> --output  <outputLocalISMV|outputLocalISMA> \r\n" +
-            "                  --trackid <TrackID>  \r\n" +
             "                 [[--contentkey <ContentKey>] | \r\n" +
             "                  [--keyid <KeyID> --keyseed <KeySeed> ]]\r\n" +
             "ASTool --parse    --input <inputLocalISMV|inputLocalISMA>  \r\n" +
@@ -543,7 +539,6 @@ namespace ASTool
             this.ContentKey = string.Empty;
             this.KeyID = string.Empty;
             this.KeySeed = string.Empty;
-            this.TrackID = 0;
             this.ListCounters = new Dictionary<string, CounterDescription>();
         }
         public static Options CheckOptions(Options options)
@@ -671,20 +666,14 @@ namespace ASTool
                     }
                     if (bFileExists == false)
                         options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
-                    if (options.TrackID > 0)
+                    if (string.IsNullOrEmpty(options.ContentKey))
                     {
-                        if (string.IsNullOrEmpty(options.ContentKey))
+                        if ((string.IsNullOrEmpty(options.KeyID)) ||
+                            (string.IsNullOrEmpty(options.KeySeed)))
                         {
-                            if ((string.IsNullOrEmpty(options.KeyID)) ||
-                                (string.IsNullOrEmpty(options.KeySeed)))
-                            {
-                                options.ErrorMessage = "KeyID or KeySeed not set to encrypt the input ISMA or ISMV file :" + options.InputUri;
-                            }
+                            options.ErrorMessage = "KeyID or KeySeed not set to encrypt the input ISMA or ISMV file :" + options.InputUri;
                         }
                     }
-                    else
-                        options.ErrorMessage = "TrackID not set to encrypt the input ISMA or ISMV file :" + options.InputUri;
-
                     return options;
                 }
                 else
@@ -709,19 +698,14 @@ namespace ASTool
                     }
                     if (bFileExists == false)
                         options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
-                    if(options.TrackID>0)
+                    if (string.IsNullOrEmpty(options.ContentKey))
                     {
-                        if (string.IsNullOrEmpty(options.ContentKey))
+                        if ((string.IsNullOrEmpty(options.KeyID)) ||
+                            (string.IsNullOrEmpty(options.KeySeed)))
                         {
-                            if ((string.IsNullOrEmpty(options.KeyID)) ||
-                                (string.IsNullOrEmpty(options.KeySeed)))
-                            {
-                                options.ErrorMessage = "KeyID or KeySeed not set to decrypt the input ISMA or ISMV file :" + options.InputUri;
-                            }
+                            options.ErrorMessage = "KeyID or KeySeed not set to decrypt the input ISMA or ISMV file :" + options.InputUri;
                         }
                     }
-                    else
-                        options.ErrorMessage = "TrackID not set to decrypt the input ISMA or ISMV file :" + options.InputUri;
 
                     return options;
                 }
@@ -880,18 +864,6 @@ namespace ASTool
                                 }
                                 else
                                     options.ErrorMessage = "Loop not set";
-                                break;
-                            case "--trackid":
-                                if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
-                                {
-                                    int trackid = 0;
-                                    if (int.TryParse(args[i++], out trackid))
-                                        options.TrackID = trackid;
-                                    else
-                                        options.ErrorMessage = "TrackID value incorrect";
-                                }
-                                else
-                                    options.ErrorMessage = "TrackID not set";
                                 break;
                             case "--keyid":
                                 if ((i < args.Length) &&
