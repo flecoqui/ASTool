@@ -16,6 +16,10 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxTFHD : Mp4Box
     {
+        public int GetTrackID()
+        {
+            return ReadMp4BoxInt32(this.Data, 4);
+        }
         static public Mp4BoxTFHD CreateTFHDBox(int TrackID, int SampleFlags)
         {
             int Flag = 32;

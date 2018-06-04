@@ -116,6 +116,54 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
+
+        public Mp4Box GetChild(string type)
+        {
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == type)
+                    {
+                        return box;
+                    }
+                    else
+                    {
+                        Mp4Box childbox = box.GetChild(type);
+                        if (childbox != null)
+                            return childbox;
+                    }
+                }
+            }
+            return null;
+        }
+        public Mp4Box GetUUIDBox(Guid id)
+        {
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == "uuid")
+                    {
+                        Mp4BoxUUID uuidbox = box as Mp4BoxUUID;
+                        if (uuidbox != null)
+                        {
+                            if (uuidbox.GetUUID() == id)
+                            {
+                                return uuidbox;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Mp4Box childbox = box.GetUUIDBox(id);
+                        if (childbox != null)
+                            return childbox;
+                    }
+                }
+            }
+            return null;
+        }
         public bool RemoveUUIDBox(Guid id)
         {
             bool result = false;
@@ -204,7 +252,7 @@ namespace ASTool.ISMHelper
             if (Children != null)
             {
                 box.SetParent(this);
-                box.SetPath(this.GetPath() + "/" + box.GetType());
+                box.SetPath(this.GetPath() + "/" + box.GetBoxType());
                 Children.Add(box);
                 if(bAddInData == true)
                 {
@@ -266,6 +314,12 @@ namespace ASTool.ISMHelper
                     return new Mp4BoxTRUN();
                 case "sdtp":
                     return new Mp4BoxSDTP();
+                case "mfra":
+                    return new Mp4BoxMFRA();
+                case "tfra":
+                    return new Mp4BoxTFRA();
+                case "mfro":
+                    return new Mp4BoxMFRO();
                 default:
                     return new Mp4Box();
             }
@@ -320,6 +374,14 @@ namespace ASTool.ISMHelper
             mp4BoxLen |= (int)(buffer[offset + 2] << 8);
             mp4BoxLen |= (int)(buffer[offset + 3] << 0);
             return mp4BoxLen;
+        }
+        static public int ReadMp4BoxInt24(byte[] buffer, int offset)
+        {
+            int Len = 0;
+            Len |= (int)(buffer[offset + 0] << 16);
+            Len |= (int)(buffer[offset + 1] << 8);
+            Len |= (int)(buffer[offset + 2] << 0);
+            return Len;
         }
         static public int ReadMp4BoxInt32(byte[] buffer, int offset)
         {

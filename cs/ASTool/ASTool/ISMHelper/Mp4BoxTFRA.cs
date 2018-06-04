@@ -16,6 +16,39 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxTFRA : Mp4Box
     {
+        public int GetTrackID()
+        {
+            return ReadMp4BoxInt32(this.Data, 4);
+        }
+        public int GetNumberOfEntry()
+        {
+            return ReadMp4BoxInt32(this.Data, 12);
+        }
+        public bool UpdateEntries(List<long> list)
+        {
+            bool result = false;
+            byte[] version = ReadMp4BoxBytes(this.Data, 0, 1);
+            if (GetNumberOfEntry() == list.Count)
+            {
+                if (version[0] == 1)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        WriteMp4BoxInt64(this.Data, 16 + 8 + i * 19, (long)list[i]);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        WriteMp4BoxInt32(this.Data, 16 + 8 + i * 11, (Int32)list[i]);
+                    }
+                }
+                result = true;
+            }
+
+            return result;
+        }
         static public Mp4BoxTFRA CreateTFRABox(Int32 TrackID, List<TimeMoofOffset> list)
         {
             int Flag = 0;

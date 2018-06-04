@@ -18,11 +18,62 @@ namespace ASTool.ISMHelper
     {
         public int SampleDuration;
         public int SampleSize;
-        public int SampleFlags;
-        public int SampleCompositionTimeoffset;
+        public int SampleFlags;        public int SampleCompositionTimeoffset;
     }
     class Mp4BoxTRUN : Mp4Box
     {
+        public bool SetDataOffset(int offset)
+        {
+            return WriteMp4BoxInt32(this.Data, 8, offset);
+        }
+        public Int32 GetDataOffset()
+        {
+            return ReadMp4BoxInt32(this.Data, 8);
+        }
+        public List<Int32> GetSampleSizeList()
+        {
+            List<Int32> list = new List<Int32>();
+            if(list!=null)
+            {
+                //	0x000001. (data - offset - present).Specifies whether the data_offset field is present.MUST be set.
+                //	0x000004  (first - sample - flags - present).Overrides the default flags for the first sample only.This makes it possible to record a group of frames where the first is a key and the rest are difference frames, without supplying explicit flags for every sample. If this flag and field are used, sample-flags shall not be present.
+                //	0x000100 (sample-duration-present). Indicates that each sample has its own duration, otherwise the default is used.
+                //	0x000200 (sample-size-present). Each sample has its own size, otherwise the default is used.
+                //	0x000400 (sample-flags-present). Each sample has its own flags, otherwise the default is used.          
+                //	0x000800 (sample-composition-time-offsets-present). Each sample has a composition time offset(e.g., as used for I/P/B video in MPEG).
+
+
+                int Flag = ReadMp4BoxInt24(this.Data, 1);
+                int TableOffset = 8;
+                if ((Flag & 0x00000001) == 0x00000001)
+                    TableOffset += 4;
+                if ((Flag & 0x00000004) == 0x00000004)
+                    TableOffset += 4;
+                int RowSize = 0;
+                if ((Flag & 0x00000100) == 0x00000100)
+                {
+                    RowSize += 4;
+                    TableOffset += 4;
+                }
+                if ((Flag & 0x00000200) == 0x00000200)
+                    RowSize += 4;
+                if ((Flag & 0x00000400) == 0x00000400)
+                    RowSize += 4;
+                if ((Flag & 0x00000800) == 0x00000800)
+                    RowSize += 4;
+
+                {
+                    int offset = 0;
+                    int SampleCount = ReadMp4BoxInt32(this.Data, 4);
+                    for (int i = 0; i < SampleCount; i++)
+                    {
+                        list.Add(ReadMp4BoxInt32(this.Data, TableOffset + offset));
+                        offset += RowSize;
+                    }
+                }
+            }
+            return list;
+        }
         static public Mp4BoxTRUN CreateTRUNBox(int SampleCount, int DataOffset, List<SampleInformation> list)
         {
             int Flag = 769;

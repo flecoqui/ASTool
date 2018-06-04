@@ -16,6 +16,29 @@ namespace ASTool.ISMHelper
 {
     public class Mp4BoxMFRA : Mp4Box
     {
+        public bool UpdateMOOFOffsetForTrack(int trackID, List<long> MOOFOffsetList)
+        {
+            bool result = false;
+            if(Children!=null)
+            {
+                foreach(var box in Children)
+                {
+                    if(box.GetBoxType() == "tfra")
+                    {
+                        Mp4BoxTFRA tfra = box as Mp4BoxTFRA;
+                        if(tfra!=null)
+                        {
+                            if(tfra.GetTrackID()==trackID)
+                            {
+                                if (tfra.GetNumberOfEntry() == MOOFOffsetList.Count)
+                                    return tfra.UpdateEntries(MOOFOffsetList);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
         static public Mp4BoxMFRA CreateMFRABox(List<Mp4Box> listChild)
         {
 

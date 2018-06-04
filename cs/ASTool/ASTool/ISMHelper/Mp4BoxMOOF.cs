@@ -18,7 +18,18 @@ namespace ASTool.ISMHelper
     {
 
 
-
+        public int GetTrackID()
+        {
+            int result = 0;
+            Mp4Box box = FindChildBox("tfhd");
+            if(box!=null)
+            {
+                Mp4BoxTFHD tfhdbox = box as Mp4BoxTFHD;
+                if (tfhdbox != null)
+                    return tfhdbox.GetTrackID();
+            }
+            return result;
+        }
         static public Mp4BoxMOOF CreateMOOFBox(List<Mp4Box> listChild)
         {
            

@@ -16,6 +16,31 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxUUID : Mp4Box
     {
+        public List<byte[]> GetIVList()
+        {
+            Guid id = GetUUID();
+            List<byte[]> list = new List<byte[]>();
+            if (id == Mp4Box.kExtProtectHeaderMOOFBoxGuid)
+            {
+                if (list != null)
+                {
+                    int offset = 0;
+                    int SampleCount = ReadMp4BoxInt32(this.Data, 20);
+                    for (int i = 0; i < SampleCount; i++)
+                    {
+                        byte[] iv = ReadMp4BoxBytes(this.Data, 24 + offset, 8);
+                        if ((iv != null) && (iv.Length == 8))
+                        {
+                            byte[] buffer = new byte[16];
+                            iv.CopyTo(buffer,0);
+                            list.Add(buffer);
+                        }
+                        offset += 8;
+                    }
+                }
+            }
+            return list;
+        }
         public Guid GetUUID()
         {
             byte[] buffer = ReadMp4BoxBytes(Data, 0, 16);
