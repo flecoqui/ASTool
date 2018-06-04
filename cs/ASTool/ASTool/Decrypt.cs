@@ -59,19 +59,26 @@ namespace ASTool
                                 // Remove uuid box DO8A...83D3 which contains the protection header
                                 // Replace encv box with avc1 and anca with mp4a
                                 // Remove sinf box
-                                // Calculate the new lenght and keep the difference with the previous lenght
+                                // Calculate the new length and keep the difference with the previous lenght
                                 // Copy the new box into the new file
                                 Mp4BoxMOOV moov = box as Mp4BoxMOOV;
                                 if (moov != null)
                                 {
+                                    int currentLength = moov.GetBoxLength();
                                     ListTrackID = moov.GetListTrackToDecrypt();
                                     if((ListTrackID!=null)&&(ListTrackID.Count>0))
                                     {
                                         // We need to decrypt some tracks
                                         bool result = moov.RemoveUUIDBox(Mp4Box.kExtProtectHeaderBoxGuid);
                                         result = moov.UpdateEncBoxes();
-
-
+                                        byte[] newBuffer = moov.UpdateBoxBuffer();
+                                        if (newBuffer != null)
+                                        {
+                                            int newLength = newBuffer.Length;
+                                            int diff = newLength - currentLength;
+                                            Mp4Box.WriteMp4BoxBuffer(newBuffer, fso);
+                                            offset += newBuffer.Length;
+                                        }
                                     }
                                     else
                                     {
@@ -80,14 +87,6 @@ namespace ASTool
                                         break;
                                     }
                                 }
-                                if (Mp4Box.WriteMp4Box(box, fso) != true)
-                                {
-                                    bResult = false;
-                                    opt.LogError("Unexpected error while writing moov box in the output file: " + OutputPath);
-                                    break;
-                                }
-
-                                offset += box.GetBoxLength();
                             }
                             else if (box.GetBoxType() == "moof")
                             {
@@ -96,39 +95,57 @@ namespace ASTool
                                 // Keep the list of sample size
                                 // Calculate the new lenght and keep the difference with the previous lenght
                                 // Open the next box (mdat) and decrypt sample by sample 
-                                offset += box.GetBoxLength();
-                                Mp4Box mdatbox = Mp4Box.ReadMp4Box(fsi);
-                                if (mdatbox != null)
+                                Mp4BoxMOOF moof = box as Mp4BoxMOOF;
+                                if (moof != null)
                                 {
-                                    if (mdatbox.GetBoxType() != "mdat")
+                                    int currentLength = moof.GetBoxLength();
+                                    bool result = moof.RemoveUUIDBox(Mp4Box.kExtProtectHeaderMOOFBoxGuid);
+                                    if (result == true)
                                     {
-                                        bResult = false;
-                                        opt.LogError("Unexpected box read in the input file after a moof box: " + InputPath + " box: " + mdatbox.GetBoxType());
-                                        break;
+                                        byte[] newBuffer = moof.UpdateBoxBuffer();
+                                        if (newBuffer != null)
+                                        {
+                                            int newLength = newBuffer.Length;
+                                            int diff = newLength - currentLength;
+                                            Mp4Box.WriteMp4BoxBuffer(newBuffer, fso);
+                                            offset += newBuffer.Length;
+
+                                        }
                                     }
                                     else
                                     {
+                                        offset += box.GetBoxLength();
                                         if (Mp4Box.WriteMp4Box(box, fso) != true)
                                         {
                                             bResult = false;
                                             opt.LogError("Unexpected error while writing moof box in the output file: " + OutputPath);
                                             break;
                                         }
-                                        if (Mp4Box.WriteMp4Box(mdatbox, fso) != true)
+                                    }
+                                    Mp4Box mdatbox = Mp4Box.ReadMp4Box(fsi);
+                                    if (mdatbox != null)
+                                    {
+                                        if (mdatbox.GetBoxType() != "mdat")
                                         {
                                             bResult = false;
-                                            opt.LogError("Unexpected error while writing mdat box in the output file: " + OutputPath);
+                                            opt.LogError("Unexpected box read in the input file after a moof box: " + InputPath + " box: " + mdatbox.GetBoxType());
                                             break;
                                         }
+                                        else
+                                        {
+                                            if (Mp4Box.WriteMp4Box(mdatbox, fso) != true)
+                                            {
+                                                bResult = false;
+                                                opt.LogError("Unexpected error while writing mdat box in the output file: " + OutputPath);
+                                                break;
+                                            }
 
+                                        }
+                                        offset += mdatbox.GetBoxLength();
                                     }
-                                    // Copy the new moof box into the new file
-                                    // Copy the new mdat box into the new file
-
-                                    offset += mdatbox.GetBoxLength();
+                                    else
+                                        opt.LogError("Error while reading the mdat box in the input file after a moof box: " + InputPath);
                                 }
-                                else
-                                    opt.LogError("Error while reading the mdat box in the input file after a moof box: " + InputPath );
                             }
                             else if (box.GetBoxType() == "mfra")
                             {

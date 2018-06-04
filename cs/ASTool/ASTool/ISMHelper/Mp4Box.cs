@@ -19,13 +19,21 @@ namespace ASTool.ISMHelper
     {
         public static Guid kExtPiffTrackEncryptionBoxGuid = new Guid("{8974DBCE-7BE7-4C51-84F9-7148F9882554}");
         public static Guid kExtProtectHeaderBoxGuid = new Guid("{d08a4f18-10f3-4a82-b6c8-32d8aba183d3}");
+        public static Guid kExtProtectHeaderMOOFBoxGuid = new Guid("{a2394f52-5a9b-4f14-a244-6c427c648df4}");
         protected Int32 Length;
         protected string Type;
         protected byte[] Data;
         protected List<Mp4Box> Children;
+        protected string Path;
+        protected Mp4Box Parent;
+        protected int ChildrenOffset = 0;
         public Int32 GetBoxLength()
         {
             return Length;
+        }
+        public void SetBoxLength(int Len)
+        {
+            Length = Len;
         }
         public string GetBoxType()
         {
@@ -53,6 +61,25 @@ namespace ASTool.ISMHelper
                 }
             }
             return null;
+        }
+        public Mp4Box GetParent()
+        {
+            return Parent;
+        }
+        public void SetParent(Mp4Box box)
+        {
+            this.Path = box.GetPath() + "/" + this.GetBoxType();
+            Parent = box;
+        }
+        public void  SetPath(string path)
+        {
+            Path = path;            
+        }
+        public string GetPath()
+        {
+            if (string.IsNullOrEmpty(Path))
+                Path = "/" + Type;
+            return Path;
         }
         public bool RemoveChildBox(string BoxType)
         {
@@ -89,12 +116,95 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
+        public bool RemoveUUIDBox(Guid id)
+        {
+            bool result = false;
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == "uuid")
+                    {
+                        Mp4BoxUUID uuidbox = box as Mp4BoxUUID;
+                        if (uuidbox != null)
+                        {
+                            if (uuidbox.GetUUID() == id)
+                            {
+                                int Len = uuidbox.GetBoxLength();
+                                UpdateParentLength(uuidbox, -Len);
+                                Children.Remove(box);
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bool res = box.RemoveUUIDBox(id);
+                        if (res == true)
+                        {
+                            result = true;
+                            break;
+                        }
+
+                    }
+                }
+            }
+            return result;
+        }
+        public byte[] UpdateBoxBuffer()
+        {
+            byte[] buffer = new byte[this.Length];
+
+            if  (buffer != null)
+            {
+                int offset = 0;
+                WriteMp4BoxInt32(buffer, offset, this.Length);
+                offset += 4;
+                WriteMp4BoxString(buffer, offset, this.Type);
+                offset += 4;
+                if (this.Children != null)
+                {
+                    if (this.ChildrenOffset > 0)
+                    {
+                        WriteMp4BoxData(buffer, offset, this.Data, this.ChildrenOffset);
+                        offset += this.ChildrenOffset;
+                    }
+
+                    foreach (var box in Children)
+                    {
+                        byte[] childBuffer = box.UpdateBoxBuffer();
+                        if (childBuffer != null)
+                        {
+                            WriteMp4BoxData(buffer, offset, childBuffer);
+                            offset += childBuffer.Length;
+                        }
+                    }
+                }
+                else
+                {
+                    WriteMp4BoxData(buffer, offset, this.Data);
+                }
+            }
+            return buffer;
+        }
+        public void UpdateParentLength(Mp4Box box, int Len)
+        {
+            Mp4Box pbox = box.GetParent();
+            while (pbox != null)
+            {
+                pbox.SetBoxLength(pbox.GetBoxLength() + Len);
+                pbox = pbox.GetParent();
+            }
+        }
         public bool AddMp4Box(Mp4Box box, bool bAddInData = false)
         {
             if (Children == null)
                 Children = new List<Mp4Box>();
             if (Children != null)
             {
+                box.SetParent(this);
+                box.SetPath(this.GetPath() + "/" + box.GetType());
                 Children.Add(box);
                 if(bAddInData == true)
                 {
@@ -144,6 +254,18 @@ namespace ASTool.ISMHelper
                     return new Mp4BoxENCV();
                 case "enct":
                     return new Mp4BoxENCT();
+                case "moof":
+                    return new Mp4BoxMOOF();
+                case "mfhd":
+                    return new Mp4BoxMFHD();
+                case "traf":
+                    return new Mp4BoxTRAF();
+                case "tfhd":
+                    return new Mp4BoxTFHD();
+                case "trun":
+                    return new Mp4BoxTRUN();
+                case "sdtp":
+                    return new Mp4BoxSDTP();
                 default:
                     return new Mp4Box();
             }
@@ -160,6 +282,7 @@ namespace ASTool.ISMHelper
                     if ((offset + box.Length <= buffer.Length)&&(box.Length>8))
                     {
                         box.Type = ReadMp4BoxType(buffer, offset);
+                        box.SetPath("/" + box.GetBoxType());
                         box.Data = ReadMp4BoxData(buffer, offset, box.Length);
                         List<Mp4Box> list = box.GetChildren();
                         if((list!=null)&&(list.Count>0))
@@ -372,6 +495,21 @@ namespace ASTool.ISMHelper
             }
             return false;
         }
+        static public bool WriteMp4BoxData(byte[] buffer, int offset, byte[] data, int Length)
+        {
+            if ((buffer != null) && (data != null))
+            {
+                if (offset + Length <= buffer.Length)
+                {
+                    for (int i = 0; i < Length; i++)
+                    {
+                        buffer[offset + i] = (byte)data[i];
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
         public override string ToString()
         {
             return "Box: " + Type + "\tLength: " + Length.ToString();
@@ -429,27 +567,45 @@ namespace ASTool.ISMHelper
             }
             return result;
         }
+        public static bool WriteMp4BoxBuffer(byte[] buffer, FileStream fs)
+        {
+            bool result = false;
+            if ((buffer != null) && (fs != null))
+            {
+                try
+                {
+                    fs.Write(buffer, 0, buffer.Length);
+                    result = true;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.Write("Exception while writing buffer box in file: " + ex.Message);
+                }
+            }
+            return result;
+        }
         public List<Mp4Box> GetChildren()
         {
             List<Mp4Box> list = new List<Mp4Box>();
             if ((list!=null)&&(Data!=null))
             {
-                int offset = 0;
+                ChildrenOffset = 0;
                 if (this.GetBoxType() == "stsd")
-                    offset = 8;
+                    ChildrenOffset = 8;
                 else if (this.GetBoxType() == "dref")
-                    offset = 8;
+                    ChildrenOffset = 8;
                 else if (this.GetBoxType() == "encv")
-                    offset = 78;
+                    ChildrenOffset = 78;
                 else if (this.GetBoxType() == "enca")
-                    offset = 28;
-                while (offset < Data.Length)
+                    ChildrenOffset = 28;
+                int Offset = ChildrenOffset;
+                while (Offset < Data.Length)
                 {
-                    Mp4Box box = CreateMp4Box(Data, offset);
+                    Mp4Box box = CreateMp4Box(Data, Offset);
                     if (box != null)
                     {
                         list.Add(box);
-                        offset += box.Length;
+                        Offset += box.Length;
                     }
                     else
                         break;
