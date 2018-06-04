@@ -160,7 +160,7 @@ namespace ASTool
                                             }
                                             else
                                             {
-                                                List<byte[]> listIV = uuidbox.GetIVList();
+                                                List<Mp4BoxUUID.SampleProtection> listIV = uuidbox.GetIVList();
                                                 List<Int32> listSampleSize = trunbox.GetSampleSizeList();
 
                                                 if ((listIV != null) &&
@@ -180,10 +180,13 @@ namespace ASTool
                                                             int dataoffset = 0;
                                                             for (int i = 0; i < listIV.Count; i++)
                                                             {
-                                                                AESCTR aesctrdec = AESCTR.CreateDecryptor(ContentKey, listIV[i]);
+                                                                AESCTR aesctrdec = AESCTR.CreateDecryptor(ContentKey, listIV[i].IV);
                                                                 if (aesctrdec != null)
                                                                 {
-                                                                    aesctrdec.TransformBlock(encryptedData, dataoffset, listSampleSize[i], clearData, 8+dataoffset);
+                                                                    int BytesOfClearData = listIV[i].BytesOfClearData;
+                                                                    for (int j = 0; j < BytesOfClearData; j++)
+                                                                        clearData[8 + dataoffset + j] = encryptedData[dataoffset + j];
+                                                                    aesctrdec.TransformBlock(encryptedData, dataoffset+ BytesOfClearData, listSampleSize[i]-BytesOfClearData, clearData, 8+dataoffset+BytesOfClearData);
                                                                     dataoffset += listSampleSize[i];
                                                                 }
                                                             }

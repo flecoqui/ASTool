@@ -395,8 +395,8 @@ namespace ASTool.ISMHelper
         static public int ReadMp4BoxInt16(byte[] buffer, int offset)
         {
             int Len = 0;
-            Len |= (int)(buffer[offset + 1] << 8);
-            Len |= (int)(buffer[offset + 0] << 0);
+            Len |= (int)(buffer[offset + 0] << 8);
+            Len |= (int)(buffer[offset + 1] << 0);
             return Len;
         }
         static public string ReadMp4BoxType(byte[] buffer, int offset)
