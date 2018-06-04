@@ -65,8 +65,20 @@ namespace ASTool
                                 if (moov != null)
                                 {
                                     ListTrackID = moov.GetListTrackToDecrypt();
+                                    if((ListTrackID!=null)&&(ListTrackID.Count>0))
+                                    {
+                                        // We need to decrypt some tracks
+                                        bool result = moov.RemoveUUIDBox(Mp4Box.kExtProtectHeaderBoxGuid);
+                                        result = moov.UpdateEncBoxes();
 
 
+                                    }
+                                    else
+                                    {
+                                        bResult = false;
+                                        opt.LogError("No track found to decrypt in the moov box output file: " + OutputPath);
+                                        break;
+                                    }
                                 }
                                 if (Mp4Box.WriteMp4Box(box, fso) != true)
                                 {

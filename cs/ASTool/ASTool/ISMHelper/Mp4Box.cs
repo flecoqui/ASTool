@@ -17,8 +17,8 @@ namespace ASTool.ISMHelper
 
     public class Mp4Box
     {
-        static Guid kExtPiffTrackEncryptionBoxGuid = new Guid("{8974DBCE-7BE7-4C51-84F9-7148F9882554}");
-        static Guid kExtProtectHeaderBoxGuid = new Guid("{d08a4f18-10f3-4a82-b6c8-32d8aba183d3}");
+        public static Guid kExtPiffTrackEncryptionBoxGuid = new Guid("{8974DBCE-7BE7-4C51-84F9-7148F9882554}");
+        public static Guid kExtProtectHeaderBoxGuid = new Guid("{d08a4f18-10f3-4a82-b6c8-32d8aba183d3}");
         protected Int32 Length;
         protected string Type;
         protected byte[] Data;
@@ -30,6 +30,10 @@ namespace ASTool.ISMHelper
         public string GetBoxType()
         {
             return Type;
+        }
+        public void SetBoxType(string t)
+        {
+            Type = t;
         }
         public byte[] GetBoxData()
         {
@@ -49,6 +53,21 @@ namespace ASTool.ISMHelper
                 }
             }
             return null;
+        }
+        public bool RemoveChildBox(string BoxType)
+        {
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == BoxType)
+                    {
+                        Children.Remove(box);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         public Mp4Box FindChildBox(string BoxType)
         {
@@ -119,6 +138,12 @@ namespace ASTool.ISMHelper
                     return new Mp4BoxMDHD();
                 case "hdlr":
                     return new Mp4BoxHDLR();
+                case "enca":
+                    return new Mp4BoxENCA();
+                case "encv":
+                    return new Mp4BoxENCV();
+                case "enct":
+                    return new Mp4BoxENCT();
                 default:
                     return new Mp4Box();
             }
@@ -414,6 +439,10 @@ namespace ASTool.ISMHelper
                     offset = 8;
                 else if (this.GetBoxType() == "dref")
                     offset = 8;
+                else if (this.GetBoxType() == "encv")
+                    offset = 78;
+                else if (this.GetBoxType() == "enca")
+                    offset = 28;
                 while (offset < Data.Length)
                 {
                     Mp4Box box = CreateMp4Box(Data, offset);

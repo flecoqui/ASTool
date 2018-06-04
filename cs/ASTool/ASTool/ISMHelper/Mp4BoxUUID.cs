@@ -16,6 +16,12 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxUUID : Mp4Box
     {
+        public Guid GetUUID()
+        {
+            byte[] buffer = ReadMp4BoxBytes(Data, 0, 16);
+            Guid id = NetworkOrderArrayToGuid(buffer);
+            return id;
+        }
         static byte[] GuidToNetworkOrderArray(Guid input)
         {
             byte[] guidAsByteArray = input.ToByteArray();
@@ -25,6 +31,16 @@ namespace ASTool.ISMHelper
             Buffer.BlockCopy(BitConverter.GetBytes(System.Net.IPAddress.HostToNetworkOrder(BitConverter.ToInt16(guidAsByteArray, 6))), 0, ret, 6, 2);
             Buffer.BlockCopy(guidAsByteArray, 8, ret, 8, 8);
             return ret;
+        }
+        static Guid NetworkOrderArrayToGuid(byte[] input)
+        {
+
+            byte[] ret = new byte[16];
+            Buffer.BlockCopy(BitConverter.GetBytes(System.Net.IPAddress.HostToNetworkOrder(BitConverter.ToInt32(input, 0))), 0, ret, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(System.Net.IPAddress.HostToNetworkOrder(BitConverter.ToInt16(input, 4))), 0, ret, 4, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes(System.Net.IPAddress.HostToNetworkOrder(BitConverter.ToInt16(input, 6))), 0, ret, 6, 2);
+            Buffer.BlockCopy(input, 8, ret, 8, 8);
+            return new Guid(ret);
         }
         static public Mp4BoxUUID CreateUUIDBox(Guid ExtendedGuid, Guid ProtectedGuid, string ProtectedData)
         {

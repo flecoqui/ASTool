@@ -16,6 +16,68 @@ namespace ASTool.ISMHelper
 {
     public class Mp4BoxMOOV : Mp4Box
     {
+        public bool UpdateEncBoxes()
+        {
+            bool result = false;
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == "trak")
+                    {
+                        Mp4Box encbox = box.FindChildBox("encv");
+                        if (encbox != null)
+                        {
+                            encbox.SetBoxType("avc1");
+                            return encbox.RemoveChildBox("sinf");
+                        }
+                        else
+                        {
+                            encbox = box.FindChildBox("enca");
+                            if (encbox != null)
+                            {
+                                encbox.SetBoxType("mp4a");
+                                return encbox.RemoveChildBox("sinf");
+                            }
+                            else
+                            {
+                                encbox = box.FindChildBox("enct");
+                                if (encbox != null)
+                                {
+                                    encbox.SetBoxType("dfxp");
+                                    return encbox.RemoveChildBox("sinf");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        public bool RemoveUUIDBox(Guid id)
+        {
+            bool result = false;
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == "uuid")
+                    {
+                        Mp4BoxUUID uuidbox = box as Mp4BoxUUID;
+                        if (uuidbox != null)
+                        {
+                            if (uuidbox.GetUUID() == id)
+                            {
+                                Children.Remove(box);
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
         public List<int> GetListTrackToDecrypt()
         {
             List<int> result = new List<int>();
