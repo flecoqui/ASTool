@@ -574,7 +574,7 @@ namespace ASTool
                         bDirExists = false;
                     }
                     if (bDirExists == false)
-                        options.ErrorMessage = "Output directory doesn't exist:" + options.OutputUri;
+                        options.ErrorMessage = "Output directory doesn't exist: " + options.OutputUri;
                     return options;
                 }
                 else
@@ -624,7 +624,7 @@ namespace ASTool
                         bFileExists = false;
                     }
                     if (bFileExists == false)
-                        options.ErrorMessage = "Input ISM file doesn't exist:" + options.InputUri;
+                        options.ErrorMessage = "Input ISM file doesn't exist: " + options.InputUri;
                     try
                     {
                         Uri uri = new Uri(options.OutputUri);
@@ -665,7 +665,7 @@ namespace ASTool
                         bFileExists = false;
                     }
                     if (bFileExists == false)
-                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
+                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist: " + options.InputUri;
                     if (string.IsNullOrEmpty(options.ContentKey))
                     {
                         if ((string.IsNullOrEmpty(options.KeyID)) ||
@@ -697,7 +697,7 @@ namespace ASTool
                         bFileExists = false;
                     }
                     if (bFileExists == false)
-                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist:" + options.InputUri;
+                        options.ErrorMessage = "Input ISMA or ISMV file doesn't exist: " + options.InputUri;
                     if (string.IsNullOrEmpty(options.ContentKey))
                     {
                         if ((string.IsNullOrEmpty(options.KeyID)) ||

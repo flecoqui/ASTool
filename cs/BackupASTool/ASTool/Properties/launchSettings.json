@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "ASTool": {
-      "commandName": "Project",
-      "commandLineArgs": "--listplugins"
-    }
-  }
-}

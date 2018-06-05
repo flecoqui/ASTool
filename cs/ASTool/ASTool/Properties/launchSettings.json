@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --decrypt --input C:\\temp\\astool\\testvod\\metisser_encrypted\\metisser\\metisser_500_enc.ismv --output C:\\temp\\astool\\testvod\\metisser_encrypted\\metisser\\metisser_500_dec.ismv --contentkey 78DA959D7AC4966A36352B27EC85DE10"
+      "commandLineArgs": "dotnet ASTool.dll --decrypt --input C:\\git\\flecoqui\\ASTool\\Tests\\Assets\\VideoAudio_0_enc.ismv --output C:\\git\\flecoqui\\ASTool\\Tests\\Assets\\VideoAudio_0_dec.ismv --contentkey 78DA959D7AC4966A36352B27EC85DE10"
     }
   }
 }

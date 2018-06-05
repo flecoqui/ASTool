@@ -16,11 +16,15 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxUUID : Mp4Box
     {
+        public struct SampleProtectionRange
+        {
+            public int BytesOfClearData;
+            public int BytesOfEncryptedData;
+        }
         public struct SampleProtection
         {
             public byte[] IV;
-            public int BytesOfClearData;
-            public int BytesOfEncryptedData;
+            public List<SampleProtectionRange> listRange;
         }
         public  Int32 GetFlag()
         {
@@ -39,6 +43,7 @@ namespace ASTool.ISMHelper
                 IVSize = ReadMp4BoxInt32(this.Data,23);
             }
             int RowOffset = IVSize;
+            int EntryOffset = 0;
             if ((Flag & 0x000002) == 0x000002)
                 RowOffset += 8;
             List<SampleProtection> list = new List<SampleProtection>();
@@ -58,15 +63,27 @@ namespace ASTool.ISMHelper
                                 if ((Flag & 0x000002) == 0x000002)
                                 {
                                     int NumberOfEntries = ReadMp4BoxInt16(this.Data, TableOffset + 4 + offset + IVSize);
-                                    sp.BytesOfClearData = ReadMp4BoxInt16(this.Data, TableOffset + 4 + offset + IVSize + 2 );
-                                    sp.BytesOfEncryptedData = ReadMp4BoxInt32(this.Data, TableOffset + 4 + offset + IVSize + 2 + 2);
+                                    if (NumberOfEntries <= 1)
+                                        EntryOffset = 0;
+                                    else
+                                        EntryOffset = (NumberOfEntries - 1) * 6;
+
+                                    sp.listRange = new List<SampleProtectionRange>();
+                                    for (int k = 0; k < NumberOfEntries; k++)
+                                    {
+                                        SampleProtectionRange spr = new SampleProtectionRange();
+
+                                        spr.BytesOfClearData = ReadMp4BoxInt16(this.Data, TableOffset + 4 + offset + IVSize + 2 + k*6);
+                                        spr.BytesOfEncryptedData = ReadMp4BoxInt32(this.Data, TableOffset + 4 + offset + IVSize + 2 + 2 + k * 6);
+                                        sp.listRange.Add(spr);
+                                    }
                                 }
                                 sp.IV = new byte[16];
                                 iv.CopyTo(sp.IV, 0);
                                 list.Add(sp);
                             }
                         }
-                        offset += RowOffset;
+                        offset += RowOffset + EntryOffset;
                     }
                 }
             }
