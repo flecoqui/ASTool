@@ -54,6 +54,9 @@ namespace ASTool
         public string TrackName { get; set; }
         [DataMember]
         public string Source { get; set; }
+        [DataMember]
+        public string CustomAttributes { get; set; }
+
         /// <summary>
         /// Get Protection Guid.
         /// </summary>

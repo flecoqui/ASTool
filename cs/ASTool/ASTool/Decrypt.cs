@@ -607,7 +607,7 @@ namespace ASTool
 
             List<byte> hexres = new List<byte>();
             for (int i = 0; i < str.Length; i += 2)
-                hexres.Add(hexindex[str.Substring(i, 2)]);
+                hexres.Add(hexindex[str.Substring(i, 2).ToUpper()]);
 
             return hexres.ToArray();
         }

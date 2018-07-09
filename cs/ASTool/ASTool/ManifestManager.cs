@@ -46,6 +46,8 @@ namespace ASTool
         public int Bitrate { get; set; }
         public string FourCC { get; set; }
         public string Language { get; set; }
+
+        public string CustomAttributes { get; set; }
     }
 
     public sealed class TextTrack : Track
@@ -662,7 +664,8 @@ namespace ASTool
                     {
                         UrlTemplate = UrlTemplate.Replace("{bitrate}", Bitrate.ToString());
                         UrlTemplate = UrlTemplate.Replace("{start time}", "{start_time}");
-                        UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", "timeScale=10000000");
+                        
+                        UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", Configuration.CustomAttributes);
                         if ((stream.StreamType.ToLower() == "audio") ||
                             (stream.StreamType.ToLower() == "video") ||
                             (stream.StreamType.ToLower() == "text"))
@@ -815,7 +818,7 @@ namespace ASTool
                     {
                         UrlTemplate = UrlTemplate.Replace("{bitrate}", Bitrate.ToString());
                         UrlTemplate = UrlTemplate.Replace("{start time}", "{start_time}");
-                        UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", "timeScale=10000000");
+                        UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", Configuration.CustomAttributes);
                         if ((stream.StreamType.ToLower() == "audio") ||
                             (stream.StreamType.ToLower() == "video") ||
                             (stream.StreamType.ToLower() == "text"))
@@ -964,6 +967,7 @@ namespace ASTool
                                         videostream = stream;
                                         VideoChunkListConfiguration configuration = new VideoChunkListConfiguration();
                                         configuration.Bitrate = (int)currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString( track.CustomAttributes);
                                         configuration.Duration = (long)Duration;
                                         configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
@@ -1024,6 +1028,8 @@ namespace ASTool
 
                                         AudioChunkListConfiguration configuration = new AudioChunkListConfiguration();
                                         configuration.Bitrate = (int)currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString(track.CustomAttributes);
+
                                         configuration.Duration = (long)Duration;
                                         configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
@@ -1067,6 +1073,8 @@ namespace ASTool
                                         textstream = stream;
                                         TextChunkListConfiguration configuration = new TextChunkListConfiguration();
                                         configuration.Bitrate = (int)currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString(track.CustomAttributes);
+
                                         configuration.Duration = (long)Duration;
                                         configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
@@ -1093,6 +1101,21 @@ namespace ASTool
                 }
             }
             return bResult;
+        }
+        string GetCustomAttributesString(IDictionary<string, string> Dict)
+        {
+            string result = string.Empty;
+            if(Dict!=null)
+            {
+                foreach(var val in Dict)
+                {
+                    if (string.IsNullOrEmpty(result))
+                        result = val.Key + "=" + val.Value;
+                    else
+                        result = ","  + val.Key + "=" + val.Value;
+                }
+            }
+            return result;
         }
         /// <summary>
         /// ParseSmoothManifest
@@ -1172,6 +1195,7 @@ namespace ASTool
                                     {
                                         Index = (int)currentIndex,
                                         Bitrate = (int)currentBitrate,
+                                        CustomAttributes = GetCustomAttributesString(track.CustomAttributes),
                                         FourCC = currentFourCC,
                                         MaxHeight = (int)currentHeight,
                                         MaxWidth = (int)currentWidth,
@@ -1185,6 +1209,8 @@ namespace ASTool
                                         videostream = stream;
                                         VideoChunkListConfiguration configuration = new VideoChunkListConfiguration();
                                         configuration.Bitrate = (int) currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString(track.CustomAttributes);
+
                                         configuration.Duration = (long) Duration;
                                         configuration.TimeScale = (int) TimeScale;
                                         configuration.Language = Lang;
@@ -1241,6 +1267,7 @@ namespace ASTool
                                     {
                                         Index = (int)audioIndex,
                                         Bitrate = (int)currentBitrate,
+                                        CustomAttributes = GetCustomAttributesString(track.CustomAttributes),
                                         FourCC = currentFourCC,
                                         BitsPerSample = (int) currentBitsPerSample,
                                         Channels = (int) currentChannels,
@@ -1256,6 +1283,8 @@ namespace ASTool
 
                                         AudioChunkListConfiguration configuration = new AudioChunkListConfiguration();
                                         configuration.Bitrate = (int)currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString(track.CustomAttributes);
+
                                         configuration.Duration = (long)Duration;
                                         configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
@@ -1287,7 +1316,7 @@ namespace ASTool
                                 stream.TryGetAttributeValueAsString("FourCC", out FourCC);
                                 foreach (QualityLevel track in stream.QualityLevels)
                                 {
-                                    ulong currentBitrate = 0;
+                                    ulong currentBitrate = 0;                                    
                                     string currentFourCC = string.Empty;
                                     track.TryGetAttributeValueAsUlong("Bitrate", out currentBitrate);
                                     if (!track.TryGetAttributeValueAsString("FourCC", out currentFourCC))
@@ -1296,6 +1325,7 @@ namespace ASTool
                                     {
                                         Index = (int)textIndex,
                                         Bitrate = (int)currentBitrate,
+                                        CustomAttributes = GetCustomAttributesString(track.CustomAttributes),
                                         FourCC = currentFourCC,
                                         Language = Lang,
                                     });
@@ -1305,6 +1335,8 @@ namespace ASTool
                                         textstream = stream;
                                         TextChunkListConfiguration configuration = new TextChunkListConfiguration();
                                         configuration.Bitrate = (int)currentBitrate;
+                                        configuration.CustomAttributes = GetCustomAttributesString(track.CustomAttributes);
+
                                         configuration.Duration = (long)Duration;
                                         configuration.TimeScale = (int)TimeScale;
                                         configuration.Language = Lang;
@@ -1846,7 +1878,7 @@ namespace ASTool
                 {
                     string url = (string.IsNullOrEmpty(RedirectBaseUrl) ? BaseUrl : RedirectBaseUrl) + "/" + cl.TemplateUrl.Replace("{start_time}", cb.Time.ToString());
                     cb.chunkBuffer = await DownloadChunkAsync(new Uri(url));
-                    if ((cl.Configuration != null) && (cl.Configuration.TrackID == -1))
+                    if ((cl.Configuration != null) && (cl.Configuration.TrackID == -1) && (cb.IsChunkDownloaded()))
                     {
                         cl.Configuration.TrackID = GetTrackID(cb.chunkBuffer);
 
