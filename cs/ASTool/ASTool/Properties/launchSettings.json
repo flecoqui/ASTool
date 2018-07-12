@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --decrypt --input C:\\git\\flecoqui\\ASTool\\Tests\\Assets\\VideoAudio_0_enc.ismv --output C:\\git\\flecoqui\\ASTool\\Tests\\Assets\\VideoAudio_0_dec.ismv --contentkey 78DA959D7AC4966A36352B27EC85DE10"
+      "commandLineArgs": "dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/artedehd/mss_test/Manifest --output c:\\temp\\astool\\publish\\srg --maxduration 60000 --minbitrate 100000 --maxbitrate 2000000"
     }
   }
 }

@@ -16,6 +16,10 @@ namespace ASTool.ISMHelper
 {
     class Mp4BoxMFHD : Mp4Box
     {
+        public bool UpdateSequenceNumber(int Seq)
+        {
+            return WriteMp4BoxInt32(this.Data, 4, Seq);
+        }
         static public Mp4BoxMFHD CreateMFHDBox(int SequenceNumber)
         {
             int Flag = 0;

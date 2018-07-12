@@ -49,6 +49,45 @@ namespace ASTool.ISMHelper
 
             return result;
         }
+        public bool UpdateTimeAndOffsetEntries(List<long> list)
+        {
+            bool result = false;
+            byte[] version = ReadMp4BoxBytes(this.Data, 0, 1);
+            if (GetNumberOfEntry() == list.Count)
+            {
+                if (version[0] == 1)
+                {
+                    Int64 currentTime = 0;
+                    Int64 timeOffset = 0;
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        currentTime = ReadMp4BoxInt64(this.Data, 16 + i * 19);
+                        if (i == 0)
+                            timeOffset = currentTime;
+                        Int64 newTime = currentTime - timeOffset;
+                        WriteMp4BoxInt64(this.Data, 16 + i * 19, (long)newTime);
+                        WriteMp4BoxInt64(this.Data, 16 + 8 + i * 19, (long)list[i]);
+                    }
+                }
+                else
+                {
+                    Int32 currentTime = 0;
+                    Int32 timeOffset = 0;
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        currentTime = ReadMp4BoxInt32(this.Data, 16 + i * 11);
+                        if (i == 0)
+                            timeOffset = currentTime;
+                        Int64 newTime = currentTime - timeOffset;
+                        WriteMp4BoxInt32(this.Data, 16 + i * 11, (Int32)newTime);
+                        WriteMp4BoxInt32(this.Data, 16 + 8 + i * 11, (Int32)list[i]);
+                    }
+                }
+                result = true;
+            }
+
+            return result;
+        }
         static public Mp4BoxTFRA CreateTFRABox(Int32 TrackID, List<TimeMoofOffset> list)
         {
             int Flag = 0;
@@ -70,10 +109,13 @@ namespace ASTool.ISMHelper
                         int Reserved = 0;
                         WriteMp4BoxInt32(Buffer, 8, Reserved);
                         WriteMp4BoxInt32(Buffer, 12, NumberOfEntry);
+                        ulong offset = 0;
                         for (int i = 0; i < NumberOfEntry; i++)
                         {
-
-                            WriteMp4BoxInt64(Buffer, 16 + i*19, (long)list[i].time);
+                            if (i == 0)
+                                offset = list[i].time;
+                            ulong time = list[i].time - offset;
+                            WriteMp4BoxInt64(Buffer, 16 + i*19, (long)time);
                             WriteMp4BoxInt64(Buffer, 16 + 8 + i * 19, (long)list[i].offset);
                             WriteMp4BoxInt8(Buffer, 16 + 8 + 8 + i * 19, 1);
                             WriteMp4BoxInt8(Buffer, 16 + 8 + 8 + 1 + i * 19, 1);

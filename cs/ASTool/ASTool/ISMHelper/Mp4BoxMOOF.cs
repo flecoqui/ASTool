@@ -30,6 +30,18 @@ namespace ASTool.ISMHelper
             }
             return result;
         }
+        public bool UpdateMFHDSequence(int SequenceNumber)
+        {
+            bool result = false;
+            Mp4Box box = FindChildBox("mfhd");
+            if (box != null)
+            {
+                Mp4BoxMFHD mfhdbox = box as Mp4BoxMFHD;
+                if (mfhdbox != null)
+                    return mfhdbox.UpdateSequenceNumber(SequenceNumber);
+            }
+            return result;
+        }
         static public Mp4BoxMOOF CreateMOOFBox(List<Mp4Box> listChild)
         {
            

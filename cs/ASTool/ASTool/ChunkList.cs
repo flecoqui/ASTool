@@ -81,7 +81,7 @@ namespace ASTool
         }
         public virtual string GetSourceName()
         {
-            return Source + "_" + Bitrate.ToString() + "_" + TrackName.ToString() ;
+            return Source + "_" + Bitrate.ToString() + "_" + (string.IsNullOrEmpty(TrackName) ? "unknown" :TrackName.ToString() );
         }
         protected List<TimeMoofOffset> ListTimeOffset;
         public bool CreateTimeOffsetList()
@@ -219,7 +219,22 @@ namespace ASTool
         
         public ConcurrentQueue<ChunkBuffer> ChunksToReadQueue { get; set; }
 
+        /// <summary>
+        /// LastTimeChunksToRead 
+        /// The Time of the last Chunk to read   
+        /// </summary>
         public ulong LastTimeChunksToRead { get; set; }
+
+        /// <summary>
+        /// Time of the first Chunk downloaded 
+        /// </summary>
+        public ulong TimeFirstChunk { get; set; }
+
+        /// <summary>
+        /// Time of the last Chunk downloaded 
+        /// </summary>
+        public ulong TimeLastChunk { get; set; }
+
         /// <summary>
         /// ChunksQueue 
         /// List of the chunks read  
@@ -227,7 +242,12 @@ namespace ASTool
 
         public ConcurrentQueue<ChunkBuffer> ChunksQueue { get; set; }
 
-
+        /// <summary>
+        /// Original TemplateUrl 
+        /// The Url template to download  the chunks
+        /// </summary>
+        [DataMember]
+        public string OriginalTemplateUrl { get; set; }
         /// <summary>
         /// TemplateUrl 
         /// The Url template to download  the chunks
@@ -322,6 +342,8 @@ namespace ASTool
         public ChunkList() {
             ChunksToReadQueue = new ConcurrentQueue<ChunkBuffer>();
             LastTimeChunksToRead = 0;
+            TimeFirstChunk = 0;
+            TimeLastChunk = 0;
             ChunksQueue = new ConcurrentQueue<ChunkBuffer>();
             ListLock = new object();
         }

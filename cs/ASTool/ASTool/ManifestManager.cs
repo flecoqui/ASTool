@@ -655,14 +655,15 @@ namespace ASTool
         {
             int Bitrate = 0;
             string UrlTemplate = string.Empty;
+            string OriginalUrlTemplate = string.Empty;
             if ((Configuration != null) && (stream != null))
             {
                 Bitrate = Configuration.Bitrate;
                 if (Bitrate > 0)
                 {
-                    if (stream.TryGetAttributeValueAsString("Url", out UrlTemplate))
+                    if (stream.TryGetAttributeValueAsString("Url", out OriginalUrlTemplate))
                     {
-                        UrlTemplate = UrlTemplate.Replace("{bitrate}", Bitrate.ToString());
+                        UrlTemplate = OriginalUrlTemplate.Replace("{bitrate}", Bitrate.ToString());
                         UrlTemplate = UrlTemplate.Replace("{start time}", "{start_time}");
                         
                         UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", Configuration.CustomAttributes);
@@ -696,6 +697,7 @@ namespace ASTool
                                 }
                                 l.Bitrate = Bitrate;
                                 l.TotalChunks = (ulong)l.ChunksToReadQueue.Count;
+                                l.OriginalTemplateUrl = OriginalUrlTemplate;
                                 l.TemplateUrl = UrlTemplate;
                                 l.TemplateUrlType = ChunkList.GetType(UrlTemplate);
                                 if (stream.StreamType.ToLower() == "video")
@@ -808,15 +810,16 @@ namespace ASTool
         {
             int Bitrate = 0;
             int NumberOfLiveChunks = 0;
+            string OriginalUrlTemplate = string.Empty;
             string UrlTemplate = string.Empty;
             if ((Configuration != null) && (stream != null))
             {
                 Bitrate = Configuration.Bitrate;
                 if (Bitrate > 0)
                 {
-                    if (stream.TryGetAttributeValueAsString("Url", out UrlTemplate))
+                    if (stream.TryGetAttributeValueAsString("Url", out OriginalUrlTemplate))
                     {
-                        UrlTemplate = UrlTemplate.Replace("{bitrate}", Bitrate.ToString());
+                        UrlTemplate = OriginalUrlTemplate.Replace("{bitrate}", Bitrate.ToString());
                         UrlTemplate = UrlTemplate.Replace("{start time}", "{start_time}");
                         UrlTemplate = UrlTemplate.Replace("{CustomAttributes}", Configuration.CustomAttributes);
                         if ((stream.StreamType.ToLower() == "audio") ||
@@ -866,6 +869,7 @@ namespace ASTool
                                 Configuration.Duration = (long) l.LastTimeChunksToRead;
                                 l.Bitrate = Bitrate;
                                 l.TotalChunks = (ulong)l.ChunksToReadQueue.Count;
+                                l.OriginalTemplateUrl = OriginalUrlTemplate;
                                 l.TemplateUrl = UrlTemplate;
                                 l.TemplateUrlType = ChunkList.GetType(UrlTemplate);
                                 if (stream.StreamType.ToLower() == "video")
@@ -1903,6 +1907,12 @@ namespace ASTool
                             cl.Configuration.AddTimeOffset(cb.Time, cl.LastDataOffset);
                             cl.LastDataOffset += l;
                         }
+                        // Set Time for chunks download
+                        if((cl.TimeFirstChunk == 0)&& (cl.TimeLastChunk == 0))
+                            cl.TimeFirstChunk = cb.Time;
+                        else
+                            cl.TimeLastChunk = cb.Time;
+
                         cl.ChunksQueue.Enqueue(cb);
 
                     }
@@ -1998,7 +2008,27 @@ namespace ASTool
             //}, downloadTaskCancellationtoken.Token);
 
         //}
-
+        public ulong GetMinChunkDurationMs()
+        {
+            ulong TimeMin = 0;
+            foreach (var l in VideoChunkListList)
+            {
+                if ((l.TimeLastChunk != 0) && ((TimeMin == 0) ||  ((l.TimeLastChunk - l.TimeFirstChunk) < TimeMin)))
+                    TimeMin = l.TimeLastChunk - l.TimeFirstChunk;
+            }
+            foreach (var l in AudioChunkListList)
+            {
+                if ((l.TimeLastChunk != 0) && ((TimeMin == 0) || ((l.TimeLastChunk - l.TimeFirstChunk) < TimeMin)))
+                    TimeMin = l.TimeLastChunk - l.TimeFirstChunk;
+            }
+            foreach (var l in TextChunkListList)
+            {
+                if ((l.TimeLastChunk != 0) && ((TimeMin == 0) || ((l.TimeLastChunk - l.TimeFirstChunk) < TimeMin)))
+                    TimeMin = l.TimeLastChunk - l.TimeFirstChunk;
+            }
+            ulong val = TimescaleToHNS(TimeMin) / 10000;
+            return val;
+        }
         /// <summary>
         /// downloadThread
         /// Download thread 
@@ -2126,6 +2156,8 @@ namespace ASTool
                     break;
                 }
 
+                // Get StartTime from the chunks
+
                 if (result == false)
                 {
                     error++;
@@ -2169,7 +2201,8 @@ namespace ASTool
                 }
                 DateTime currentTime = DateTime.Now;
                 if ((MaxDuration > 0) &&
-                 ((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration)) 
+                 //((currentTime - DownloadThreadStartTime).TotalMilliseconds > MaxDuration))
+                    (GetMinChunkDurationMs() > MaxDuration))
                 {
                     DateTime time = DateTime.Now;
                     if (bCreateMFRA)

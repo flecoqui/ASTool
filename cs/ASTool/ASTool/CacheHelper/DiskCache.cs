@@ -42,6 +42,8 @@ namespace ASTool.CacheHelper
         }
 
         private string root = "";
+        private const string ISMFileName = "asset.ism";
+        private const string ISMCFileName = "asset.ismc";
         private const string manifestFileName = "manifest.xml";
         private const string audioIndexFileName = "AudioIndex";
         private const string videoIndexFileName = "VideoIndex";
@@ -133,6 +135,8 @@ namespace ASTool.CacheHelper
         /// </summary>
         public async Task<bool> ProcessManifest(ManifestManager cache)
         {
+            await SaveISM(cache);
+            await SaveISMC(cache);
             return await SaveManifest(cache);
         }
         /// <summary>
@@ -161,6 +165,356 @@ namespace ASTool.CacheHelper
                     }
                 }
                 catch(Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer exception for Uri: " + cache.ManifestUri.ToString() + " Exception: " + e.Message);
+
+                }
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer Exit for Uri: " + cache.ManifestUri.ToString());
+            }
+            return bResult;
+        }
+        /// <summary>
+        /// Save ISM File
+        /// Save manifest on disk 
+        /// </summary>
+        public async Task<bool> SaveISM(ManifestManager cache)
+        {
+            bool bResult = false;
+            if (!DirectoryExists(Path.Combine(root, cache.StoragePath)))
+                CreateDirectory(Path.Combine(root, cache.StoragePath));
+
+            using (var releaser = await internalManifestDiskLock.WriterLockAsync())
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer Enter for Uri: " + cache.ManifestUri.ToString());
+                try
+                {                   
+                    string header = "<?xml version=\"1.0\" encoding=\"utf-16\"?><smil xmlns=\"http://www.w3.org/2001/SMIL20/Language\"><head><meta name=\"clientManifestRelativePath\" content=\"asset.ismc\"/></head><body><switch>";
+                    string footer = "</switch></body></smil>";
+                    string videoMask = "<video src=\"{0}\" systemBitrate=\"{1}\"><param name=\"trackID\" value=\"{2}\" valuetype=\"data\" /><param name=\"trackName\" value=\"{3}\" valuetype=\"data\"/><param name=\"timescale\" value=\"{4}\" valuetype=\"data\"/></video>";
+                    string audioMask = "<audio src=\"{0}\" systemBitrate=\"{1}\" systemLanguage=\"{2}\"><param name=\"trackID\" value=\"{3}\" valuetype=\"data\" /><param name=\"trackName\" value=\"{4}\" valuetype=\"data\"/><param name=\"timescale\" value=\"{5}\" valuetype=\"data\"/></audio>";
+                    string textMask = "<textstream src=\"{0}\" systemBitrate=\"{1}\" systemLanguage=\"{2}\"><param name=\"trackID\" value=\"{3}\" valuetype=\"data\" /><param name=\"trackName\" value=\"{4}\" valuetype=\"data\"/><param name=\"timescale\" value=\"{5}\" valuetype=\"data\"/></textstream>";
+
+                    string content = header;
+                    int Track = 0;
+                    foreach (var cl in cache.VideoChunkListList)
+                    {
+                        string FileName = videoContentFileName + "_" + Track.ToString() + ".ismv";
+                        VideoChunkListConfiguration ac = cl.Configuration as VideoChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            
+                            content += string.Format(videoMask, FileName,
+                                                ac.Bitrate.ToString(),
+                                                ac.TrackID.ToString(),
+                                                //cl.Configuration.Language.ToString(),
+                                                ( string.IsNullOrEmpty(ac.TrackName) ?"video" :ac.TrackName.ToString()),
+                                                ac.TimeScale.ToString());
+                            Track++;
+                        }
+                    }
+                    Track = 0;
+                    foreach (var cl in cache.AudioChunkListList)
+                    {
+                        string FileName = audioContentFileName + "_" + Track.ToString() + ".isma";
+                        AudioChunkListConfiguration ac = cl.Configuration as AudioChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            content += string.Format(audioMask, FileName,
+                                                ac.Bitrate.ToString(),
+                                                (!string.IsNullOrEmpty(ac.Language)? ac.Language.ToString(): "unk"),
+                                                ac.TrackID.ToString(),
+                                                (string.IsNullOrEmpty(ac.TrackName) ? "audio"  : ac.TrackName.ToString()),
+                                                ac.TimeScale.ToString());
+                            Track++;
+
+                        }
+                    }
+                    Track = 0;
+                    foreach (var cl in cache.TextChunkListList)
+                    {
+                        string FileName = textContentFileName + "_" + Track.ToString() + ".ismt";
+                        AudioChunkListConfiguration ac = cl.Configuration as AudioChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            content += string.Format(textMask, FileName,
+                                                ac.Bitrate.ToString(),
+                                                (!string.IsNullOrEmpty(ac.Language) ? ac.Language.ToString() : "unk"),
+                                                ac.TrackID.ToString(),
+                                                (string.IsNullOrEmpty(ac.TrackName) ? "text"  : ac.TrackName.ToString()),
+                                                ac.TimeScale.ToString());
+                            Track++;
+
+                        }
+                    }
+
+
+                    content += footer;
+
+                    byte[] dump = { 0xFF, 0xFE };
+                    bResult = Save(Path.Combine(Path.Combine(root, cache.StoragePath), ISMFileName), dump);
+                    Append(Path.Combine(Path.Combine(root, cache.StoragePath), ISMFileName), System.Text.Encoding.Unicode.GetBytes(content));
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer exception for Uri: " + cache.ManifestUri.ToString() + " Exception: " + e.Message);
+
+                }
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer Exit for Uri: " + cache.ManifestUri.ToString());
+            }
+            return bResult;
+        }
+        /// <summary>
+        /// Save ISMC File
+        /// Save manifest on disk 
+        /// </summary>
+        public async Task<bool> SaveISMC(ManifestManager cache)
+        {
+            bool bResult = false;
+            if (!DirectoryExists(Path.Combine(root, cache.StoragePath)))
+                CreateDirectory(Path.Combine(root, cache.StoragePath));
+
+            using (var releaser = await internalManifestDiskLock.WriterLockAsync())
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer Enter for Uri: " + cache.ManifestUri.ToString());
+                try
+                {
+                    string headerMask = "<?xml version=\"1.0\" encoding=\"utf-16\"?><SmoothStreamingMedia MajorVersion=\"2\" MinorVersion=\"0\" TimeScale=\"{0}\" Duration=\"{1}\">";
+                    string footer = "</SmoothStreamingMedia>";
+                    string videoStreamIndexMask = "<StreamIndex Type=\"video\" TimeScale=\"{0}\" Name=\"{1}\" Chunks=\"{2}\" QualityLevels=\"{3}\" Url=\"{4}\" MaxWidth=\"{5}\" MaxHeight=\"{6}\" DisplayWidth=\"{7}\" DisplayHeight=\"{8}\" >";
+                    string videoQualityLevelMask = "<QualityLevel Index=\"{0}\" Bitrate=\"{1}\" NominalBitrate=\"{2}\" BufferTime=\"1000\" FourCC=\"{3}\" MaxWidth=\"{4}\" MaxHeight=\"{5}\" CodecPrivateData=\"{6}\" NALUnitLengthField=\"4\"/>";
+                    string audioStreamIndexMask = "<StreamIndex Type=\"audio\" TimeScale=\"{0}\" Language=\"{1}\" Name=\"{2}\" Chunks=\"{3}\" QualityLevels=\"1\" Url=\"{4}\">";
+                    string audioQualityLevelMask = "<QualityLevel Index=\"0\" Bitrate=\"{0}\" SamplingRate=\"{1}\" Channels=\"{2}\" BitsPerSample=\"{3}\" PacketSize=\"{4}\"  AudioTag=\"{5}\" FourCC=\"{6}\" CodecPrivateData=\"{7}\"/>";
+                    string textStreamIndexMask = "<StreamIndex Type=\"text\" TimeScale=\"{0}\" Subtype=\"SUBT\" Language=\"{1}\" Name=\"{2}\" Url=\"{3}\" Chunks=\"{4}\">";
+                    string textQualityLevelMask = "<QualityLevel Index=\"0\" Bitrate=\"{0}\" FourCC=\"{1}\"/>";
+                    //string chunkBeginMask = "<c t=\"{0}\" d=\"{1}\"/>";
+//                    string chunkBeginMask = "<c n=\"{0}\" d=\"{1}\"/>";
+                    string chunkBeginMask = "<c t=\"0\" d=\"{0}\"/>";
+                    string chunkMask = "<c d=\"{0}\"/>";
+                    string streamIndexEnd = "</StreamIndex>";
+
+                    string content = string.Format(headerMask, cache.TimeScale.ToString(),(cache.GetMinChunkDurationMs()*10000).ToString());
+                    int Track = 0;
+                    ulong TotalChunks = 0;
+                    string url = string.Empty;
+                    int MaxWidth = 0;
+                    int MaxHeight = 0;
+                    string Name = string.Empty;
+                    // video section
+                    
+                    foreach (var cl in cache.VideoChunkListList)
+                    {
+                        if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
+                            TotalChunks = cl.TotalChunks;
+                        url = cl.OriginalTemplateUrl;
+                        VideoChunkListConfiguration ac = cl.Configuration as VideoChunkListConfiguration;
+                        if(ac != null)
+                        {
+                            Name = (string.IsNullOrEmpty(ac.TrackName)?"video": ac.TrackName.ToString());
+                            
+                            if (ac.Width > MaxWidth)
+                                MaxWidth = ac.Width;
+                            if (ac.Height > MaxHeight)
+                                MaxHeight = ac.Height;
+
+                        }
+                    }
+                    string chunksContent = string.Empty;
+                    ulong offset = 0;
+                    ulong size = 20;
+                    string IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), videoIndexFileName) + "_0";
+                    ulong fileSize = GetFileSize(IndexFile);
+                    int Index = 0;
+                    ulong lastTime = 0;
+                    while (offset < fileSize)
+                    {
+                        byte[] b = Restore(IndexFile, offset, size);
+                        IndexCache ic = new IndexCache(b);
+                        if (ic != null)
+                        {
+                            if (Index == 0)
+                                lastTime = ic.Time;
+                            else
+                            {
+                                ulong duration = ic.Time - lastTime;
+                                if (Index == 1)
+                                    chunksContent += string.Format(chunkBeginMask,
+                                //                    lastTime.ToString(),
+                                duration.ToString());
+                                else
+                                    chunksContent += string.Format(chunkMask,
+                                                   // (Index - 1).ToString(),
+                                                    duration.ToString());
+                                lastTime = ic.Time;
+
+                            }
+                            Index++;
+                        }
+                        offset += size;
+                    }
+
+                    content += string.Format(videoStreamIndexMask,
+                        cache.TimeScale.ToString(),
+                        Name,
+                        (Index-1).ToString(), 
+                        cache.VideoChunkListList.Count.ToString(), 
+                        url, 
+                        MaxWidth, 
+                        MaxHeight, 
+                        MaxWidth, 
+                        MaxHeight);
+                    foreach (var cl in cache.VideoChunkListList)
+                    {
+                        VideoChunkListConfiguration ac = cl.Configuration as VideoChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            content += string.Format(videoQualityLevelMask,
+                                        Track.ToString(),
+                                        ac.Bitrate.ToString(),
+                                        ac.Bitrate.ToString(),
+                                        ac.FourCC.ToString(),
+                                        ac.Width.ToString(),
+                                        ac.Height.ToString(),
+                                        ac.CodecPrivateData.ToString());
+                            Track++;
+                        }
+                    }
+                    content += chunksContent;
+                    content += streamIndexEnd;
+
+                    // Audio section
+                    int AudioTrack = 0;
+                    string Language = string.Empty;
+                    foreach (var cl in cache.AudioChunkListList)
+                    {
+                        if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
+                            TotalChunks = cl.TotalChunks;
+                        url = cl.OriginalTemplateUrl;
+                        AudioChunkListConfiguration ac = cl.Configuration as AudioChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            offset = 0;
+                            size = 20;
+                            IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioIndexFileName) + "_" + AudioTrack.ToString();
+                            fileSize = GetFileSize(IndexFile);
+                            Index = 0;
+                            lastTime = 0;
+                            chunksContent = string.Empty;
+                            while (offset < fileSize)
+                            {
+                                byte[] b = Restore(IndexFile, offset, size);
+                                IndexCache ic = new IndexCache(b);
+                                if (ic != null)
+                                {
+                                    if (Index == 0)
+                                        lastTime = ic.Time;
+                                    else
+                                    {
+                                        ulong duration = ic.Time - lastTime;
+                                        if (Index == 1)
+                                            chunksContent += string.Format(chunkBeginMask,
+                                        //                    lastTime.ToString(),
+                                        duration.ToString());
+                                        else
+                                            chunksContent += string.Format(chunkMask,
+                                                            // (Index - 1).ToString(),
+                                                            duration.ToString());
+                                        lastTime = ic.Time;
+                                    }
+                                    Index++;
+                                }
+                                offset += size;
+                            }
+
+                            content += string.Format(audioStreamIndexMask,
+                                cache.TimeScale.ToString(),
+                                ac.Language,
+                                (string.IsNullOrEmpty(ac.TrackName) ? "audio" : ac.TrackName.ToString()),
+                                (Index - 1).ToString(),
+                                url);
+                            content += string.Format(audioQualityLevelMask,
+                                ac.Bitrate.ToString(),
+                                ac.SamplingRate.ToString(),
+                                ac.Channels.ToString(),
+                                ac.BitsPerSample.ToString(),
+                                ac.PacketSize.ToString(),
+                                ac.AudioTag.ToString(),
+                                ac.FourCC.ToString(),
+                                ac.CodecPrivateData.ToString());
+
+                            content += chunksContent;
+                            content += streamIndexEnd;
+                            AudioTrack++;
+                        }
+                    }
+
+                    // Text section
+                    int TextTrack = 0;
+                    Language = string.Empty;
+                    foreach (var cl in cache.TextChunkListList)
+                    {
+                        if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
+                            TotalChunks = cl.TotalChunks;
+                        url = cl.OriginalTemplateUrl;
+                        TextChunkListConfiguration ac = cl.Configuration as TextChunkListConfiguration;
+                        if (ac != null)
+                        {
+                            offset = 0;
+                            size = 20;
+                            IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), textIndexFileName) + "_" + TextTrack.ToString();
+                            fileSize = GetFileSize(IndexFile);
+                            Index = 0;
+                            lastTime = 0;
+                            chunksContent = string.Empty;
+                            while (offset < fileSize)
+                            {
+                                byte[] b = Restore(IndexFile, offset, size);
+                                IndexCache ic = new IndexCache(b);
+                                if (ic != null)
+                                {
+                                    if (Index == 0)
+                                        lastTime = ic.Time;
+                                    else
+                                    {
+                                        ulong duration = ic.Time - lastTime;
+                                        if (Index == 1)
+                                            chunksContent += string.Format(chunkBeginMask,
+                                        //                    lastTime.ToString(),
+                                        duration.ToString());
+                                        else
+                                            chunksContent += string.Format(chunkMask,
+                                                            // (Index - 1).ToString(),
+                                                            duration.ToString());
+                                        lastTime = ic.Time;
+                                    }
+                                    Index++;
+                                }
+                                offset += size;
+                            }
+
+                            content += string.Format(textStreamIndexMask,
+                                cache.TimeScale.ToString(),
+                                ac.Language,
+                                (string.IsNullOrEmpty(ac.TrackName) ? "text" : ac.TrackName.ToString()),
+                                url,
+                                (Index - 1).ToString());
+                            content += string.Format(textQualityLevelMask,
+                                ac.Bitrate.ToString(),
+                                ac.FourCC.ToString());
+
+                            content += chunksContent;
+                            content += streamIndexEnd;
+                            TextTrack++;
+                        }
+                    }
+
+
+
+                    content += footer;
+                    byte[] dump = { 0xFF, 0xFE };
+                    bResult = Save(Path.Combine(Path.Combine(root, cache.StoragePath), ISMCFileName), dump);
+                    Append(Path.Combine(Path.Combine(root, cache.StoragePath), ISMCFileName), System.Text.Encoding.Unicode.GetBytes(content));
+                }
+                catch (Exception e)
                 {
                     System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " internalManifestDiskLock Writer exception for Uri: " + cache.ManifestUri.ToString() + " Exception: " + e.Message);
 
@@ -678,6 +1032,16 @@ namespace ASTool.CacheHelper
             {
                 bResult = false;
                 System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving manifest chunks for url: " + cache.ManifestUri.ToString());
+            }
+            if (!(await SaveISM(cache)))
+            {
+                bResult = false;
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving ism file for url: " + cache.ManifestUri.ToString());
+            }
+            if (!(await SaveISMC(cache)))
+            {
+                bResult = false;
+                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while saving ismc file for url: " + cache.ManifestUri.ToString());
             }
             return bResult;
         }

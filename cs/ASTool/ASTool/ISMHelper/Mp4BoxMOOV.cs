@@ -75,7 +75,23 @@ namespace ASTool.ISMHelper
             }
             return result;
         }
-
+        public List<int> GetListTrack()
+        {
+            List<int> result = new List<int>();
+            if (Children != null)
+            {
+                foreach (var box in Children)
+                {
+                    if (box.GetBoxType() == "trak")
+                    {
+                        Mp4BoxTRAK trakbox = box as Mp4BoxTRAK;
+                        if (trakbox != null)
+                            result.Add(trakbox.GetTrackID());
+                    }
+                }
+            }
+            return result;
+        }
         public List<int> GetListTrackToDecrypt()
         {
             List<int> result = new List<int>();

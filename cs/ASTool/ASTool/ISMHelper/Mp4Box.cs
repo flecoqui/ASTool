@@ -20,6 +20,9 @@ namespace ASTool.ISMHelper
         public static Guid kExtPiffTrackEncryptionBoxGuid = new Guid("{8974DBCE-7BE7-4C51-84F9-7148F9882554}");
         public static Guid kExtProtectHeaderBoxGuid = new Guid("{d08a4f18-10f3-4a82-b6c8-32d8aba183d3}");
         public static Guid kExtProtectHeaderMOOFBoxGuid = new Guid("{a2394f52-5a9b-4f14-a244-6c427c648df4}");
+        public static Guid kTrackFragExtHeaderBoxGuid = new Guid("{6D1D9B05-42D5-44E6-80E2-141DAFF757B2}");
+        public static Guid kTrackFragHeaderBoxGuid = new Guid("{D4807EF2-CA39-4695-8E54-26CB9E46A79F}");
+
         protected Int32 Length;
         protected string Type;
         protected byte[] Data;
@@ -450,6 +453,18 @@ namespace ASTool.ISMHelper
                 return true;
             }
             return false;
+        }
+        static public Int64 ReadMp4BoxInt64(byte[] buffer, int offset)
+        {
+            Int64 Len = 0;
+
+            Len = buffer[offset];
+            for (int i = 1; i < 8; i++)
+            {
+                Len <<= 8;
+                Len |= buffer[offset + i];
+            }
+            return Len;
         }
         static public bool WriteMp4BoxInt32(byte[] buffer, int offset, Int32 value)
         {

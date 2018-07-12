@@ -21,6 +21,225 @@ namespace ASTool
 {
     public partial class Program
     {
+        //public static bool UpdateFile(Options opt, string InputPath, string OutputPath)
+        //{
+        //    bool bResult = true;
+        //    string log = string.Empty;
+        //    Dictionary<int, List<long>> MOOFOffsetDictionnary = new Dictionary<int, List<long>>();
+        //    try
+        //    {
+        //        int SequenceNumber = 1;
+        //        FileStream fsi = new FileStream(InputPath, FileMode.Open, FileAccess.Read);
+        //        FileStream fso = new FileStream(OutputPath, FileMode.Create, FileAccess.ReadWrite);
+        //        if ((fsi != null) && (fso != null))
+        //        {
+        //            long offset = 0;
+        //            fsi.Seek((long)offset, SeekOrigin.Begin);
+        //            while (offset < fsi.Length)
+        //            {
+        //                Mp4Box box = Mp4Box.ReadMp4Box(fsi);
+        //                if (box != null)
+        //                {
+        //                    log += box.ToString() + "\tat offset: " + offset.ToString() + "\r\n";
+
+        //                    if (box.GetBoxType() == "ftyp")
+        //                    {
+        //                        // No modification required
+        //                        // Copy the box into the new file
+        //                        if (Mp4Box.WriteMp4Box(box, fso) != true)
+        //                        {
+        //                            bResult = false;
+        //                            opt.LogError("Unexpected error while writing ftyp box in the output file: " + OutputPath);
+        //                            break;
+        //                        }
+        //                        offset += box.GetBoxLength();
+        //                    }
+        //                    else if (box.GetBoxType() == "moov")
+        //                    {
+        //                        // Get the list of tracks which are encrypted
+        //                        // Remove uuid box DO8A...83D3 which contains the protection header
+        //                        // Replace encv box with avc1 and anca with mp4a
+        //                        // Remove sinf box
+        //                        // Calculate the new length and keep the difference with the previous lenght
+        //                        // Copy the new box into the new file
+        //                        Mp4BoxMOOV moov = box as Mp4BoxMOOV;
+        //                        if (moov != null)
+        //                        {
+        //                            int currentLength = moov.GetBoxLength();
+        //                            List<int> ListTrackID = moov.GetListTrack();
+        //                            if ((ListTrackID != null) && (ListTrackID.Count > 0))
+        //                            {
+        //                                foreach (var track in ListTrackID)
+        //                                {
+        //                                    MOOFOffsetDictionnary.Add(track, new List<long>());
+        //                                }
+        //                            }
+        //                        }
+        //                        // Copy the box into the new file
+        //                        if (Mp4Box.WriteMp4Box(box, fso) != true)
+        //                        {
+        //                            bResult = false;
+        //                            opt.LogError("Unexpected error while writing moov box in the output file: " + OutputPath);
+        //                            break;
+        //                        }
+        //                        offset += box.GetBoxLength();
+        //                    }
+        //                    else if (box.GetBoxType() == "moof")
+        //                    {
+        //                        // Remove uuid box A239...8DF4 which contains the IV (initialisation vectors for the encryption)
+        //                        // Keep the list of IV (initialisation vectors for the encryption) included in this box
+        //                        // Keep the list of sample size
+        //                        // Calculate the new lenght and keep the difference with the previous lenght
+        //                        // Open the next box (mdat) and decrypt sample by sample 
+        //                        Mp4BoxMOOF moof = box as Mp4BoxMOOF;
+        //                        if (moof != null)
+        //                        {
+        //                            int currentLength = moof.GetBoxLength();
+        //                            int currentTrackID = moof.GetTrackID();
+        //                            Mp4BoxUUID uuidextbox = moof.GetUUIDBox(Mp4Box.kTrackFragExtHeaderBoxGuid) as Mp4BoxUUID;
+        //                            Mp4BoxUUID uuidbox = moof.GetUUIDBox(Mp4Box.kTrackFragHeaderBoxGuid) as Mp4BoxUUID;
+        //                            Mp4BoxTRUN trunbox = moof.GetChild("trun") as Mp4BoxTRUN;
+        //                            if ((trunbox != null) && ((uuidextbox != null)|| (uuidbox != null)))
+        //                            {
+        //                                bool result = false;
+        //                                if (uuidextbox != null)
+        //                                {
+        //                                    moof.RemoveUUIDBox(Mp4Box.kTrackFragExtHeaderBoxGuid);
+        //                                    result = true;
+        //                                }
+        //                                if (uuidbox != null)
+        //                                {
+        //                                    moof.RemoveUUIDBox(Mp4Box.kTrackFragHeaderBoxGuid);
+        //                                    result = true;
+        //                                }
+        //                                if (result == true)
+        //                                {
+        //                                    if (MOOFOffsetDictionnary.ContainsKey(currentTrackID))
+        //                                        MOOFOffsetDictionnary[currentTrackID].Add(offset);
+
+        //                                    Int32 doff = trunbox.GetDataOffset();
+        //                                    if (uuidextbox != null)
+        //                                        doff -= uuidextbox.GetBoxLength();
+        //                                    if (uuidbox != null)
+        //                                        doff -= uuidbox.GetBoxLength();
+        //                                    if (doff > 0)
+        //                                        trunbox.SetDataOffset(doff);
+        //                                    else
+        //                                    {
+        //                                        bResult = false;
+        //                                        opt.LogError("Error while updating the dataoffset in the TRUN box in the input file after a moof box: " + InputPath);
+        //                                        break;
+        //                                    }
+        //                                    moof.UpdateMFHDSequence(SequenceNumber++);
+        //                                    byte[] newBuffer = moof.UpdateBoxBuffer();
+        //                                    if (newBuffer != null)
+        //                                    {
+        //                                        int newLength = newBuffer.Length;
+        //                                        int diff = newLength - currentLength;
+
+        //                                        Mp4Box.WriteMp4BoxBuffer(newBuffer, fso);
+        //                                        offset += newBuffer.Length;
+
+        //                                    }
+        //                                }
+        //                                else
+        //                                {
+        //                                    offset += box.GetBoxLength();
+        //                                    if (Mp4Box.WriteMp4Box(box, fso) != true)
+        //                                    {
+        //                                        bResult = false;
+        //                                        opt.LogError("Unexpected error while writing moof box in the output file: " + OutputPath);
+        //                                        break;
+        //                                    }
+        //                                }
+        //                                Mp4Box mdatbox = Mp4Box.ReadMp4Box(fsi);
+        //                                if (mdatbox != null)
+        //                                {
+        //                                    if (mdatbox.GetBoxType() != "mdat")
+        //                                    {
+        //                                        bResult = false;
+        //                                        opt.LogError("Unexpected box read in the input file after a moof box: " + InputPath + " box: " + mdatbox.GetBoxType());
+        //                                        break;
+        //                                    }
+        //                                    else
+        //                                    {
+        //                                        if (Mp4Box.WriteMp4Box(mdatbox, fso) != true)
+        //                                        {
+        //                                            bResult = false;
+        //                                            opt.LogError("Unexpected error while writing mdat box in the output file: " + OutputPath);
+        //                                            break;
+        //                                        }
+        //                                    }
+        //                                    offset += mdatbox.GetBoxLength();
+        //                                }
+        //                                else
+        //                                    opt.LogError("Error while reading the mdat box in the input file after a moof box: " + InputPath);
+        //                            }
+        //                        }
+        //                    }
+        //                    else if (box.GetBoxType() == "mfra")
+        //                    {
+        //                        // Update each tfra boxes with the new offset of each moof box
+        //                        // Copy the new mfra box into the new file
+        //                        Mp4BoxMFRA mfra = box as Mp4BoxMFRA;
+        //                        if (mfra != null)
+        //                        {
+        //                            if (MOOFOffsetDictionnary.Count > 0)
+        //                            {
+        //                                foreach (var v in MOOFOffsetDictionnary)
+        //                                {
+        //                                    if (mfra.UpdateMOOFTimeAndOffsetForTrack(v.Key, v.Value) != true)
+        //                                    {
+        //                                        bResult = false;
+        //                                        opt.LogError("Error while updating the MFRA/TFRA offset table in the output file: " + OutputPath);
+        //                                        break;
+        //                                    }
+
+        //                                }
+
+        //                                byte[] newBuffer = mfra.UpdateBoxBuffer();
+        //                                if (newBuffer != null)
+        //                                {
+        //                                    Mp4Box.WriteMp4BoxBuffer(newBuffer, fso);
+        //                                    offset += newBuffer.Length;
+        //                                }
+        //                            }
+        //                            else
+        //                            {
+        //                                if (Mp4Box.WriteMp4Box(box, fso) != true)
+        //                                {
+        //                                    bResult = false;
+        //                                    opt.LogError("Unexpected error while writing mfra box in the output file: " + OutputPath);
+        //                                    break;
+        //                                }
+        //                                offset += box.GetBoxLength();
+        //                            }
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        bResult = false;
+        //                        opt.LogError("Unexpected box read in the input file: " + InputPath + " box: " + box.GetBoxType());
+        //                        offset += box.GetBoxLength();
+        //                        break;
+        //                    }
+        //                }
+        //                else
+        //                    break;
+        //            }
+        //            fsi.Close();
+        //            fso.Close();
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        opt.LogError("ERROR: Exception while decrypting the file: " + InputPath + " Exception: " + ex.Message);
+        //        bResult = false;
+        //    }
+        //    return bResult;
+        //}
+
         public static bool DecryptFile(Options opt, string InputPath, string OutputPath, byte[] ContentKey, bool bProtectCaption)
         {
             bool bResult = true;
