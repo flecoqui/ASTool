@@ -234,7 +234,7 @@ namespace ASTool.CacheHelper
                     foreach (var cl in cache.TextChunkListList)
                     {
                         string FileName = textContentFileName + "_" + Track.ToString() + ".ismt";
-                        AudioChunkListConfiguration ac = cl.Configuration as AudioChunkListConfiguration;
+                        TextChunkListConfiguration ac = cl.Configuration as TextChunkListConfiguration;
                         if (ac != null)
                         {
                             content += string.Format(textMask, FileName,
