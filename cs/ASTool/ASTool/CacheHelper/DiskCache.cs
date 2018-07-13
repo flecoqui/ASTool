@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.IO.IsolatedStorage;
+using ASTool.ISMHelper;
 
 namespace ASTool.CacheHelper
 {
@@ -571,8 +572,10 @@ namespace ASTool.CacheHelper
                             //    foreach ( var cc in cl.ChunksQueue)
                             {
                                 //var cc = cl.ChunksQueue.ElementAt(Index);
+
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
+                                    cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks);
                                     IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
                                     if (ic != null)
                                     {
@@ -672,6 +675,7 @@ namespace ASTool.CacheHelper
                               //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
+                                    cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks);
                                     IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
                                     if (ic != null)
                                     {
@@ -720,7 +724,85 @@ namespace ASTool.CacheHelper
 
             return bResult;
         }
+        byte[] RemoveLiveTimestampAndUpdateSequenceNumber(byte[] buffer,ulong sequenceNumber)
+        {
+            byte[] result = null;
+            if ((buffer != null) && (buffer.Length > 0))
+            {
+                int offset = 0;
+                while (offset < buffer.Length)
+                {
+                    Mp4Box box = Mp4Box.ReadMp4BoxFromBuffer(buffer, offset);
+                    if (box != null)
+                    {
+                        if (box.GetBoxType() == "moof")
+                        {
+                            // Remove uuid box A239...8DF4 which contains the IV (initialisation vectors for the encryption)
+                            // Keep the list of IV (initialisation vectors for the encryption) included in this box
+                            // Keep the list of sample size
+                            // Calculate the new lenght and keep the difference with the previous lenght
+                            // Open the next box (mdat) and decrypt sample by sample 
+                            Mp4BoxMOOF moof = box as Mp4BoxMOOF;
+                            if (moof != null)
+                            {
+                                int currentLength = moof.GetBoxLength();
+                                int currentTrackID = moof.GetTrackID();
+                                bool bRemoved = false;
+                                
+                                Mp4BoxUUID uuidextbox = moof.GetUUIDBox(Mp4Box.kTrackFragExtHeaderBoxGuid) as Mp4BoxUUID;
+                                if (uuidextbox != null)
+                                {
+                                    moof.RemoveUUIDBox(Mp4Box.kTrackFragExtHeaderBoxGuid);
+                                    bRemoved = true;
+                                }
+                                Mp4BoxUUID uuidbox = moof.GetUUIDBox(Mp4Box.kTrackFragHeaderBoxGuid) as Mp4BoxUUID;
+                                if (uuidbox != null)
+                                {
+                                    moof.RemoveUUIDBox(Mp4Box.kTrackFragHeaderBoxGuid);
+                                    bRemoved = true;
+                                }
+                                Int32 decreasedSize = 0;
+                                if (bRemoved == true)
+                                {
+                                    moof.UpdateMFHDSequence((int)sequenceNumber);
+                                    Mp4BoxTRUN trunbox = moof.GetChild("trun") as Mp4BoxTRUN;
+                                    if (trunbox != null)
+                                    {
+                                        Int32 doff = trunbox.GetDataOffset();
+                                        if (uuidextbox != null)
+                                            decreasedSize += uuidextbox.GetBoxLength();
+                                        if (uuidbox != null)
+                                            decreasedSize += uuidbox.GetBoxLength();
+                                        doff -= decreasedSize;
+                                        if (doff > 0)
+                                            trunbox.SetDataOffset(doff);
+                                    }
+                                    byte[] newBuffer = moof.UpdateBoxBuffer();
+                                    result = new byte[buffer.Length - decreasedSize];
+                                    if (result != null)
+                                    {
+                                        Buffer.BlockCopy(buffer, 0, result, 0, offset);
+                                        Buffer.BlockCopy(newBuffer, 0, result, offset, moof.GetBoxLength());
+                                        Buffer.BlockCopy(buffer, offset + moof.GetBoxLength() + decreasedSize, result, offset + moof.GetBoxLength(), buffer.Length - offset - moof.GetBoxLength() - decreasedSize);
+                                        return result;
+                                    }
+                                }
+                                else
+                                    break;
+                            }
+                        }
+                        else
+                        {
 
+                        }
+                        offset += box.GetBoxLength();
+                    }
+                    else
+                        break;
+                }
+            }
+            return buffer;
+        }
         /// <summary>
         /// SaveVideoChunks
         /// Save video chunks on disk 
@@ -772,6 +854,7 @@ namespace ASTool.CacheHelper
                               //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
+                                   cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks);
                                     IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
                                     if (ic != null)
                                     {

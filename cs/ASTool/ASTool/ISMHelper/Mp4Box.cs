@@ -623,6 +623,30 @@ namespace ASTool.ISMHelper
             }
             return box;
         }
+        public static Mp4Box ReadMp4BoxFromBuffer(byte[] sourceBuffer, int offset)
+        {
+            Mp4Box box = null;
+            if (sourceBuffer != null)
+            {
+
+                int mp4BoxLen = 0;
+                mp4BoxLen |= (int)(sourceBuffer[offset + 0] << 24);
+                mp4BoxLen |= (int)(sourceBuffer[offset + 1] << 16);
+                mp4BoxLen |= (int)(sourceBuffer[offset + 2] << 8);
+                mp4BoxLen |= (int)(sourceBuffer[offset + 3] << 0);
+                if (mp4BoxLen >= 8)
+                {
+                    byte[] buffer = new byte[mp4BoxLen];
+                    if (buffer != null)
+                    {
+                        WriteMp4BoxInt32(buffer, 0, mp4BoxLen);
+                        Buffer.BlockCopy(sourceBuffer, offset + 4, buffer, 4, mp4BoxLen - 4);
+                        return CreateMp4Box(buffer, 0);
+                    }
+                }
+            }
+            return box;
+        }
         public static bool WriteMp4Box(Mp4Box box, FileStream fs)
         {
             bool result = false;
