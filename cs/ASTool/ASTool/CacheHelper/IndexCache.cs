@@ -19,13 +19,15 @@ namespace ASTool.CacheHelper
     class IndexCache
     {
         public ulong Time;
+        public ulong Duration;
         public ulong Offset;
         public UInt32 Size;
 
         /// <summary>Construct the data by giving the parameters. This is for writing index data to storage</summary>
-        public IndexCache(ulong time, ulong offset, UInt32 size)
+        public IndexCache(ulong time, ulong duration, ulong offset, UInt32 size)
         {
             Time = time;
+            Duration = duration;
             Offset = offset;
             Size = size;
         }
@@ -34,8 +36,9 @@ namespace ASTool.CacheHelper
         public IndexCache(Byte[] Data)
         {
             Time = BitConverter.ToUInt64(Data, 0);
-            Offset = BitConverter.ToUInt64(Data, 8);
-            Size = BitConverter.ToUInt32(Data, 16);
+            Duration = BitConverter.ToUInt64(Data, 8);
+            Offset = BitConverter.ToUInt64(Data, 16);
+            Size = BitConverter.ToUInt32(Data, 24);
         }
 
         /// <summary> Convert all content index information to Byte Array in order to save it to file</summary>
@@ -44,12 +47,13 @@ namespace ASTool.CacheHelper
         {
             Byte[] Data = new Byte[IndexCacheSize];
             BitConverter.GetBytes(Time).CopyTo(Data, 0);
-            BitConverter.GetBytes(Offset).CopyTo(Data, 8);
-            BitConverter.GetBytes(Size).CopyTo(Data, 16);
+            BitConverter.GetBytes(Duration).CopyTo(Data, 8);
+            BitConverter.GetBytes(Offset).CopyTo(Data, 16);
+            BitConverter.GetBytes(Size).CopyTo(Data, 24);
 
             return Data;
         }
 
-        public const int IndexCacheSize = 20;
+        public const int IndexCacheSize = 28;
     }
 }

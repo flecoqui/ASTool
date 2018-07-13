@@ -321,11 +321,11 @@ namespace ASTool.CacheHelper
                     }
                     string chunksContent = string.Empty;
                     ulong offset = 0;
-                    ulong size = 20;
+                    ulong size = 28;
                     string IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), videoIndexFileName) + "_0";
                     ulong fileSize = GetFileSize(IndexFile);
                     int Index = 0;
-                    ulong lastTime = 0;
+                    //ulong lastTime = 0;
                     while (offset < fileSize)
                     {
                         byte[] b = Restore(IndexFile, offset, size);
@@ -333,21 +333,26 @@ namespace ASTool.CacheHelper
                         if (ic != null)
                         {
                             if (Index == 0)
-                                lastTime = ic.Time;
+                                chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
                             else
-                            {
-                                ulong duration = ic.Time - lastTime;
-                                if (Index == 1)
-                                    chunksContent += string.Format(chunkBeginMask,
-                                //                    lastTime.ToString(),
-                                duration.ToString());
-                                else
-                                    chunksContent += string.Format(chunkMask,
-                                                   // (Index - 1).ToString(),
-                                                    duration.ToString());
-                                lastTime = ic.Time;
+                                chunksContent += string.Format(chunkMask, ic.Duration.ToString());
 
-                            }
+                            //if (Index == 0)
+                            //    lastTime = ic.Time;
+                            //else
+                            //{
+                            //    ulong duration = ic.Time - lastTime;
+                            //    if (Index == 1)
+                            //        chunksContent += string.Format(chunkBeginMask,
+                            //    //                    lastTime.ToString(),
+                            //    duration.ToString());
+                            //    else
+                            //        chunksContent += string.Format(chunkMask,
+                            //                        // (Index - 1).ToString(),
+                            //                        duration.ToString());
+                            //    lastTime = ic.Time;
+
+                            //}
                             Index++;
                         }
                         offset += size;
@@ -394,11 +399,11 @@ namespace ASTool.CacheHelper
                         if (ac != null)
                         {
                             offset = 0;
-                            size = 20;
+                            size = 28;
                             IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioIndexFileName) + "_" + AudioTrack.ToString();
                             fileSize = GetFileSize(IndexFile);
                             Index = 0;
-                            lastTime = 0;
+                            //lastTime = 0;
                             chunksContent = string.Empty;
                             while (offset < fileSize)
                             {
@@ -407,20 +412,25 @@ namespace ASTool.CacheHelper
                                 if (ic != null)
                                 {
                                     if (Index == 0)
-                                        lastTime = ic.Time;
+                                        chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
                                     else
-                                    {
-                                        ulong duration = ic.Time - lastTime;
-                                        if (Index == 1)
-                                            chunksContent += string.Format(chunkBeginMask,
-                                        //                    lastTime.ToString(),
-                                        duration.ToString());
-                                        else
-                                            chunksContent += string.Format(chunkMask,
-                                                            // (Index - 1).ToString(),
-                                                            duration.ToString());
-                                        lastTime = ic.Time;
-                                    }
+                                        chunksContent += string.Format(chunkMask, ic.Duration.ToString());
+
+                                    //if (Index == 0)
+                                    //    lastTime = ic.Time;
+                                    //else
+                                    //{
+                                    //    ulong duration = ic.Time - lastTime;
+                                    //    if (Index == 1)
+                                    //        chunksContent += string.Format(chunkBeginMask,
+                                    //    //                    lastTime.ToString(),
+                                    //    duration.ToString());
+                                    //    else
+                                    //        chunksContent += string.Format(chunkMask,
+                                    //                        // (Index - 1).ToString(),
+                                    //                        duration.ToString());
+                                    //    lastTime = ic.Time;
+                                    //}
                                     Index++;
                                 }
                                 offset += size;
@@ -460,11 +470,11 @@ namespace ASTool.CacheHelper
                         if (ac != null)
                         {
                             offset = 0;
-                            size = 20;
+                            size = 28;
                             IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), textIndexFileName) + "_" + TextTrack.ToString();
                             fileSize = GetFileSize(IndexFile);
                             Index = 0;
-                            lastTime = 0;
+                            //lastTime = 0;
                             chunksContent = string.Empty;
                             while (offset < fileSize)
                             {
@@ -473,20 +483,25 @@ namespace ASTool.CacheHelper
                                 if (ic != null)
                                 {
                                     if (Index == 0)
-                                        lastTime = ic.Time;
+                                        chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
                                     else
-                                    {
-                                        ulong duration = ic.Time - lastTime;
-                                        if (Index == 1)
-                                            chunksContent += string.Format(chunkBeginMask,
-                                        //                    lastTime.ToString(),
-                                        duration.ToString());
-                                        else
-                                            chunksContent += string.Format(chunkMask,
-                                                            // (Index - 1).ToString(),
-                                                            duration.ToString());
-                                        lastTime = ic.Time;
-                                    }
+                                        chunksContent += string.Format(chunkMask, ic.Duration.ToString());
+
+                                    //if (Index == 0)
+                                    //    lastTime = ic.Time;
+                                    //else
+                                    //{
+                                    //    ulong duration = ic.Time - lastTime;
+                                    //    if (Index == 1)
+                                    //        chunksContent += string.Format(chunkBeginMask,
+                                    //    //                    lastTime.ToString(),
+                                    //    duration.ToString());
+                                    //    else
+                                    //        chunksContent += string.Format(chunkMask,
+                                    //                        // (Index - 1).ToString(),
+                                    //                        duration.ToString());
+                                    //    lastTime = ic.Time;
+                                    //}
                                     Index++;
                                 }
                                 offset += size;
@@ -576,7 +591,7 @@ namespace ASTool.CacheHelper
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     //cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
-                                    IndexCache ic = new IndexCache(cc.Time, AudioOffset, cc.GetLength());
+                                    IndexCache ic = new IndexCache(cc.Time, cc.Duration, AudioOffset, cc.GetLength());
                                     if (ic != null)
                                     {
                                         ulong res = Append(FilePath, cc.chunkBuffer);
@@ -676,7 +691,7 @@ namespace ASTool.CacheHelper
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                     //cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
-                                    IndexCache ic = new IndexCache(cc.Time, TextOffset, cc.GetLength());
+                                    IndexCache ic = new IndexCache(cc.Time, cc.Duration, TextOffset, cc.GetLength());
                                     if (ic != null)
                                     {
                                         ulong res = Append(FilePath, cc.chunkBuffer);
@@ -855,7 +870,7 @@ namespace ASTool.CacheHelper
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
                                   // cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
-                                    IndexCache ic = new IndexCache(cc.Time, VideoOffset, cc.GetLength());
+                                    IndexCache ic = new IndexCache(cc.Time, cc.Duration, VideoOffset, cc.GetLength());
                                     if (ic != null)
                                     {
                                         ulong res = Append(FilePath, cc.chunkBuffer);
