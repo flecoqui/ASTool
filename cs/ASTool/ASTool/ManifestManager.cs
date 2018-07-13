@@ -18,6 +18,8 @@ using System.IO;
 using System.Xml;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization;
+
+
 namespace ASTool
 {
     public enum AssetStatus
@@ -1865,6 +1867,85 @@ namespace ASTool
             }
             return result;
         }
+        byte[] RemoveLiveTimestampAndUpdateSequenceNumber(byte[] buffer, ulong sequenceNumber)
+        {
+            byte[] result = null;
+            if ((buffer != null) && (buffer.Length > 0))
+            {
+                int offset = 0;
+                while (offset < buffer.Length)
+                {
+                    ISMHelper.Mp4Box box = ISMHelper.Mp4Box.ReadMp4BoxFromBuffer(buffer, offset);
+                    if (box != null)
+                    {
+                        if (box.GetBoxType() == "moof")
+                        {
+                            // Remove uuid box A239...8DF4 which contains the IV (initialisation vectors for the encryption)
+                            // Keep the list of IV (initialisation vectors for the encryption) included in this box
+                            // Keep the list of sample size
+                            // Calculate the new lenght and keep the difference with the previous lenght
+                            // Open the next box (mdat) and decrypt sample by sample 
+                            ISMHelper.Mp4BoxMOOF moof = box as ISMHelper.Mp4BoxMOOF;
+                            if (moof != null)
+                            {
+                                int currentLength = moof.GetBoxLength();
+                                int currentTrackID = moof.GetTrackID();
+                                bool bRemoved = false;
+
+                                ISMHelper.Mp4BoxUUID uuidextbox = moof.GetUUIDBox(ISMHelper.Mp4Box.kTrackFragExtHeaderBoxGuid) as ISMHelper.Mp4BoxUUID;
+                                if (uuidextbox != null)
+                                {
+                                    moof.RemoveUUIDBox(ISMHelper.Mp4Box.kTrackFragExtHeaderBoxGuid);
+                                    bRemoved = true;
+                                }
+                                ISMHelper.Mp4BoxUUID uuidbox = moof.GetUUIDBox(ISMHelper.Mp4Box.kTrackFragHeaderBoxGuid) as ISMHelper.Mp4BoxUUID;
+                                if (uuidbox != null)
+                                {
+                                    moof.RemoveUUIDBox(ISMHelper.Mp4Box.kTrackFragHeaderBoxGuid);
+                                    bRemoved = true;
+                                }
+                                Int32 decreasedSize = 0;
+                                if (bRemoved == true)
+                                {
+                                    moof.UpdateMFHDSequence((int)sequenceNumber);
+                                    ISMHelper.Mp4BoxTRUN trunbox = moof.GetChild("trun") as ISMHelper.Mp4BoxTRUN;
+                                    if (trunbox != null)
+                                    {
+                                        Int32 doff = trunbox.GetDataOffset();
+                                        if (uuidextbox != null)
+                                            decreasedSize += uuidextbox.GetBoxLength();
+                                        if (uuidbox != null)
+                                            decreasedSize += uuidbox.GetBoxLength();
+                                        doff -= decreasedSize;
+                                        if (doff > 0)
+                                            trunbox.SetDataOffset(doff);
+                                    }
+                                    byte[] newBuffer = moof.UpdateBoxBuffer();
+                                    result = new byte[buffer.Length - decreasedSize];
+                                    if (result != null)
+                                    {
+                                        Buffer.BlockCopy(buffer, 0, result, 0, offset);
+                                        Buffer.BlockCopy(newBuffer, 0, result, offset, moof.GetBoxLength());
+                                        Buffer.BlockCopy(buffer, offset + moof.GetBoxLength() + decreasedSize, result, offset + moof.GetBoxLength(), buffer.Length - offset - moof.GetBoxLength() - decreasedSize);
+                                        return result;
+                                    }
+                                }
+                                else
+                                    break;
+                            }
+                        }
+                        else
+                        {
+
+                        }
+                        offset += box.GetBoxLength();
+                    }
+                    else
+                        break;
+                }
+            }
+            return buffer;
+        }
 
         /// <summary>
         /// DownloadCurrentChunks
@@ -1898,6 +1979,9 @@ namespace ASTool
                     }
                     if (cb.IsChunkDownloaded())
                     {
+                        if (bCreateMFRA)
+                            cb.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cb.chunkBuffer, cl.InputChunks + 1);
+
                         ulong l = cb.GetLength();
                         cl.InputBytes += l;
                         len += (long)l;
