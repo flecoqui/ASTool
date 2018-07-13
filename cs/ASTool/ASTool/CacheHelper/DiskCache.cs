@@ -361,7 +361,7 @@ namespace ASTool.CacheHelper
                     content += string.Format(videoStreamIndexMask,
                         cache.TimeScale.ToString(),
                         Name,
-                        (Index-1).ToString(), 
+                        (Index).ToString(), 
                         cache.VideoChunkListList.Count.ToString(), 
                         url, 
                         MaxWidth, 
@@ -440,7 +440,7 @@ namespace ASTool.CacheHelper
                                 cache.TimeScale.ToString(),
                                 ac.Language,
                                 (string.IsNullOrEmpty(ac.TrackName) ? "audio" : ac.TrackName.ToString()),
-                                (Index - 1).ToString(),
+                                (Index).ToString(),
                                 url);
                             content += string.Format(audioQualityLevelMask,
                                 ac.Bitrate.ToString(),
@@ -512,7 +512,7 @@ namespace ASTool.CacheHelper
                                 ac.Language,
                                 (string.IsNullOrEmpty(ac.TrackName) ? "text" : ac.TrackName.ToString()),
                                 url,
-                                (Index - 1).ToString());
+                                (Index).ToString());
                             content += string.Format(textQualityLevelMask,
                                 ac.Bitrate.ToString(),
                                 ac.FourCC.ToString());
