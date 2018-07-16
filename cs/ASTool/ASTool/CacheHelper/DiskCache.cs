@@ -52,7 +52,7 @@ namespace ASTool.CacheHelper
         private const string audioContentFileName = "Audio";
         private const string videoContentFileName = "Video";
         private const string textContentFileName = "Text";
-        public const ulong indexSize = 20;
+        public const ulong indexSize = IndexCache.IndexCacheSize;
 
         /// <summary> Get object from isolated storage file.</summary>
         /// <param name="fullpath"> file name to retreive</param>
@@ -321,15 +321,19 @@ namespace ASTool.CacheHelper
                     }
                     string chunksContent = string.Empty;
                     ulong offset = 0;
-                    ulong size = 28;
+                    ulong size = IndexCache.IndexCacheSize;
                     string IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), videoIndexFileName) + "_0";
                     ulong fileSize = GetFileSize(IndexFile);
                     int Index = 0;
+                    byte[] IndexBuffer = null;
                     //ulong lastTime = 0;
                     while (offset < fileSize)
                     {
-                        byte[] b = Restore(IndexFile, offset, size);
-                        IndexCache ic = new IndexCache(b);
+                        if (IndexBuffer == null)
+                            IndexBuffer = Restore(IndexFile);
+
+                        
+                        IndexCache ic = new IndexCache(IndexBuffer, offset);
                         if (ic != null)
                         {
                             if (Index == 0)
@@ -399,16 +403,19 @@ namespace ASTool.CacheHelper
                         if (ac != null)
                         {
                             offset = 0;
-                            size = 28;
+                            size = IndexCache.IndexCacheSize;
                             IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), audioIndexFileName) + "_" + AudioTrack.ToString();
                             fileSize = GetFileSize(IndexFile);
                             Index = 0;
                             //lastTime = 0;
                             chunksContent = string.Empty;
+                            IndexBuffer = null;
+                            //ulong lastTime = 0;
                             while (offset < fileSize)
                             {
-                                byte[] b = Restore(IndexFile, offset, size);
-                                IndexCache ic = new IndexCache(b);
+                                if (IndexBuffer == null)
+                                    IndexBuffer = Restore(IndexFile);
+                                IndexCache ic = new IndexCache(IndexBuffer,offset);
                                 if (ic != null)
                                 {
                                     if (Index == 0)
@@ -470,16 +477,19 @@ namespace ASTool.CacheHelper
                         if (ac != null)
                         {
                             offset = 0;
-                            size = 28;
+                            size = IndexCache.IndexCacheSize;
                             IndexFile = Path.Combine(Path.Combine(root, cache.StoragePath), textIndexFileName) + "_" + TextTrack.ToString();
                             fileSize = GetFileSize(IndexFile);
                             Index = 0;
                             //lastTime = 0;
                             chunksContent = string.Empty;
+                            IndexBuffer = null;
+                            //ulong lastTime = 0;
                             while (offset < fileSize)
                             {
-                                byte[] b = Restore(IndexFile, offset, size);
-                                IndexCache ic = new IndexCache(b);
+                                if (IndexBuffer == null)
+                                    IndexBuffer = Restore(IndexFile);
+                                IndexCache ic = new IndexCache(IndexBuffer, offset);
                                 if (ic != null)
                                 {
                                     if (Index == 0)
@@ -590,6 +600,7 @@ namespace ASTool.CacheHelper
 
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
+                                    cl.MemorySizeForChunks -= cc.GetLength();
                                     //cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
                                     IndexCache ic = new IndexCache(cc.Time, cc.Duration, AudioOffset, cc.GetLength());
                                     if (ic != null)
@@ -690,6 +701,7 @@ namespace ASTool.CacheHelper
                               //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
+                                    cl.MemorySizeForChunks -= cc.GetLength();
                                     //cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
                                     IndexCache ic = new IndexCache(cc.Time, cc.Duration, TextOffset, cc.GetLength());
                                     if (ic != null)
@@ -869,7 +881,8 @@ namespace ASTool.CacheHelper
                               //  var cc = cl.ChunksList.Values.ElementAt(Index);
                                 if ((cc != null) && (cc.GetLength() > 0))
                                 {
-                                  // cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
+                                    cl.MemorySizeForChunks -= cc.GetLength();
+                                    // cc.chunkBuffer = RemoveLiveTimestampAndUpdateSequenceNumber(cc.chunkBuffer, cl.OutputChunks+1);
                                     IndexCache ic = new IndexCache(cc.Time, cc.Duration, VideoOffset, cc.GetLength());
                                     if (ic != null)
                                     {
@@ -1401,7 +1414,7 @@ namespace ASTool.CacheHelper
                     long sizetoread;
                     if ((long)offset < fs.Length)
                     {
-                        if ( (long) (offset + size) > fs.Length)
+                        if ((size == 0 ) || ( (long) (offset + size) > fs.Length))
                             sizetoread = (long) (fs.Length - (long)offset);
                         else
                             sizetoread = (long)size;

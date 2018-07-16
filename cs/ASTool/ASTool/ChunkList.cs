@@ -239,7 +239,6 @@ namespace ASTool
         /// ChunksQueue 
         /// List of the chunks read  
         /// </summary>
-
         public ConcurrentQueue<ChunkBuffer> ChunksQueue { get; set; }
 
         /// <summary>
@@ -261,6 +260,10 @@ namespace ASTool
         [DataMember]
         public string TemplateUrlType { get; set; }
 
+        /// <summary>
+        /// Amount of memory used to store chunks
+        /// </summary>
+        public ulong MemorySizeForChunks { get; set; }
 
         /// <summary>
         /// Bitrate 
@@ -345,6 +348,7 @@ namespace ASTool
             TimeFirstChunk = 0;
             TimeLastChunk = 0;
             ChunksQueue = new ConcurrentQueue<ChunkBuffer>();
+            MemorySizeForChunks = 0;
             ListLock = new object();
         }
 
@@ -368,6 +372,8 @@ namespace ASTool
                 }
                 ChunksQueue.Clear();
             }
+            MemorySizeForChunks = 0;
+
         }
     }
 }

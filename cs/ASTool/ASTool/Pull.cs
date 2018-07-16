@@ -33,6 +33,8 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", "Number of Input Bytes", cl.InputBytes, string.Empty, "Number of Input Bytes");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", "Number of Output Chunks", cl.OutputChunks, string.Empty, "Number of Output Chunks");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", "Number of Output Bytes", cl.OutputBytes, string.Empty, "Number of Output Bytes");
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", "Duration of chunks in ms", ((cl.TimeLastChunk == 0)|| (cl.TimeFirstChunk == 0) ? 0:(cl.TimeLastChunk - cl.TimeFirstChunk) / 10000), string.Empty, "Duration of current Chunks buffer");
+
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;
@@ -49,6 +51,7 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", "Number of Input Bytes", cl.InputBytes, string.Empty, "Number of Input Bytes");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", "Number of Output Chunks", cl.OutputChunks, string.Empty, "Number of Output Chunks");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", "Number of Output Bytes", cl.OutputBytes, string.Empty, "Number of Output Bytes");
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", "Duration of chunks in ms", ((cl.TimeLastChunk == 0) || (cl.TimeFirstChunk == 0) ? 0 : (cl.TimeLastChunk - cl.TimeFirstChunk) / 10000), string.Empty, "Duration of current Chunks buffer");
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;
@@ -64,6 +67,7 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", "Number of Input Bytes", cl.InputBytes, string.Empty, "Number of Input Bytes");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", "Number of Output Chunks", cl.OutputChunks, string.Empty, "Number of Output Chunks");
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", "Number of Output Bytes", cl.OutputBytes, string.Empty, "Number of Output Bytes");
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", "Duration of chunks in ms", ((cl.TimeLastChunk == 0) || (cl.TimeFirstChunk == 0) ? 0 : (cl.TimeLastChunk - cl.TimeFirstChunk) / 10000), string.Empty, "Duration of current Chunks buffer");
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;
@@ -94,6 +98,7 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", cl.InputBytes);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", cl.OutputChunks);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", cl.OutputBytes);
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", ((cl.TimeLastChunk == 0) || (cl.TimeFirstChunk == 0) ? 0 : (cl.TimeLastChunk - cl.TimeFirstChunk) / 10000));
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;
@@ -110,6 +115,8 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", cl.InputBytes);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", cl.OutputChunks);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", cl.OutputBytes);
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", ((cl.TimeLastChunk == 0) || (cl.TimeFirstChunk == 0) ? 0 : (cl.TimeLastChunk - cl.TimeFirstChunk) / 10000));
+
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;
@@ -125,6 +132,8 @@ namespace ASTool
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_InputBytes", cl.InputBytes);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputChunks", cl.OutputChunks);
                 opt.SetCounter(cl.Configuration.GetSourceName() + "_OutputBytes", cl.OutputBytes);
+                opt.SetCounter(cl.Configuration.GetSourceName() + "_Duration", ((cl.TimeLastChunk == 0) || (cl.TimeFirstChunk == 0) ? 0 : (cl.TimeLastChunk - cl.TimeFirstChunk) / 10000));
+
                 InputChunks += cl.InputChunks;
                 OutputChunks += cl.OutputChunks;
                 InputBytes += cl.InputBytes;

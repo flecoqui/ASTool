@@ -1802,19 +1802,19 @@ namespace ASTool
             ulong listSize = 0;
             foreach (var cl in list)
             {
-                ulong i = cl.InputChunks;
+                listSize += cl.MemorySizeForChunks;
 
-                lock (cl.ChunksQueue)
-                {
-                    var enu = cl.ChunksQueue.GetEnumerator();
-                    if(enu!=null)
-                    {
-                        while((enu.MoveNext()) && (enu.Current !=null ))
-                        {
-                            listSize += (ulong)(enu.Current.chunkBuffer == null ? 0:enu.Current.chunkBuffer.Length);
-                        }
-                    }
-                }
+                //lock (cl.ChunksQueue)
+                //{
+                //    var enu = cl.ChunksQueue.GetEnumerator();
+                //    if(enu!=null)
+                //    {
+                //        while((enu.MoveNext()) && (enu.Current !=null ))
+                //        {
+                //            listSize += (ulong)(enu.Current.chunkBuffer == null ? 0:enu.Current.chunkBuffer.Length);
+                //        }
+                //    }
+                //}
             }
             return listSize;
         }
@@ -1998,6 +1998,7 @@ namespace ASTool
                             cl.TimeLastChunk = cb.Time;
 
                         cl.ChunksQueue.Enqueue(cb);
+                        cl.MemorySizeForChunks += l;
 
                     }
                     else

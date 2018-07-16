@@ -33,12 +33,12 @@ namespace ASTool.CacheHelper
         }
 
         /// <summary>Construct the data by giving the Byte Array data. This is for reading index data from storage</summary>
-        public IndexCache(Byte[] Data)
+        public IndexCache(Byte[] Data, ulong offset = 0)
         {
-            Time = BitConverter.ToUInt64(Data, 0);
-            Duration = BitConverter.ToUInt64(Data, 8);
-            Offset = BitConverter.ToUInt64(Data, 16);
-            Size = BitConverter.ToUInt32(Data, 24);
+            Time = BitConverter.ToUInt64(Data, (int)offset + 0);
+            Duration = BitConverter.ToUInt64(Data, (int)offset + 8);
+            Offset = BitConverter.ToUInt64(Data, (int)offset + 16);
+            Size = BitConverter.ToUInt32(Data, (int)offset + 24);
         }
 
         /// <summary> Convert all content index information to Byte Array in order to save it to file</summary>
