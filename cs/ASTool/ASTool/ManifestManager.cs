@@ -761,12 +761,13 @@ namespace ASTool
             {
                 foreach (var cl in upd.ChunksToReadQueue)
                 {
-                    if (cl.Time > org.LastTimeChunksToRead)
+                    if (cl.Time >= org.LastTimeChunksToRead)
                     {
                         lock (org.ChunksToReadQueue)
                         {
                             org.ChunksToReadQueue.Enqueue(cl);
-                            org.LastTimeChunksToRead = cl.Time;
+//                            org.LastTimeChunksToRead = cl.Time;
+                            org.LastTimeChunksToRead += cl.Duration;
                             NewChunk++;
                             org.TotalChunks++;
                         }
@@ -785,17 +786,17 @@ namespace ASTool
         {
             if((list!=null)&& (LiveOffset > 0))
             {
-                int i = 1;
+                int i = 0;
                 float d = 0;
-                while ((list.Count - i)>=0)
+                while ((list.Count - 1 - i)>=0)
                 {
-                    d += (float) list[list.Count - i].Duration / (float) TimeScale;
+                    if(i!=0)
+                        d += (float) list[list.Count - 1 - i].Duration / (float) TimeScale;
                     if(d>LiveOffset)
                     {
                         return i;
                     }
                     i++;
-
                 }
 
             }
@@ -841,7 +842,7 @@ namespace ASTool
                                 else
                                 {
                                     if ((Count - NumberOfLiveChunks) > 0)
-                                        Threshold = Count - NumberOfLiveChunks;
+                                        Threshold = Count - NumberOfLiveChunks ;
                                     else
                                         Threshold = 0;
                                 }
