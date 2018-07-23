@@ -1995,7 +1995,7 @@ namespace ASTool
                         if((cl.TimeFirstChunk == 0)&& (cl.TimeLastChunk == 0))
                             cl.TimeFirstChunk = cb.Time;
                         else
-                            cl.TimeLastChunk = cb.Time;
+                            cl.TimeLastChunk = cb.Time + cb.Duration;
 
                         cl.ChunksQueue.Enqueue(cb);
                         cl.MemorySizeForChunks += l;

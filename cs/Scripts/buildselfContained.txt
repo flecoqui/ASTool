@@ -1,3 +1,107 @@
+
+mstsc /admin /v:vmastool.eastus.cloudapp.azure.com
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest(format=m3u8-aapl)
+http://localhost:8080/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest(format=m3u8-aapl)
+
+
+<video width="960" height="540" src="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8" autoplay="" controls=""></video>
+
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8
+Add :
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",NAME="English",AUTOSELECT=YES,DEFAULT=YES,FORCED=NO,URI="s1/en/prog_index.m3u8"
+
+
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/s1/en/prog_index.m3u8
+
+#EXTM3U
+#EXT-X-TARGETDURATION:6
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:6.00000,
+fileSequence0.webvtt
+#EXTINF:6.00000,
+fileSequence1.webvtt
+#EXTINF:6.00000,
+fileSequence2.webvtt
+#EXTINF:6.00000,
+fileSequence3.webvtt
+#EXTINF:6.00000,
+
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/s1/en/fileSequence9.webvtt
+
+
+116100000000
+http://amssamples.streaming.mediaservices.windows.net/bc57e088-27ec-44e0-ac20-a85ccbcd50da/TearsOfSteel.ism/manifest(format=m3u8-aapl)
+
+http://amssamples.streaming.mediaservices.windows.net/bc57e088-27ec-44e0-ac20-a85ccbcd50da/TOS-es.vtt
+
+diaservices.windows.net/bc57e088-27ec-44e0-ac20-a85ccbcd50da/TearsOfSteel.ism/manifest(format=m3u8-aapl)
+
+
+
+https://testamsmedia.streaming.mediaservices.windows.net/7155b94b-f47e-47e5-8265-622d3fcf6e9d/5890621e-c209-4abe-a524-7bd6723e7851.ism/manifest
+https://testamsmedia.streaming.mediaservices.windows.net/7155b94b-f47e-47e5-8265-622d3fcf6e9d/5890621e-c209-4abe-a524-7bd6723e7851.ism/manifest(format=m3u8-aapl)
+
+
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest
+
+C:\Users\flecoqui>curl http://amssamples.streaming.mediaservices.windows.net/bc57e088-27ec-44e0-ac20-a85ccbcd50da/TearsOfSteel.ism/manifest(format=m3u8-aapl)
+#EXTM3U
+#EXT-X-VERSION:4
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="AAC_und_ch2_128kbps",URI="QualityLevels(125655)/Manifest(AAC_und_ch2_128kbps,format=m3u8-aapl)"
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="AAC_und_ch2_56kbps",DEFAULT=YES,URI="QualityLevels(53651)/Manifest(AAC_und_ch2_56kbps,format=m3u8-aapl)"
+#EXT-X-STREAM-INF:BANDWIDTH=549028,RESOLUTION=320x132,CODECS="avc1.64000d,mp4a.40.2",AUDIO="audio"
+QualityLevels(395587)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=549028,RESOLUTION=320x132,CODECS="avc1.64000d",URI="QualityLevels(395587)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=804147,RESOLUTION=640x268,CODECS="avc1.640015,mp4a.40.2",AUDIO="audio"
+QualityLevels(645214)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=804147,RESOLUTION=640x268,CODECS="avc1.640015",URI="QualityLevels(645214)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=1161539,RESOLUTION=640x268,CODECS="avc1.640015,mp4a.40.2",AUDIO="audio"
+QualityLevels(994912)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=1161539,RESOLUTION=640x268,CODECS="avc1.640015",URI="QualityLevels(994912)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=1672158,RESOLUTION=960x400,CODECS="avc1.64001e,mp4a.40.2",AUDIO="audio"
+QualityLevels(1494540)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=1672158,RESOLUTION=960x400,CODECS="avc1.64001e",URI="QualityLevels(1494540)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=2438152,RESOLUTION=960x400,CODECS="avc1.64001e,mp4a.40.2",AUDIO="audio"
+QualityLevels(2244045)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=2438152,RESOLUTION=960x400,CODECS="avc1.64001e",URI="QualityLevels(2244045)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=3612656,RESOLUTION=1280x536,CODECS="avc1.64001f,mp4a.40.2",AUDIO="audio"
+QualityLevels(3393266)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=3612656,RESOLUTION=1280x536,CODECS="avc1.64001f",URI="QualityLevels(3393266)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=4940258,RESOLUTION=1920x800,CODECS="avc1.640028,mp4a.40.2",AUDIO="audio"
+QualityLevels(4692289)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=4940258,RESOLUTION=1920x800,CODECS="avc1.640028",URI="QualityLevels(4692289)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=6268050,RESOLUTION=1920x800,CODECS="avc1.640028,mp4a.40.2",AUDIO="audio"
+QualityLevels(5991499)/Manifest(video,format=m3u8-aapl)
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=6268050,RESOLUTION=1920x800,CODECS="avc1.640028",URI="QualityLevels(5991499)/Manifest(video,format=m3u8-aapl,type=keyframes)"
+#EXT-X-STREAM-INF:BANDWIDTH=62991,CODECS="mp4a.40.2",AUDIO="audio"
+QualityLevels(53651)/Manifest(AAC_und_ch2_56kbps,format=m3u8-aapl)
+
+
+116100000000
+116105386698
+116100000000
+207300000000
+
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest(format=m3u8-aapl)
+
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/QualityLevels(249600)/Manifest(video,format=m3u8-aapl)
+
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/QualityLevels(249600)/Manifest(video,format=m3u8-aapl)/Fragments(video=207300000000,format=m3u8-aapl)
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/QualityLevels(249600)/Fragments(video=207300000000,format=m3u8-aapl)
+
+
+
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest(format=m3u8-aapl-v3)
+https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest(format=mpd-time-csf)
+
+
+http://cdn.iptv.lu/live/disk/tf1hd/mss_test/Manifest
+
+
+
 dotnet publish --self-contained -c Release -r win10-x64
 dotnet publish --self-contained -c Release -r win10-x64 --output bin
 dotnet publish --self-contained -c Release -r debian-x64
@@ -31,7 +135,7 @@ http://vmastool.eastus.cloudapp.azure.com/VideoApp/tf1/mss_test/asset.ism/manife
 http://vmastool.eastus.cloudapp.azure.com/VideoApp/artedehd/mss_test/asset.ism/manifest
 
 http://vmastool.eastus.cloudapp.azure.com/VideoApp/artedehd/mss_test/asset.ism/manifest
-
+http://vmastool.eastus.cloudapp.azure.com/VideoApp/srg/preview/asset.ism/manifest
 
 
 Test Play http://localhost/VideoApp/arte/mss_test/asset.ism/manifest
@@ -100,6 +204,8 @@ astool.exe --pull --input http://cdn.iptv.lu/live/disk/tf1hd/mss_test/Manifest  
 
 dotnet ASTool.dll --pull --input 					  --maxbitrate 1000000 --maxduration 30000 --liveoffset 10 --output C:\\temp\\astool\\testdvr1
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml  --loop 0
+
+ASTool.exe --push --input  C:\astool\dvr\srg\preview\asset.ism --output http://testsmoothlive-testamsmedia.channel.mediaservices.windows.net/ingest.isml --loop 0
 
 
 dotnet ASTool.dll --push --input C:\projects\VideoApp\metisser\metisser.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
