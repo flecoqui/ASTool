@@ -88,7 +88,7 @@ namespace ASTool.ISMHelper
 
             return result;
         }
-        static public Mp4BoxTFRA CreateTFRABox(Int32 TrackID, List<TimeMoofOffset> list)
+        static public Mp4BoxTFRA CreateTFRABox(Int32 TrackID, List<TimeMoofOffset> list, ulong OffsetWithVideo)
         {
             int Flag = 0;
             byte version = 0x01;
@@ -114,7 +114,7 @@ namespace ASTool.ISMHelper
                         {
                             if (i == 0)
                                 offset = list[i].time;
-                            ulong time = list[i].time - offset;
+                            ulong time = list[i].time - offset + OffsetWithVideo;
                             WriteMp4BoxInt64(Buffer, 16 + i*19, (long)time);
                             WriteMp4BoxInt64(Buffer, 16 + 8 + i * 19, (long)list[i].offset);
                             WriteMp4BoxInt8(Buffer, 16 + 8 + 8 + i * 19, 1);

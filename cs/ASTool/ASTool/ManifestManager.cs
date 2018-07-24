@@ -1765,13 +1765,16 @@ namespace ASTool
         /// </summary>
         /// <param name=""></param>
         /// <returns>return true if nothing to download</returns>
-        public bool CreateMFRABuffer(List<ChunkList> list)
+        public bool CreateMFRABuffer(List<ChunkList> list, ulong TimeFirstVideoChunk)
         {
             if (list == null)
                 return false;
             foreach (var cl in list)
             {
-                cl.mfraData = cl.Configuration.GetMFRAData();
+                ulong offsetWithVideo = 0;
+                if (cl.TimeFirstChunk > TimeFirstVideoChunk)
+                    offsetWithVideo = cl.TimeFirstChunk - TimeFirstVideoChunk;
+                cl.mfraData = cl.Configuration.GetMFRAData(offsetWithVideo);
             }
             return true;
         }
@@ -2267,9 +2270,14 @@ namespace ASTool
                     DateTime time = DateTime.Now;
                     if (bCreateMFRA)
                     {
-                        CreateMFRABuffer(TextChunkListList);
-                        CreateMFRABuffer(VideoChunkListList);
-                        CreateMFRABuffer(AudioChunkListList);
+                        ulong TimeFirstVideoChunk = 0;
+                        ChunkList cl = VideoChunkListList.First();
+                        if (cl != null)
+                            TimeFirstVideoChunk = cl.TimeFirstChunk;
+
+                        CreateMFRABuffer(VideoChunkListList, TimeFirstVideoChunk);
+                        CreateMFRABuffer(AudioChunkListList, TimeFirstVideoChunk);
+                        CreateMFRABuffer(TextChunkListList, TimeFirstVideoChunk);
                     }
                     System.Diagnostics.Debug.WriteLine("Download done at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time));
                     System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");
@@ -2293,9 +2301,13 @@ namespace ASTool
                     DateTime time = DateTime.Now;
                     if (bCreateMFRA)
                     {
-                        CreateMFRABuffer(TextChunkListList);
-                        CreateMFRABuffer(VideoChunkListList);
-                        CreateMFRABuffer(AudioChunkListList);
+                        ulong TimeFirstVideoChunk = 0;
+                        ChunkList cl = VideoChunkListList.First();
+                        if (cl != null)
+                            TimeFirstVideoChunk = cl.TimeFirstChunk;
+                        CreateMFRABuffer(VideoChunkListList, TimeFirstVideoChunk);
+                        CreateMFRABuffer(AudioChunkListList, TimeFirstVideoChunk);
+                        CreateMFRABuffer(TextChunkListList, TimeFirstVideoChunk);
                     }
                     System.Diagnostics.Debug.WriteLine("Download stopped at " + string.Format("{0:d/M/yyyy HH:mm:ss.fff}", time) + " at MaxDuration: " + MaxDuration.ToString());
                     System.Diagnostics.Debug.WriteLine("Current Media Size: " + this.CurrentMediaSize.ToString() + " Bytes");

@@ -102,9 +102,9 @@ namespace ASTool
             }
             return true;
         }
-        public virtual byte[] GetMFRAData()
+        public virtual byte[] GetMFRAData(ulong OffsetWithVideo)
         {
-            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateMFRABox((Int16)TrackID,ListTimeOffset);
+            ISMHelper.Mp4Box box = ISMHelper.Mp4Box.CreateMFRABox((Int16)TrackID,ListTimeOffset, OffsetWithVideo);
             if (box != null)
                 return box.GetBoxBytes();
             return null;

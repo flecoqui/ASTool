@@ -1364,14 +1364,14 @@ namespace ASTool.ISMHelper
             }
             return null;
         }
-        public static Mp4BoxMFRA CreateMFRABox(Int16 TrackID, List<TimeMoofOffset> listTimeOffset)
+        public static Mp4BoxMFRA CreateMFRABox(Int16 TrackID, List<TimeMoofOffset> listTimeOffset, ulong OffsetWithVideo)
         {
             if (listTimeOffset != null)
             {
                 List<Mp4Box> list = new List<Mp4Box>();
                 if (list != null)
                 {
-                    Mp4BoxTFRA boxtfra = Mp4BoxTFRA.CreateTFRABox(TrackID, listTimeOffset);
+                    Mp4BoxTFRA boxtfra = Mp4BoxTFRA.CreateTFRABox(TrackID, listTimeOffset, OffsetWithVideo);
                     if (boxtfra != null)
                     {
 

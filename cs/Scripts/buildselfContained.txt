@@ -1,3 +1,20 @@
+http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest
+http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=m3u8-aapl)
+http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=mpd-time-csf)
+
+http://localhost:8080/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest
+http://localhost:8080/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=m3u8-aapl)
+http://localhost:8080/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=mpd-time-csf)
+
+http://localhost/VideoApp/m6/mss_test/asset.ism/manifest
+
+http://testamsmedia.streaming.mediaservices.windows.net/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest
+http://testamsmedia.streaming.mediaservices.windows.net/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest(format=m3u8-aapl)
+http://testamsmedia.streaming.mediaservices.windows.net/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest(format=mpd-time-csf)
+
+http://localhost:8080/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest
+http://localhost:8080/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest(format=m3u8-aapl)
+http://localhost:8080/7c2c4406-105a-418f-b4b4-4a98a6d65532/6193b18a-4410-4f08-b0cc-b1d59545223f.ism/manifest(format=mpd-time-csf)
 
 mstsc /admin /v:vmastool.eastus.cloudapp.azure.com
 https://testamsmedia.streaming.mediaservices.windows.net/6cddd98f-8aca-4a94-9a0d-6f66026aebd8/54153f4a-8f9c-44b4-9912-f1bfc8a2fe8f.ism/manifest

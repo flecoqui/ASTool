@@ -290,6 +290,7 @@ namespace ASTool.CacheHelper
                     //string chunkBeginMask = "<c t=\"{0}\" d=\"{1}\"/>";
 //                    string chunkBeginMask = "<c n=\"{0}\" d=\"{1}\"/>";
                     string chunkBeginMask = "<c t=\"0\" d=\"{0}\"/>";
+                    string chunkBeginMaskWithTime = "<c t=\"{0}\" d=\"{1}\"/>";
                     string chunkMask = "<c d=\"{0}\"/>";
                     string streamIndexEnd = "</StreamIndex>";
 
@@ -301,9 +302,14 @@ namespace ASTool.CacheHelper
                     int MaxHeight = 0;
                     string Name = string.Empty;
                     // video section
-                    
+                    ulong TimeFirstVideoChunk = 0;
+                    ulong TimeFirstAudioChunk = 0;
+                    ulong TimeFirstTextChunk = 0;
                     foreach (var cl in cache.VideoChunkListList)
                     {
+
+                        TimeFirstVideoChunk = cl.TimeFirstChunk;
+
                         if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
                             TotalChunks = cl.TotalChunks;
                         url = cl.OriginalTemplateUrl;
@@ -396,6 +402,7 @@ namespace ASTool.CacheHelper
                     string Language = string.Empty;
                     foreach (var cl in cache.AudioChunkListList)
                     {
+                        TimeFirstAudioChunk = cl.TimeFirstChunk;
                         if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
                             TotalChunks = cl.TotalChunks;
                         url = cl.OriginalTemplateUrl;
@@ -419,7 +426,12 @@ namespace ASTool.CacheHelper
                                 if (ic != null)
                                 {
                                     if (Index == 0)
-                                        chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
+                                    {
+                                        if(TimeFirstAudioChunk > TimeFirstVideoChunk)
+                                            chunksContent += string.Format(chunkBeginMaskWithTime,(TimeFirstAudioChunk - TimeFirstVideoChunk).ToString() ,ic.Duration.ToString());
+                                        else
+                                            chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
+                                    }
                                     else
                                         chunksContent += string.Format(chunkMask, ic.Duration.ToString());
 
@@ -470,6 +482,7 @@ namespace ASTool.CacheHelper
                     Language = string.Empty;
                     foreach (var cl in cache.TextChunkListList)
                     {
+                        TimeFirstTextChunk = cl.TimeFirstChunk;
                         if ((TotalChunks == 0) || (cl.TotalChunks < TotalChunks))
                             TotalChunks = cl.TotalChunks;
                         url = cl.OriginalTemplateUrl;
@@ -493,7 +506,12 @@ namespace ASTool.CacheHelper
                                 if (ic != null)
                                 {
                                     if (Index == 0)
-                                        chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
+                                    {
+                                        if (TimeFirstTextChunk > TimeFirstVideoChunk)
+                                            chunksContent += string.Format(chunkBeginMaskWithTime, (TimeFirstTextChunk - TimeFirstVideoChunk).ToString(), ic.Duration.ToString());
+                                        else
+                                            chunksContent += string.Format(chunkBeginMask, ic.Duration.ToString());
+                                    }
                                     else
                                         chunksContent += string.Format(chunkMask, ic.Duration.ToString());
 
