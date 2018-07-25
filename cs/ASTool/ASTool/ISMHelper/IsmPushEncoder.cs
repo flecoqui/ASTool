@@ -327,8 +327,10 @@ namespace ASTool.ISMHelper
                                                             byte[] extendedData = new byte[16];
                                                             if(CurrentChunk==0)
                                                             {
+                                                                // if the time of the first chunk is not 0 and the value is below 3 duration
+                                                                // update AbsoluteTime
                                                                 if ((_ChunkArray[CurrentChunk].time != 0) &&
-                                                                    (_ChunkArray[CurrentChunk].time < _ChunkArray[CurrentChunk].duration))
+                                                                    (_ChunkArray[CurrentChunk].time < 3*_ChunkArray[CurrentChunk].duration))
                                                                     AbsoluteTime += _ChunkArray[CurrentChunk].time;
                                                             }
                                                             long duration = _ChunkArray[CurrentChunk].duration;
