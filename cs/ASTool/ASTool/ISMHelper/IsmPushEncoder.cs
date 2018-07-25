@@ -258,6 +258,7 @@ namespace ASTool.ISMHelper
 
                         long CurrentChunk = 0;
                         long AbsoluteTime = 0;
+                        bool bAbsoluteTimeUpdated = false;
 
                         int i;
                        // long sent = 0;
@@ -325,13 +326,16 @@ namespace ASTool.ISMHelper
                                                         {
                                                             // need to insert data here
                                                             byte[] extendedData = new byte[16];
-                                                            if(CurrentChunk==0)
+                                                            if((CurrentChunk==0)&&(bAbsoluteTimeUpdated==false))
                                                             {
                                                                 // if the time of the first chunk is not 0 and the value is below 3 duration
                                                                 // update AbsoluteTime
                                                                 if ((_ChunkArray[CurrentChunk].time != 0) &&
-                                                                    (_ChunkArray[CurrentChunk].time < 3*_ChunkArray[CurrentChunk].duration))
+                                                                    (_ChunkArray[CurrentChunk].time < 3 * _ChunkArray[CurrentChunk].duration))
+                                                                {
                                                                     AbsoluteTime += _ChunkArray[CurrentChunk].time;
+                                                                    bAbsoluteTimeUpdated = true;
+                                                                }
                                                             }
                                                             long duration = _ChunkArray[CurrentChunk].duration;
                                                             extendedData[0] = (byte)(AbsoluteTime >> 56);
