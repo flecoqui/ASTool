@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --pull --input http://cdn.iptv.lu/live/disk/m6hd/mss_test/Manifest --output c:\\temp\\dvr --maxbitrate 2000000 --liveoffset 20 --maxduration 60000"
+      "commandLineArgs": "dotnet ASTool.dll --push --input C:\\projects\\VideoApp\\mss_test\\asset.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0"
     }
   }
 }

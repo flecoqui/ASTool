@@ -1,3 +1,7 @@
+http://localhost/VideoApp/41Live/_live1.isml/manifest
+http://localhost/VideoApp/m6/mss_test/asset.ism/manifest
+
+
 http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest
 http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=m3u8-aapl)
 http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest(format=mpd-time-csf)

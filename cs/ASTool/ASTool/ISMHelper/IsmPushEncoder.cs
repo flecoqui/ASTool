@@ -325,6 +325,12 @@ namespace ASTool.ISMHelper
                                                         {
                                                             // need to insert data here
                                                             byte[] extendedData = new byte[16];
+                                                            if(CurrentChunk==0)
+                                                            {
+                                                                if ((_ChunkArray[CurrentChunk].time != 0) &&
+                                                                    (_ChunkArray[CurrentChunk].time < _ChunkArray[CurrentChunk].duration))
+                                                                    AbsoluteTime += _ChunkArray[CurrentChunk].time;
+                                                            }
                                                             long duration = _ChunkArray[CurrentChunk].duration;
                                                             extendedData[0] = (byte)(AbsoluteTime >> 56);
                                                             extendedData[1] = (byte)(AbsoluteTime >> 48);

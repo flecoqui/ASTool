@@ -91,9 +91,13 @@ namespace ASTool.ISMHelper
             else
                 Index = Ind;
             duration = long.Parse(n.Attributes["d"].Value);
+            time = 0;
+            if(n.Attributes["t"]!=null)
+                time = long.Parse(n.Attributes["t"].Value);
         }
         public long Index;
-        public long duration;        
+        public long duration;
+        public long time;
     }
     public class StreamIndex
     {
