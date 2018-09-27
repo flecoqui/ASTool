@@ -1,5 +1,22 @@
-http://localhost/VideoApp/41Live/_live1.isml/manifest
+http://localhost/VideoApp/Live/_live1.isml/manifest
 http://localhost/VideoApp/m6/mss_test/asset.ism/manifest
+
+ASTool.exe --pull --input http://cdn.iptv.lu/live/disk/m6hd/mss_test/Manifest --output C:\astool\dvr\m6 --maxduration 60000 --liveoffset 20
+
+Play:
+
+http://vmastool.eastus.cloudapp.azure.com/VideoApp/m6/mss_test/asset.ism/manifest
+http://vmastool.eastus.cloudapp.azure.com/VideoApp/artehd/mss_test/asset.ism/manifest
+
+ASTool.exe --push --input C:\astool\dvr\m6\mss_test\asset.ism --output http://localhost/VideoApp/Live/_live1.isml --loop 0
+pushencoder.exe /loop http://localhost/VideoApp/Live/_live1.isml  C:\astool\dvr\m6\mss_test\asset.ism 
+
+
+Play:
+
+http://vmastool.eastus.cloudapp.azure.com/VideoApp/Live/_live1.isml/manifest
+
+
 
 
 http://testamsmedia.streaming.mediaservices.windows.net/18003c32-3453-47ef-9547-2255188a2242/asset.ism/manifest

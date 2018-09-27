@@ -90,22 +90,25 @@ namespace ASTool
                         if (ism.Tracks[i].MediaType == IsmTrackType.textstream)
                             LiveManifest = ism.GetTextManifest(ism.Tracks[i].TrackId, ism.Tracks[i].TrackName, ism.Tracks[i].Bitrate, ism.Tracks[i].Source, ismc);
                         ISMHelper.Chunk[] ChunkArray = ism.GetChunkList(ism.Tracks[i].TrackName, ismc);
-                        encoder = new IsmPushEncoder(
-                            server,
-                            ism,
-                            ismvFile,
-                            opt.OutputUri,
-                            AssetId,
-                            streamId++,
-                            ism.Tracks[i].Bitrate,
-                            LiveManifest,
-                            ChunkArray,
-                            ism.Tracks[i].TrackId,
-                            opt);
-                        encoder.InsertNtp = true;
-                        encoder.InsertBoxes = true;
-                        encoder.Loop = (opt.Loop == 0);
-                        pushers.Add(encoder);
+                        if ((ism.Tracks[i].MediaType != IsmTrackType.video) || (((opt.MaxBitrate == 0) || (ism.Tracks[i].Bitrate <= opt.MaxBitrate)) && (ism.Tracks[i].Bitrate >= opt.MinBitrate)))
+                        {
+                            encoder = new IsmPushEncoder(
+                                server,
+                                ism,
+                                ismvFile,
+                                opt.OutputUri,
+                                AssetId,
+                                streamId++,
+                                ism.Tracks[i].Bitrate,
+                                LiveManifest,
+                                ChunkArray,
+                                ism.Tracks[i].TrackId,
+                                opt);
+                            encoder.InsertNtp = true;
+                            encoder.InsertBoxes = true;
+                            encoder.Loop = (opt.Loop == 0);
+                            pushers.Add(encoder);
+                        }
                     }
                 }
             }
