@@ -20,7 +20,8 @@ namespace ASTool.ISMHelper
         {
             if (!string.IsNullOrEmpty(name))
             {
-                byte version = 0x01;
+                // Update version to 0
+                byte version = 0x00;
                 Mp4BoxHDLR box = new Mp4BoxHDLR();
                 if (box != null)
                 {

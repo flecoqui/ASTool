@@ -18,7 +18,8 @@ namespace ASTool.ISMHelper
     {
         static public Mp4BoxTREX CreateTREXBox(Int32 TrackID)
         {
-            byte version = 0x01;
+            // update version to 0
+            byte version = 0x00;
             Mp4BoxTREX box = new Mp4BoxTREX();
             if (box != null)
             {
