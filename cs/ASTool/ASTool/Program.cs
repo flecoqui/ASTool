@@ -57,7 +57,7 @@ namespace ASTool
     */
     public partial class Program
     {
-        static Int32 Version = ASVersion.SetVersion(0x01, 0x00, 0x00, 0x00);
+        static Int32 Version = ASVersion.SetVersion(0x01, 0x00, 0x00, 0x01);
         static Options ParseCommandLine(string[] args)
         {
             Options opt = Options.InitializeOptions(args);

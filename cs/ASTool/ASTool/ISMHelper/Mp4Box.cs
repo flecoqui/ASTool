@@ -819,9 +819,11 @@ namespace ASTool.ISMHelper
             string CodecPrivateData, Guid ProtectionGuid, string ProtectionData)
         {
             Byte ConfigurationVersion = 0x01;
-            Byte AVCProfileIndication = 0x64;
+            // Update AVC Profile Indication from 0x64 to  0x4D
+            Byte AVCProfileIndication = 0x4D;
             Byte ProfileCompatibility = 0x40;
-            Byte AVCLevelIndication = 0x1F;
+            // Update AVCLevelIndication from 0x1F to 0x29
+            Byte AVCLevelIndication = 0x29;
             Int16 RefIndex = 1;
             Int16 HorizontalRes = 72;
             Int16 VerticalRes = 72;
