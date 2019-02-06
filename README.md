@@ -496,6 +496,464 @@ The configuration files ([astool.linux.xml](https://raw.githubusercontent.com/fl
 This service will run simulatenously 2 captures, storing the audio and video chunks under /astool/dvr/test1 and /astool/dvr/test2.
 The logs files will be available under /astool/log.
 
+## Deploying ASTOOL in Azure Containers
+
+### BUILDING A CONTAINER IMAGE IN AZURE
+Before deploying your application in a container running in Azure, you need to create a container image and deploy it in the cloud with Azure Container Registry:
+https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-quick-task
+
+
+1. Open a command shell window in the project folder  
+
+
+        C:\git\me\ASTool\cs\ASToolp> 
+
+2. Create a resource group with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az group create --resource-group "ResourceGroupName" --location "RegionName"</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az group create --resource-group testacrrg --location eastus2
+
+3. Create an Azure Container Registry with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az acr create --resource-group "ResourceGroupName" --name "ACRName" --sku "ACRSku" --location "RegionName"</p>
+For instance:
+
+        C:\git\me\ASTool\cs\ASToolp> az acr create --resource-group testacrrg --name testacreu2  --sku Standard --location eastus2  
+
+
+4. Build the container image and register it in the new Azure Container Registry with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder"</p>
+For instance:
+
+        C:\git\me\ASTool\cs\ASToolp> az acr build --registry testacreu2   --image astool:v1 .
+
+     After few minutes, the image should be available in the new registry:
+
+     For instance:
+        
+        2019/02/05 20:03:41
+        - image:
+            registry: testacreu2.azurecr.io
+            repository: astool
+            tag: v1
+            digest: sha256:dc06bb0e107f52bd2b43abbf8c16ae816e667061acaece36c96074160fd99581
+          runtime-dependency:
+            registry: registry.hub.docker.com
+            repository: microsoft/dotnet
+            tag: 2.2-runtime
+            digest: sha256:cca439245c5d46d8549e83630c34f04dfbf3d6b70874e9a27faa971819df57a3
+          buildtime-dependency:
+          - registry: registry.hub.docker.com
+            repository: microsoft/dotnet
+            tag: 2.2-sdk
+            digest: sha256:06c53fd178222eb693f78546303c850cc75174f8548c87210e7b83e3433603f5
+          git: {}        
+        
+        Run ID: ch1 was successful after 3m0s
+
+
+### Deploying the image in ACI (Azure Container Registration)
+Your container image is now available from your container registry in Azure.
+You can deploy this image from your registry immediately.
+
+#### CONFIGURING REGISTRY AUTHENTICATION
+In this sections, you create an Azure Key Vault and Service Principal, then deploy the container to Azure Container Instances (ACI) using Service Principal's credentials.
+
+1. Create a key vault with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az keyvault create --resource-group "ResourceGroupName" --name "AzureKeyVaultName"</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az keyvault create --resource-group testacrrg --name acrkv
+ 
+2. Display the ID associated with the new Azure Container Registry using the following command:</p>
+In order to create the Service Principal you need to know the ID associated with the new Azure Container Registry, you can display this information with the following command:</p>
+**Azure CLI 2.0:** az acr show --name "ACRName" --query id --output tsv</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az acr show --name testacreu2 --query id --output tsv
+
+3. Create a Service Principal and display the password with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az ad sp create-for-rbac --name "ACRSPName" --scopes "ACRID" --role acrpull --query password --output tsv</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
+
+     After few seconds the result (ACR Password) is displayed:
+
+        Changing "spacreu2" to a valid URI of "http://acrspeu2", which is the required format used for service principal names
+        Retrying role assignment creation: 1/36
+        Retrying role assignment creation: 2/36
+        yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+
+
+4. Store credentials (ACR password) with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az keyvault secret set  --vault-name "AzureKeyVaultName" --name "PasswordSecretName" --value "ServicePrincipalPassword" </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-pwd --value yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+ 
+5. Display the Application ID associated with the new Service Principal with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az ad sp show --id http://"ACRSPName" --query appId --output tsv</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASTool> az ad sp show --id http://acrspeu2 --query appId --output tsv
+
+     After few seconds the result (ACR AppId) is displayed:
+
+        wwwwwwww-wwww-wwww-wwww-wwwwwwwwwwww
+
+
+
+6. Store credentials (ACR AppID) with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az keyvault secret set  --vault-name "AzureKeyVaultName" --name "AppIDSecretName" --value "ServicePrincipalAppID" </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-usr --value wwwwwwww-wwww-wwww-wwww-wwwwwwwwwwww
+ 
+
+     The Azure Key Vault contains now the Azure Container Registry AppID and Password. 
+
+
+### Deploying ASTOOL in ACI (Azure Container Instance)
+
+You can now deploy the image using the credentials stored in Azure Key Vault.
+
+1. You need first to retrieve the AppID from the Azure Key Vault with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az keyvault secret show --vault-name "AzureKeyVaultName" --name "AppIDSecretName" --query value -o tsv  </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-usr --query value -o tsv
+ 
+     After few seconds the result (ACR AppId) is displayed:
+
+        wwwwwwww-wwww-wwww-wwww-wwwwwwwwwwww
+
+2. You need also to retrieve the Password from the Azure Key Vault with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az keyvault secret show --vault-name "AzureKeyVaultName" --name "PasswordSecretName" --query value -o tsv  </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-pwd --query value -o tsv
+ 
+     After few seconds the result (Password) is displayed:
+
+        yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+
+
+3. With the AppID and the Password you can now deploy the image in a container with Azure CLI using the following command:</p>
+**Azure CLI 2.0:** az container create --resource-group "ResourceGroupName"  --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --registry-login-server "ACRName".azurecr.io --registry-username "ServicePrincipalAppID" --registry-password "ServicePrincipalPassword" --dns-name-label "InstanceName" --query "{FQDN:ipAddress.fqdn}" --output table </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az container create --resource-group acrrg --name acr-tasks --image acreu2.azurecr.io/astool:v1 --registry-login-server acreu2.azurecr.io --registry-username d384b6b7-9d83-4f8c-9fa0-8909b117e89d --registry-password 52018750-2458-4e7b-a62e-8778486ebf55 --dns-name-label acr-tasks-acreu2 --query "{FQDN:ipAddress.fqdn}" --output table
+ 
+     After few seconds the command returns the DNS Name of the new instance:
+
+        ------------------------------------------
+        "InstanceName"."RegionName".azurecontainer.io
+
+     For instance:
+
+        ------------------------------------------
+        acr-tasks-acreu2.eastus2.azurecontainer.io
+
+4. With your favorite Browser open the url http://"InstanceDNSName"/ 
+As it's an http connection and not a https connection, the browser will block the connection click on a link displayed (Advanced or Details) on the screen to open an http connection with the ASP.Net Core Application running on your machine.
+The following page should be displayed on your browser
+
+     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aspnetacipage.png"/>
+   
+
+
+     For instance:
+
+        http://acr-tasks-acreu2.eastus2.azurecontainer.io/ 
+
+#### VERIFYING THE CONTAINER RUNNING IN AZURE
+You can recevie on your local machine the logs from the Container running in Azure with Azure CLI with the following command: </p>
+**Azure CLI 2.0:** az container attach --resource-group "ResourceGroupName" --name "ContainerGroupName"  </p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az container attach --resource-group acrrg --name acr-tasks
+
+
+
+
+
+
+### Deploying ASTOOL in AKS (Azure Kubernetes Service)
+Using the same container image in the Azure Container Registry you can deploy the same container image in Azure Kubernetes Service (AKS).</p>
+You'll find further information here:</p>
+https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster 
+
+
+#### CREATING SERVICE PRINCIPAL FOR AKS DEPLOYMENT
+
+1. With Azure CLI create an Service Principal:
+**Azure CLI 2.0:** az ad sp create-for-rbac --skip-assignment </p>
+For instance:
+
+
+          C:\git\me\ASTool\cs\ASToolp> az ad sp create-for-rbac --skip-assignment
+ 
+      The command returns the following information associated with the new Service Principal:
+      - appID
+      - displayName
+      - name
+      - password
+      - tenant
+
+     For instance:
+
+
+          AppId                                 Password                            
+          ------------------------------------  ------------------------------------
+          d604dc61-d8c0-41e2-803e-443415a62825  097df367-7472-4c23-96e1-9722e1d8270a
+
+
+
+2. Display the ID associated with the new Azure Container Registry using the following command:</p>
+In order to allow the Service Principal to have access to the Azure Container Registry you need to display the ACR resource ID with the following command:</p>
+**Azure CLI 2.0:** az acr show --name "ACRName" --query id --output tsv</p>
+For instance:
+
+
+        C:\git\me\ASTool\cs\ASToolp> az acr show --name acreu2 --query id --output tsv
+
+     The command returns ACR resource ID.
+
+     For instance:
+
+        /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2
+
+
+3. Allow the Service Principal to have access to the Azure Container Registry with the following command:</p>
+**Azure CLI 2.0:** az role assignment create --assignee "AppID" --scope "ACRReourceID" --role Reader
+ For instance:
+
+        C:\git\me\ASTool\cs\ASToolp> az role assignment create --assignee d604dc61-d8c0-41e2-803e-443415a62825 --scope /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role Reader
+
+
+#### CREATING A KUBERNETES CLUSTER
+Now you can create the Kubernetes Cluster in Azure. </p>
+
+
+1. With the following Azure CLI command create the Azure Kubernetes Cluster:</p>
+**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
+
+     For instance:
+
+
+        az aks create --resource-group acrrg --name netcoreakscluster --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
+
+ 
+2. After few minutes, the Cluster is deployed. To connect to the cluster from your local computer, you use the Kubernetes Command Line Client. Use the following Azure CLI command to install the Kubernetes Command Line Client:
+**Azure CLI 2.0:** az aks install-cli </p>
+
+
+3. Connect the Kubernetes Command Line Client to your Cluster in Azure using the following Azure CLI command:
+**Azure CLI 2.0:** az aks get-credentials --resource-group "ResourceGroupName" --name "AKSClusterName" </p>
+
+     For instance:
+
+        az aks get-credentials --resource-group acrrg --name netcoreakscluster
+
+
+4. Check the connection from the Kubernetes Command Line Client with the following command:
+**kubectl:** kubectl get nodes
+
+     The commmand will return information about the Kuberentes nodes.
+     For instance:
+
+        NAME                       STATUS    ROLES     AGE       VERSION
+        aks-nodepool1-38201324-0   Ready     agent     16m       v1.9.11
+
+     You are now connected to your cluster from your local machine.
+
+#### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE
+
+1. You can list the Azure Container Registry per Resource Group using the following Azure CLI command: </p>
+**Azure CLI 2.0:** az acr list --resource-group  "ResourceGroupName" </p>
+For instance: 
+ 
+
+        az acr list --resource-group  testacrrg
+
+     it returns the list of ACR associated with this resource group.
+     For instance:
+
+        NAME    RESOURCE GROUP    LOCATION    SKU       LOGIN SERVER       CREATION DATE         ADMIN ENABLED
+        ------  ----------------  ----------  --------  -----------------  --------------------  ---------------
+        acreu2  acrrg             eastus2     Standard  acreu2.azurecr.io  2019-01-02T09:31:12Z
+
+
+2. You can list the repository in each Azure Container Registry  using the following Azure CLI command: </p>
+**Azure CLI 2.0:** az acr repository list --name "ACRName" --output table </p>
+
+     For instance: 
+ 
+
+        az acr repository list --name acreu2 --output table
+
+
+     It returns the list of images.
+
+     For instance:
+
+        Result
+        --------------------
+        astool
+
+
+3. You can now deploy the image with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl run "ImageDeploymentName" --image "ACRName".azurecr.io/"ImageName":v1 --port 80 </p>
+
+     For instance: 
+ 
+
+        kubectl run astool --image acreu2.azurecr.io/astool:v1 --port 80 
+
+
+
+4. Expose your container to the internet with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl expose deployment "ImageDeploymentName" --type="LoadBalancer" --port=80 </p>
+
+     For instance: 
+ 
+
+        kubectl expose deployment astool --type="LoadBalancer" --port=80 
+
+
+
+5. You can check the creation of the services with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl get services </p>
+
+     For instance: 
+ 
+
+        kubectl get services 
+
+     After the deployment of the image the public IP address is not yet available, the EXTERNAL-IP field is still in pending state.
+
+
+        NAME                   TYPE           CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+        astool   LoadBalancer   10.0.15.205   <pending>     80:30301/TCP   45s
+        kubernetes             ClusterIP      10.0.0.1      <none>        443/TCP        37m
+
+     After few minutes the public IP address is available:
+
+
+        NAME                   TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)        AGE
+        astool   LoadBalancer   10.0.15.205   104.210.7.67   80:30301/TCP   2m
+        kubernetes             ClusterIP      10.0.0.1      <none>         443/TCP        38m
+
+
+
+
+6. With your favorite Browser open the url http://"EXTERNAL-IP"/ 
+As it's an http connection and not a https connection, the browser will block the connection click on a link displayed (Advanced or Details) on the screen to open an http connection with the ASP.Net Core Application running on your machine.
+The following page should be displayed on your browser
+
+     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aspnetacipage.png"/>
+   
+
+
+     For instance:
+
+        http://104.210.7.67/ 
+ 
+
+#### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE WITH THE YAML FILE
+
+1. You can deploy the same image in Azure Kubernetes Cluster using the YAML file aspnetcoreapp.yaml with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl apply -f aspnetcoreapp.yaml </p>
+
+     For instance: 
+
+          C:\git\me\ASTool\cs\ASToolp> kubectl apply -f aspnetcoreapp.yaml
+ 
+     Before launching this command you need to edit the file aspnetcoreapp.yaml and update the line 28, and replace the field <AzureContainerRegistryName> with the Azure Container Registry Name. 
+
+      - image: <AzureContainerRegistryName>.azurecr.io/astool:v1
+        name: astool
+
+     For instance:
+
+      - image: acreu2.azurecr.io/astool:v1
+        name: astool
+
+
+2. You can check the new deployment with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl get services </p>
+
+     For instance: 
+ 
+
+        kubectl get services
+
+     This command returns a result like this one below:
+
+
+        NAME                   TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)        AGE
+        astool   LoadBalancer   10.0.15.205   104.210.7.67   80:30756/TCP   2h
+        kubernetes             ClusterIP      10.0.0.1      <none>         443/TCP        3h
+
+
+#### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
+
+
+1. You can list the pods associated with your AKS Deployment with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl get pods </p>
+
+     It returns the list of pods associated with your deployment for instance:
+
+
+        NAME                                    READY     STATUS    RESTARTS   AGE
+        astool-5dcfbd44df-wcfjx   1/1       Running   0          15m
+
+
+2. You can scale up your AKS Deployment with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl scale deployment astool --replicas=4 </p>
+
+     If you run the command "kubectl get pods" again, you'll see the 4 pods for instance:
+
+
+        NAME                                    READY     STATUS    RESTARTS   AGE
+        astool-5dcfbd44df-h8wpc   1/1       Running   0          14s
+        astool-5dcfbd44df-tkkl6   1/1       Running   0          14s
+        astool-5dcfbd44df-w9qbf   1/1       Running   0          14s
+        astool-5dcfbd44df-wcfjx   1/1       Running   0          15m
+
+
+3. You can test resiliency in deleting a pod with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl delete pod "PodName" </p>
+
+     For instance:
+
+
+        kubectl delete pod astool-5dcfbd44df-w9qbf
+
+
+     If you run the command "kubectl get pods" again, you'll see the 1 pod terminating and one new pod, for instance:
+
+
+        NAME                                    READY     STATUS        RESTARTS   AGE
+        astool-5dcfbd44df-2tkpv   1/1       Running       0          14s
+        astool-5dcfbd44df-w9qbf   0/1       Terminating   0          45s
+        astool-5dcfbd44df-h8wpc   1/1       Running       0          7m
+        astool-5dcfbd44df-tkkl6   1/1       Running       0          7m
+        astool-5dcfbd44df-wcfjx   1/1       Running       0          22m
+
+
 # Next Steps
 
 1. Deploy ASTool as Micro Service in Service Fabric

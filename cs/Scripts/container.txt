@@ -1,0 +1,118 @@
+C:\git\flecoqui\ASTool\cs\ASTool>
+
+
+docker build --pull -t astool .
+
+docker run  astool
+docker run  --rm -it --entrypoint=/bin/bash  astool
+
+docker run  astool  --pull --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest  --output ./ --maxduration 10000
+
+
+
+az acr build --registry testacreu2   --image astool:v1 .
+
+2019/02/05 20:03:41
+- image:
+    registry: testacreu2.azurecr.io
+    repository: astool
+    tag: v1
+    digest: sha256:dc06bb0e107f52bd2b43abbf8c16ae816e667061acaece36c96074160fd99581
+  runtime-dependency:
+    registry: registry.hub.docker.com
+    repository: microsoft/dotnet
+    tag: 2.2-runtime
+    digest: sha256:cca439245c5d46d8549e83630c34f04dfbf3d6b70874e9a27faa971819df57a3
+  buildtime-dependency:
+  - registry: registry.hub.docker.com
+    repository: microsoft/dotnet
+    tag: 2.2-sdk
+    digest: sha256:06c53fd178222eb693f78546303c850cc75174f8548c87210e7b83e3433603f5
+  git: {}
+
+Run ID: ch5 was successful after 1m24s
+
+az acr list --resource-group  testacrrg
+az acr repository list --name testacreu2 --output table
+
+ kubectl run astool --image testacreu2.azurecr.io/astool:v1 --port 80 
+
+ACI
+
+az keyvault secret show --vault-name testacrkv --name testacreu2-pull-usr --query value -o tsv
+40e21cbe-9b70-469f-80da-4369e02ebc58
+az keyvault secret show --vault-name testacrkv --name testacreu2-pull-pwd --query value -o tsv
+783c8982-1c2b-4048-a70f-c9a21f5eba8f
+
+
+az container create --resource-group acrrg --name acr-tasks --image testacreu2.azurecr.io/aspnetcorereactredux:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f --dns-name-label acr-tasks-testacreu2 --query "{FQDN:ipAddress.fqdn}" --output table
+
+az container create --resource-group testacrrg --name acr-tasks --image testacreu2.azurecr.io/astool:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f --dns-name-label acr-tasks-testacreu2 --query "{FQDN:ipAddress.fqdn}" --output table
+
+az container delete --resource-group testacrrg --name acr-tasks 
+
+
+
+az container create --resource-group testacrrg --name acr-tasks --image testacreu2.azurecr.io/astool:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f --dns-name-label acr-tasks-testastoolacreu2 --query "{FQDN:ipAddress.fqdn}" --output table
+
+az container attach --resource-group testacrrg --name acr-tasks
+
+az container create --resource-group testacrrg --name acr-tasks --image testacreu2.azurecr.io/astool:v1 --command-line "dotnet ASTool.dll --pull --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --output ./app --maxduration 10000" --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f --dns-name-label acr-tasks-testastoolacreu2 --query "{FQDN:ipAddress.fqdn}"  --output table
+
+az container show --resource-group testacrrg --name acr-tasks --query id --output tsv
+/subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/testacrrg/providers/Microsoft.ContainerInstance/containerGroups/acr-tasks
+
+az monitor metrics list --resource /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/testacrrg/providers/Microsoft.ContainerInstance/containerGroups/acr-tasks --metric CPUUsage --dimension containerName --output table
+
+az container exec --resource-group testacrrg --name /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/testacrrg/providers/Microsoft.ContainerInstance/containerGroups/acr-tasks --exec-command "/bin/bash"
+
+az container exec --resource-group testacrrg --name pulltask --exec-command "/bin/bash"
+
+az container delete --resource-group testacrrg --name 
+
+az container exec --resource-group testacrrg --name pullpushtask1 --exec-command "/bin/bash"
+
+az container create --resource-group testacrrg --name pullpushtask1 --image testacreu2.azurecr.io/astoolpullpush:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f  --cpu 2 --memory 4 --ip-address Public --output table
+
+https://reference.dashif.org/dash.js/v2.9.2/samples/dash-if-reference-player/index.html?url=
+https://verizon-uhddstvstreamingno-euno.streaming.media.azure.net/d3358df5-9db8-4344-823e-390104be159f/hd2az.ism/manifest
+
+http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/Manifest
+
+(format=mpd-time-csf)
+
+
+Chennel 1
+http://channel1-testlivevi-use2.channel.media.azure.net/ingest.isml 
+chennel 2
+http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml
+
+astool:v1 no argument
+
+az container create --resource-group testacrrg --name pullpushtask1 --image testacreu2.azurecr.io/astool:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f  --command-line "dotnet ASTool.dll  --pullpush --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --minbitrate 300000   --maxbitrate 2000000  --output http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml" --output table
+Name           ResourceGroup    Status    Image                            CPU/Memory       OsType    Location
+-------------  ---------------  --------  -------------------------------  ---------------  --------  ----------
+pullpushtask1  testacrrg        Running   testacreu2.azurecr.io/astool:v1  1.0 core/1.5 gb  Linux     eastus2
+
+C:\git\flecoqui\ASTool\cs\ASTool>az container stop --resource-group testacrrg --name pullpushtask1
+
+C:\git\flecoqui\ASTool\cs\ASTool>az container start --resource-group testacrrg --name pullpushtask1
+
+C:\git\flecoqui\ASTool\cs\ASTool>az container delete --resource-group testacrrg --name pullpushtask1
+Are you sure you want to perform this operation? (y/n): y
+Location    Name           OsType    ProvisioningState    ResourceGroup    RestartPolicy
+----------  -------------  --------  -------------------  ---------------  ---------------
+eastus2     pullpushtask1  Linux     Succeeded            testacrrg        Always
+
+az container create --resource-group testacrrg --name pullpushtask1 --image testacreu2.azurecr.io/astool:v1 --registry-login-server testacreu2.azurecr.io --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f  --command-line 
+
+"dotnet ASTool.dll  --pullpush --input http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest --minbitrate 300000   --maxbitrate 2000000  --output http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml" --output table
+
+az container create --resource-group testacrrg --name astoolpullpush -f astool.pullpush.aci.yaml --output table
+
+
+http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest
+ASTool.exe --push /app/outputvideo/metisser.ism  --output http://channel1-testlivevi-use2.channel.media.azure.net/ingest.isml --loop 0
+
+
+dotnet ASTool.dll --pullpush --input http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest --minbitrate 300000   --maxbitrate 2000000  --output http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml
