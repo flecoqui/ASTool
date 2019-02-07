@@ -506,27 +506,27 @@ https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tut
 1. Open a command shell window in the project folder  
 
 
-        C:\git\me\ASTool\cs\ASToolp> 
+        C:\git\me\ASTool\cs\ASTool> 
 
 2. Create a resource group with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az group create --resource-group "ResourceGroupName" --location "RegionName"</p>
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASToolp> az group create --resource-group testacrrg --location eastus2
+        C:\git\me\ASTool\cs\ASTool> az group create --resource-group testacrrg --location eastus2
 
 3. Create an Azure Container Registry with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az acr create --resource-group "ResourceGroupName" --name "ACRName" --sku "ACRSku" --location "RegionName"</p>
 For instance:
 
-        C:\git\me\ASTool\cs\ASToolp> az acr create --resource-group testacrrg --name testacreu2  --sku Standard --location eastus2  
+        C:\git\me\ASTool\cs\ASTool> az acr create --resource-group testacrrg --name testacreu2  --sku Standard --location eastus2  
 
 
 4. Build the container image and register it in the new Azure Container Registry with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder"</p>
 For instance:
 
-        C:\git\me\ASTool\cs\ASToolp> az acr build --registry testacreu2   --image astool:v1 .
+        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool:v1 .
 
      After few minutes, the image should be available in the new registry:
 
@@ -552,6 +552,34 @@ For instance:
         
         Run ID: ch1 was successful after 3m0s
 
+     The image is built using the DockerFile below:
+
+
+          FROM microsoft/dotnet:2.2-sdk AS build-env
+          WORKDIR /app
+          
+          # copy csproj and restore as distinct layers
+          COPY  ASTool/*.csproj ./ASTool/
+          WORKDIR /app/ASTool
+          RUN dotnet restore
+
+          # copy everything else and build app
+          WORKDIR /app
+          #COPY outputvideo/. ./outputvideo/
+
+          COPY ASTool/. ./ASTool/
+          WORKDIR /app/ASTool
+          RUN dotnet publish -c Release -o out
+
+          FROM microsoft/dotnet:2.2-runtime AS runtime
+          WORKDIR /app
+          COPY --from=build-env /app/ASTool/out ./
+          #COPY --from=build-env /app/outputvideo ./outputvideo/
+
+          ENTRYPOINT ["dotnet", "ASTool.dll"]
+
+
+
 
 ### Deploying the image in ACI (Azure Container Registration)
 Your container image is now available from your container registry in Azure.
@@ -565,7 +593,7 @@ In this sections, you create an Azure Key Vault and Service Principal, then depl
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASToolp> az keyvault create --resource-group testacrrg --name acrkv
+        C:\git\me\ASTool\cs\ASTool> az keyvault create --resource-group testacrrg --name acrkv
  
 2. Display the ID associated with the new Azure Container Registry using the following command:</p>
 In order to create the Service Principal you need to know the ID associated with the new Azure Container Registry, you can display this information with the following command:</p>
@@ -580,7 +608,7 @@ For instance:
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASToolp> az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
+        C:\git\me\ASTool\cs\ASTool> az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
 
      After few seconds the result (ACR Password) is displayed:
 
@@ -595,7 +623,7 @@ For instance:
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASToolp> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-pwd --value yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+        C:\git\me\ASTool\cs\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-pwd --value yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
  
 5. Display the Application ID associated with the new Service Principal with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az ad sp show --id http://"ACRSPName" --query appId --output tsv</p>
@@ -649,21 +677,63 @@ For instance:
 
 
 3. With the AppID and the Password you can now deploy the image in a container with Azure CLI using the following command:</p>
-**Azure CLI 2.0:** az container create --resource-group "ResourceGroupName"  --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --registry-login-server "ACRName".azurecr.io --registry-username "ServicePrincipalAppID" --registry-password "ServicePrincipalPassword" --dns-name-label "InstanceName" --query "{FQDN:ipAddress.fqdn}" --output table </p>
+**Azure CLI 2.0:** az container create --resource-group "ResourceGroupName"  --name "ContainerGroupName" -f "file.yaml" -o json --debug</p>
+
+
+Below the content of the file "file.yaml" :
+
+          apiVersion: 2018-06-01
+          location: eastus2
+          name: <ContainerGroupName>
+          properties:
+            containers:
+            - name: astool
+              properties:
+                image: <ACRName>.azurecr.io/astool:v1
+                command: ["dotnet","ASTool.dll","--pullpush", "--input", "<inputSmoothStreamingUrl>", "--minbitrate", "<minBitrate>", "--maxbitrate", "<maxBitrate>", "--liveoffset", "<LiveOffset>", "--output", "<outputSmoothStreamingUrl>"]
+                resources:
+                  requests:
+                    cpu: 1
+                    memoryInGb: 1.5
+            osType: Linux
+            imageRegistryCredentials:
+            - server: testacreu2.azurecr.io
+              username: <AppUserName>
+              password: <AppPassword>
+          tags: null
+          type: Microsoft.ContainerInstance/containerGroups
+
+
 For instance:
 
-
-        C:\git\me\ASTool\cs\ASToolp> az container create --resource-group acrrg --name acr-tasks --image acreu2.azurecr.io/astool:v1 --registry-login-server acreu2.azurecr.io --registry-username d384b6b7-9d83-4f8c-9fa0-8909b117e89d --registry-password 52018750-2458-4e7b-a62e-8778486ebf55 --dns-name-label acr-tasks-acreu2 --query "{FQDN:ipAddress.fqdn}" --output table
+        C:\git\me\ASTool\cs\ASToolp> az container create --resource-group testacrrg --name astoolpullpush1 -f astool.pullpush1.aci.yaml -o json --debug
+        
  
-     After few seconds the command returns the DNS Name of the new instance:
+        For instance the content of the yaml file below:
 
-        ------------------------------------------
-        "InstanceName"."RegionName".azurecontainer.io
+          apiVersion: 2018-06-01
+          location: eastus2
+          name: astoolpullpush1
+          properties:
+            containers:
+            - name: astool
+              properties:
+                image: testacreu2.azurecr.io/astool:v1
+                command: ["dotnet","ASTool.dll","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+                resources:
+                  requests:
+                    cpu: 1
+                    memoryInGb: 1.5
+            osType: Linux
+            imageRegistryCredentials:
+            - server: testacreu2.azurecr.io
+              username: 40e21cbe-9b70-469f-80da-4369e02ebc58
+              password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+          tags: null
+          type: Microsoft.ContainerInstance/containerGroups
 
-     For instance:
 
-        ------------------------------------------
-        acr-tasks-acreu2.eastus2.azurecontainer.io
+
 
 4. With your favorite Browser open the url http://"InstanceDNSName"/ 
 As it's an http connection and not a https connection, the browser will block the connection click on a link displayed (Advanced or Details) on the screen to open an http connection with the ASP.Net Core Application running on your machine.
