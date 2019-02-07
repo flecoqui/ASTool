@@ -953,7 +953,7 @@ For instance:
 
 
 
-3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file aspnetcoreapp.yaml with Kubernetes Command Line Client: </p>
+3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file astool.pullpush.aks.yaml with Kubernetes Command Line Client: </p>
 **kubectl:** kubectl apply -f "yamlfile" </p>
 
      For instance: 
