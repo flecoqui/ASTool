@@ -686,6 +686,12 @@ For instance:
 Your container image astool:v1 is now available from your container registry in Azure.
 You can now deploy the image using the credentials stored in Azure Key Vault.
 
+
+
+<img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aci.png"/>
+
+
+
 1. You need first to retrieve the AppID from the Azure Key Vault with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az keyvault secret show --vault-name "AzureKeyVaultName" --name "AppIDSecretName" --query value -o tsv  </p>
 For instance:
@@ -821,6 +827,9 @@ After this command, your image should not keep on rebooting, and you could brows
 Using the same container image in the Azure Container Registry you can deploy the same container image in Azure Kubernetes Service (AKS).</p>
 You'll find further information here:</p>
 https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster 
+
+
+<img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aks.png"/>
 
 
 #### CREATING SERVICE PRINCIPAL FOR AKS DEPLOYMENT
