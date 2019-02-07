@@ -498,7 +498,7 @@ The logs files will be available under /astool/log.
 
 ## Deploying ASTOOL in Azure Containers
 
-### Pre-requisite
+### Pre-requisites
 First you need an Azure subscription.
 You can subscribe here:  https://azure.microsoft.com/en-us/free/ . </p>
 Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.
@@ -604,7 +604,7 @@ For instance:
           ENTRYPOINT ["dotnet", "ASTool.dll"]
 
 
-The [DockerFile](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+The DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
 
 Moreover, as the entrypoint is :
 
@@ -740,9 +740,11 @@ Below the content of the file "file.yaml" :
 For instance:
 
         C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush1 -f astool.pullpush1.aci.yaml -o json --debug
-        
+
+
  
-        For instance the content of the yaml file below:
+The content of the yaml file below:
+
 
           apiVersion: 2018-06-01
           location: eastus2
@@ -914,11 +916,13 @@ For instance:
         az acr list --resource-group  testacrrg
 
      it returns the list of ACR associated with this resource group.
-     For instance:
+     For instance:</p>
 
-     NAME        RESOURCE GROUP    LOCATION    SKU       LOGIN SERVER           CREATION DATE         ADMIN ENABLED
-     ----------  ----------------  ----------  --------  ---------------------  --------------------  ---------------
-     testacreu2  testacrrg         eastus2     Standard  testacreu2.azurecr.io  2018-12-14T17:19:30Z
+
+          NAME        RESOURCE GROUP    LOCATION    SKU       LOGIN SERVER           CREATION DATE         ADMIN ENABLED
+          ----------  ----------------  ----------  --------  ---------------------  --------------------  ---------------
+          testacreu2  testacrrg         eastus2     Standard  testacreu2.azurecr.io  2018-12-14T17:19:30Z
+
 
 
 2. You can list the repository in each Azure Container Registry  using the following Azure CLI command: </p>
@@ -958,12 +962,16 @@ For instance:
         name: astool
     
      You also need to update the line 30 and add the arguments used to call ASTool</p>
-     For instance:
-
+     For instance replace:
 
         command: ["dotnet","ASTool.dll"]
 
+
+    with:
+
+
         command: ["dotnet","ASTool.dll","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+
 
 
 4. You can check the new deployment with Kubernetes Command Line Client: </p>
