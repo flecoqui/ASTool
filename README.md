@@ -580,28 +580,29 @@ For instance:
      The image is built using the DockerFile below:
 
 
-          FROM microsoft/dotnet:2.2-sdk AS build-env
-          WORKDIR /app
-          
-          # copy csproj and restore as distinct layers
-          COPY  ASTool/*.csproj ./ASTool/
-          WORKDIR /app/ASTool
-          RUN dotnet restore
+        FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
+        WORKDIR /app
+        
+        # copy csproj and restore as distinct layers
+        COPY  ASTool/*.csproj ./ASTool/
+        WORKDIR /app/ASTool
+        RUN dotnet restore
 
-          # copy everything else and build app
-          WORKDIR /app
-          #COPY outputvideo/. ./outputvideo/
+        # copy everything else and build app
+        WORKDIR /app
+        #COPY outputvideo/. ./outputvideo/
 
-          COPY ASTool/. ./ASTool/
-          WORKDIR /app/ASTool
-          RUN dotnet publish -c Release -o out
+        COPY ASTool/. ./ASTool/
+        WORKDIR /app/ASTool
+        #RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
+        RUN dotnet publish  -c Release -o out
 
-          FROM microsoft/dotnet:2.2-runtime AS runtime
-          WORKDIR /app
-          COPY --from=build-env /app/ASTool/out ./
-          #COPY --from=build-env /app/outputvideo ./outputvideo/
+        FROM microsoft/dotnet:2.2.1-runtime-alpine AS runtime
+        WORKDIR /app
+        COPY --from=build-env /app/ASTool/out ./
+        #COPY --from=build-env /app/outputvideo ./outputvideo/
 
-          ENTRYPOINT ["dotnet", "ASTool.dll"]
+        ENTRYPOINT ["dotnet", "ASTool.dll"]
 
 
 The DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
@@ -687,6 +688,7 @@ Your container image astool:v1 is now available from your container registry in 
 You can now deploy the image using the credentials stored in Azure Key Vault.
 
 
+**Warning:** There is currently an issue for the pullpush feature running in container. After several hours, the application ASTool lose the connection with the ingestion point (TCP conneciton lost). As a temporary turnaround the container is deployed with the restart policy set to OnFailure to force the container to restart the pullpush feature.</p>
 
 <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aci.png"/>
 
@@ -716,13 +718,13 @@ For instance:
 
 
 3. With the AppID and the Password you can now deploy the image in a container with Azure CLI using the following command:</p>
-**Azure CLI 2.0:** az container create --resource-group "ResourceGroupName"  --name "ContainerGroupName" -f "file.yaml" -o json --debug</p>
+**Azure CLI 2.0:** az container create --resource-group "ResourceGroupName"  --name "ContainerGroupName" -f "file.yaml" -o json --debug --restart-policy OnFailure</p>
 
 
 Below the content of the file "file.yaml" :
 
           apiVersion: 2018-06-01
-          location: eastus2
+          location: <Region>
           name: <ContainerGroupName>
           properties:
             containers:
@@ -736,7 +738,7 @@ Below the content of the file "file.yaml" :
                     memoryInGb: 1.5
             osType: Linux
             imageRegistryCredentials:
-            - server: testacreu2.azurecr.io
+            - server: <ACRName>.azurecr.io
               username: <AppUserName>
               password: <AppPassword>
           tags: null
@@ -745,7 +747,7 @@ Below the content of the file "file.yaml" :
 
 For instance:
 
-        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush1 -f astool.pullpush1.aci.yaml -o json --debug
+        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush1 -f astool.pullpush1.aci.yaml -o json --debug --restart-policy OnFailure
 
 
  
@@ -916,6 +918,8 @@ Now you can create the Kubernetes Cluster in Azure. </p>
      You are now connected to your cluster from your local machine.
 
 #### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE
+
+**Warning:** There is currently an issue for the pullpush feature running in container. After several hours, the application ASTool lose the connection with the ingestion point (TCP conneciton lost). As a temporary turnaround the container is deployed with the restart policy set to Always to force the container to restart the pullpush feature.</p>
 
 1. You can list the Azure Container Registry per Resource Group using the following Azure CLI command: </p>
 **Azure CLI 2.0:** az acr list --resource-group  "ResourceGroupName" </p>

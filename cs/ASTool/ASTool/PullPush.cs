@@ -167,6 +167,8 @@ namespace ASTool
                                 var tt = mc.StartDownloadChunks();
                                 tt.Wait();
                                 result = tt.Result;
+                                DateTime startTime = DateTime.Now;
+                                DateTime currentTime = DateTime.Now;
                                 while (mc.GetAssetStatus() != AssetStatus.ChunksDownloaded)
                                 {
                                     if (opt.CounterPeriod > 0)
@@ -181,6 +183,19 @@ namespace ASTool
                                         System.Threading.Tasks.Task.Delay(1000).Wait();
 
 
+
+                                    // Force Garbage Collection in Container
+                                    currentTime = DateTime.Now;
+                                    if ((currentTime - startTime).TotalSeconds > 300)
+                                    {
+                                        startTime = currentTime;
+                                        if (InDocker)
+                                        {
+                                            opt.LogInformation("\r\nCalling Garbage Collection " + opt.Name + "\r\n Pulling from : " + opt.InputUri + "\r\n Pushing to : " + opt.OutputUri);
+                                            GC.Collect();
+                                            GC.WaitForPendingFinalizers();
+                                        }
+                                    }
                                 }
                             }
                         }

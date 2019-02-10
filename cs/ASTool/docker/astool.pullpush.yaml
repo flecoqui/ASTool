@@ -25,16 +25,8 @@ spec:
         run: astool
     spec:
       containers:
-      - image: <AzureContainerRegistryName>.azurecr.io/astool:v1
+      - image: testacreu2.azurecr.io/astool:v1
         name: astool
-        ports:
-        - containerPort: 80
-          protocol: TCP
-        resources: 
-          requests:
-            cpu: 250m
-          limits:
-            cpu: 500m
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -48,13 +40,8 @@ metadata:
   name: astool
   namespace: default
 spec:
-  externalTrafficPolicy: Cluster
-  ports:
-  - nodePort: 30756
-    port: 80
-    protocol: TCP
-    targetPort: 80
-  selector:
-    run: astool
-  sessionAffinity: None
-  type: LoadBalancer
+    containers:
+    - name: astool
+      image: testacreu2.azurecr.io/astool:v1
+      command: ["dotnet"]
+      args: ["ASTool.dll","--pushpull", "--input", "http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]

@@ -232,7 +232,7 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            System.Diagnostics.Debug.WriteLine("Error while senfing audio chuncks");
+                            Console.WriteLine("Error while senfing audio chuncks");
                         }
                     }
                     else
@@ -273,7 +273,7 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            System.Diagnostics.Debug.WriteLine("Error while senfing audio chuncks");
+                            Console.WriteLine("Error while senfing audio chuncks");
                         }
                     }
                     else
@@ -313,7 +313,7 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            System.Diagnostics.Debug.WriteLine("Error while sending video chunks");
+                            Console.WriteLine("Error while sending video chunks");
                         }
                     }
                     else
@@ -353,7 +353,10 @@ namespace ASTool
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Exception while sending box: " + ex.Message);
+                    Console.WriteLine("Exception while sending box: " + ex.Message);
+                    // Exit if in container 
+                    if(Program.InDocker)
+                        System.Environment.Exit(0);
                     return false;
                 }
                 return true;

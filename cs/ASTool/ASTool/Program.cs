@@ -69,6 +69,7 @@ namespace ASTool
             }
             return opt;
         }
+        public static bool InDocker { get { return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";} }
         static List<Options> LaunchServices(Options inputOption , out bool bContinued)
         {
             List<Options> list = null;
@@ -188,18 +189,21 @@ namespace ASTool
                     }
                     else if (option.ASToolAction == Options.Action.PullPush)
                     {
+                        if(InDocker) option.LogInformation("\r\nRunning in Docker");
                         option.Task = System.Threading.Tasks.Task.Run(() => PullPush(option));
                         ThreadLaunched++;
                     }
                     if (option.ASToolAction == Options.Action.Pull)
                     {
                        
+                        if(InDocker) option.LogInformation("\r\nRunning in Docker");
                         option.Task = System.Threading.Tasks.Task.Run(() => Pull(option));
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Push)
                     {
+                        if(InDocker) option.LogInformation("\r\nRunning in Docker");
                         option.Task = System.Threading.Tasks.Task.Run(() => Push(option));
                         ThreadLaunched++;
 
@@ -212,12 +216,14 @@ namespace ASTool
                     }
                     if (option.ASToolAction == Options.Action.Decrypt)
                     {
+                        if(InDocker) option.LogInformation("\r\nRunning in Docker");
                         option.Task = System.Threading.Tasks.Task.Run(() => Decrypt(option));
                         ThreadLaunched++;
 
                     }
                     if (option.ASToolAction == Options.Action.Encrypt)
                     {
+                        if(InDocker) option.LogInformation("\r\nRunning in Docker");
                         option.Task = System.Threading.Tasks.Task.Run(() => Decrypt(option,false));
                         ThreadLaunched++;
 

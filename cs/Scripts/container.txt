@@ -1,3 +1,27 @@
+Presentation:
+https://blobstoragebackup.blob.core.windows.net/mycontent/ASTOOLDOC.pptx
+Source Code:
+https://github.com/flecoqui/ASTool
+
+ASTOOL Push Demonstration:
+https://ampdemo.azureedge.net/azuremediaplayer.html?url=%2F%2Ftestlivevi-use2.streaming.media.azure.net%2Fc80fbee5-278d-427e-bdc1-862ab4f671e1%2F03ff06c5-63d4-4cbf-a3c8-d7877e7634fc.ism%2Fmanifest
+ASTOOL PullPush Demonstration:
+https://ampdemo.azureedge.net/azuremediaplayer.html?url=%2F%2Ftestlivevi-use2.streaming.media.azure.net%2F32c7ef75-9e50-447f-b962-03411facd641%2F6e913edb-e288-4dbc-b6f9-01a6aed740f4.ism%2Fmanifest
+
+
+
+http://channel2-testlivevi-use2.channel.media.azure.net/preview.isml/manifest
+http://testlivevi-use2.streaming.media.azure.net/32c7ef75-9e50-447f-b962-03411facd641/6e913edb-e288-4dbc-b6f9-01a6aed740f4.ism/manifest
+https://ampdemo.azureedge.net/azuremediaplayer.html?url=%2F%2Ftestlivevi-use2.streaming.media.azure.net%2F32c7ef75-9e50-447f-b962-03411facd641%2F6e913edb-e288-4dbc-b6f9-01a6aed740f4.ism%2Fmanifest
+
+
+
+http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest
+http://testlivevi-use2.streaming.media.azure.net/c80fbee5-278d-427e-bdc1-862ab4f671e1/03ff06c5-63d4-4cbf-a3c8-d7877e7634fc.ism/manifest
+https://ampdemo.azureedge.net/azuremediaplayer.html?url=%2F%2Ftestlivevi-use2.streaming.media.azure.net%2Fc80fbee5-278d-427e-bdc1-862ab4f671e1%2F03ff06c5-63d4-4cbf-a3c8-d7877e7634fc.ism%2Fmanifest
+
+
+
 C:\git\flecoqui\ASTool\cs\ASTool>
 
 
