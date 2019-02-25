@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
+FROM microsoft/dotnet:2.2.103-sdk AS build-env
 WORKDIR /app
    
 # copy csproj and restore as distinct layers
@@ -12,12 +12,12 @@ WORKDIR /app
 
 COPY ASTool/. ./ASTool/
 WORKDIR /app/ASTool
-#RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
-RUN dotnet publish  -c Release -o out
+RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
+#RUN dotnet publish  -c Release -o out
 
-FROM microsoft/dotnet:2.2.1-runtime-alpine AS runtime
+FROM microsoft/dotnet:2.2.103 AS runtime
 WORKDIR /app
 COPY --from=build-env /app/ASTool/out ./
 #COPY --from=build-env /app/outputvideo ./outputvideo/
 
-ENTRYPOINT ["dotnet", "ASTool.dll"]
+ENTRYPOINT ["ASTool", "--version"]

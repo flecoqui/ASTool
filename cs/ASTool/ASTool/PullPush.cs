@@ -154,7 +154,7 @@ namespace ASTool
                 bool InitResult =  d.Initialize(opt);
                 if(InitResult == true)
                 {
-                    ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.MaxDuration, (ulong)opt.BufferSize, opt.LiveOffset);
+                    ManifestManager mc = ManifestManager.CreateManifestCache(new Uri(opt.InputUri), (ulong)opt.MinBitrate, (ulong)opt.MaxBitrate, opt.AudioTrackName, opt.TextTrackName, opt.MaxDuration, (ulong)opt.BufferSize, opt.LiveOffset,opt);
                     if (mc != null)
                     {
                         if (mc.SetManifestOutput(d) == true)

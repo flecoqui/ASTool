@@ -1,0 +1,20 @@
+apiVersion: 2018-06-01
+location: eastus2
+name: astoolpullpush.linux
+properties:
+  containers:
+  - name: astool
+    properties:
+      image: testacreu2.azurecr.io/astool.linux:v1
+      command: ["./ASTool","--pullpush", "--input", "https://verizon-uhddstvstreamingno-euno.streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5          
+  osType: Linux
+  imageRegistryCredentials:
+  - server: testacreu2.azurecr.io
+    username: 40e21cbe-9b70-469f-80da-4369e02ebc58
+    password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+tags: null
+type: Microsoft.ContainerInstance/containerGroups
