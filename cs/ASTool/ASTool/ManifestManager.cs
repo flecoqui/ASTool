@@ -2361,10 +2361,10 @@ namespace ASTool
                 ulong s = GetBufferSize();
                 if (s > MaxMemoryBufferSize)
                 {
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
                     if (OutputManager != null)
                         await OutputManager.ProcessChunks(this);
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
 
                 }
 
