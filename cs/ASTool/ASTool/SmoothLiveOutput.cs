@@ -252,6 +252,7 @@ namespace ASTool
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
                             cl.OutputChunks++;
+                            cl.MemorySizeForChunks -= res;
                         }
                         else
                         {
@@ -293,6 +294,8 @@ namespace ASTool
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
                             cl.OutputChunks++;
+                            cl.MemorySizeForChunks -= res;
+
                         }
                         else
                         {
@@ -333,6 +336,7 @@ namespace ASTool
                             cc.chunkBuffer = null;
                             cl.OutputBytes += res;
                             cl.OutputChunks++;
+                            cl.MemorySizeForChunks -= res;
                         }
                         else
                         {
