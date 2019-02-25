@@ -1758,13 +1758,13 @@ namespace ASTool
                     if (buffer != null)
                     {
                         int val = buffer.Length;
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DownloadChunk done for chunk: " + chunkUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "DownloadChunk done for chunk: " + chunkUri.ToString());
                         return buffer.ToArray();
                     }
                 }
                 catch (Exception e)
                 {
-                    LogMessage(Options.LogLevel.Error, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " DownloadChunk exception: " + e.Message + " for chunk: " + chunkUri.ToString());
+                    LogMessage(Options.LogLevel.Error, "DownloadChunk exception: " + e.Message + " for chunk: " + chunkUri.ToString());
                 }
             }
             return null;
@@ -2158,12 +2158,12 @@ namespace ASTool
         public async  Task<bool> downloadThread()
         {
 
-            LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread started for Uri: " + ManifestUri.ToString());
+            LogMessage(Options.LogLevel.Verbose, "DownloadThread started for Uri: " + ManifestUri.ToString());
             downloadTaskRunning = true;
             // Were we already canceled?
             if (downloadTaskCancellationtoken != null)
             {
-                LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Cancellation Token throw for Uri: " + ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Verbose, "DownloadThread Cancellation Token throw for Uri: " + ManifestUri.ToString());
                 downloadTaskCancellationtoken.Token.ThrowIfCancellationRequested();
             }
 
@@ -2182,7 +2182,7 @@ namespace ASTool
                 // other cleanup before throwing.
                 if ((downloadTaskCancellationtoken != null) && (downloadTaskCancellationtoken.Token.IsCancellationRequested))
                 {
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Cancellation Token throw for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose,  "DownloadThread Cancellation Token throw for Uri: " + ManifestUri.ToString());
                     // Clean up here, then...
                     downloadTaskCancellationtoken.Token.ThrowIfCancellationRequested();
                 }
@@ -2194,7 +2194,7 @@ namespace ASTool
                     // Something to download
                     if(!IsDownloadCompleted(VideoChunkListList))
                     {
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading video chunks for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose,  "DownloadThread downloading video chunks for Uri: " + ManifestUri.ToString());
                         long len = await DownloadCurrentChunks(VideoChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
@@ -2202,9 +2202,9 @@ namespace ASTool
                             result = true;
                         }
                         else
-                            LogMessage(Options.LogLevel.Error, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading video chunks error for Uri: " + ManifestUri.ToString());
+                            LogMessage(Options.LogLevel.Error, "DownloadThread downloading video chunks error for Uri: " + ManifestUri.ToString());
 
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading video chunks done for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "DownloadThread downloading video chunks done for Uri: " + ManifestUri.ToString());
 
                     }
                     else
@@ -2216,7 +2216,7 @@ namespace ASTool
 
                 if (downloadTaskRunning == false)
                 {
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose, "DownloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
                     break;
                 }
 
@@ -2226,7 +2226,7 @@ namespace ASTool
                     // Something to download
                     if (!IsDownloadCompleted(AudioChunkListList))
                     {
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading audio chunks for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "DownloadThread downloading audio chunks for Uri: " + ManifestUri.ToString());
                         long len = await DownloadCurrentChunks(AudioChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
@@ -2234,8 +2234,8 @@ namespace ASTool
                             result = true;
                         }
                         else
-                            LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading audio chunks error for Uri: " + ManifestUri.ToString());
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading audio chunks done for Uri: " + ManifestUri.ToString());
+                            LogMessage(Options.LogLevel.Verbose, "DownloadThread downloading audio chunks error for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "DownloadThread downloading audio chunks done for Uri: " + ManifestUri.ToString());
 
                     }
                     else
@@ -2246,7 +2246,7 @@ namespace ASTool
                 }
                 if (downloadTaskRunning == false)
                 {
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose, "DownloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
                     break;
                 }
 
@@ -2256,7 +2256,7 @@ namespace ASTool
                     // Something to download
                     if (!IsDownloadCompleted(TextChunkListList))
                     {
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading text chunks for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose,"DownloadThread downloading text chunks for Uri: " + ManifestUri.ToString());
                         long len = await DownloadCurrentChunks(TextChunkListList, bCreateMFRA);
                         if (len >= 0)
                         {
@@ -2264,8 +2264,8 @@ namespace ASTool
                             result = true;
                         }
                         else
-                            LogMessage(Options.LogLevel.Error, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading text chunks error for Uri: " + ManifestUri.ToString());
-                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloading text chunks done for Uri: " + ManifestUri.ToString());
+                            LogMessage(Options.LogLevel.Error,"DownloadThread downloading text chunks error for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "DownloadThread downloading text chunks done for Uri: " + ManifestUri.ToString());
 
                     }
                     else
@@ -2276,7 +2276,7 @@ namespace ASTool
                 }
                 if (downloadTaskRunning == false)
                 {
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Verbose, "DownloadThread downloadTaskRunning == false for Uri: " + ManifestUri.ToString());
                     break;
                 }
 
@@ -2384,7 +2384,7 @@ namespace ASTool
 
             downloadTaskRunning = false;
             downloadManifestTaskRunning = false;
-            LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread ended for Uri: " + ManifestUri.ToString());
+            LogMessage(Options.LogLevel.Information, "DownloadThread ended for Uri: " + ManifestUri.ToString());
             return true; 
 
         }
@@ -2425,25 +2425,25 @@ namespace ASTool
         {
             if ((downloadTask != null) && (downloadTaskRunning == true))
             {
-                LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask thread for Uri: " + ManifestUri.ToString());
-                LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask downloadTaskRunning = false for Uri: " + ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Information, "Stopping downloadTask thread for Uri: " + ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Information, "Stopping downloadTask downloadTaskRunning = false for Uri: " + ManifestUri.ToString());
                 downloadTaskRunning = false;
                 if (!downloadTask.IsCompleted)
                 {
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask Cancel token for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, "Stopping downloadTask Cancel token for Uri: " + ManifestUri.ToString());
                     downloadTaskCancellationtoken.Cancel();
                 }
                 try
                 {
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask thread Waiting end of thread for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, "Stopping downloadTask thread Waiting end of thread for Uri: " + ManifestUri.ToString());
                     downloadTask.Wait(500);
                 }
                 catch (Exception e)
                 {
-                    LogMessage(Options.LogLevel.Error, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask thread Exception for Uri: " + ManifestUri.ToString() + " exception: " + e.Message);
+                    LogMessage(Options.LogLevel.Error, "Stopping downloadTask thread Exception for Uri: " + ManifestUri.ToString() + " exception: " + e.Message);
                 }
 
-                LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Stopping downloadTask thread completed for Uri: " + ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Information, "Stopping downloadTask thread completed for Uri: " + ManifestUri.ToString());
                 downloadTask = null;
             }
             return true;
