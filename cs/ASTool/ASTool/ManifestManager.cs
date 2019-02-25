@@ -2371,11 +2371,11 @@ namespace ASTool
                 {
                     if (OutputManager != null)
                     {
-                        LogMessage(Options.LogLevel.Verbose, "Maxbuffersize downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "Maxbuffersize: " + MaxMemoryBufferSize.ToString() + " Buffer Size:" + s.ToString() + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
                         bool r = await OutputManager.ProcessChunks(this);
                         if(r==false)
-                            LogMessage(Options.LogLevel.Verbose, "Maxbuffersize downloadThread Saving error done for Uri: " + ManifestUri.ToString());
-                        LogMessage(Options.LogLevel.Verbose, "Maxbuffersize downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                            LogMessage(Options.LogLevel.Verbose, "Maxbuffersize: " + MaxMemoryBufferSize.ToString() + " Buffer Size:" + s.ToString() + " downloadThread Saving error done for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, "Maxbuffersize: " + MaxMemoryBufferSize.ToString() + " Buffer Size:" + s.ToString() + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
                     }
 
                 }
