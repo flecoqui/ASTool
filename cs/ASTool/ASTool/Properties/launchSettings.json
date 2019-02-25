@@ -2,7 +2,7 @@
   "profiles": {
     "ASTool": {
       "commandName": "Project",
-      "commandLineArgs": "dotnet ASTool.dll --pullpush --input https://verizon-uhddstvstreamingno-euno.streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest --minbitrate 200000 --maxbitrate 1810000 --liveoffset 10 --output http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml --counterperiod 0 --consolelevel information"
+      "commandLineArgs": "dotnet ASTool.dll --pullpush --input https://verizon-uhddstvstreamingno-euno.streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest --minbitrate 200000 --maxbitrate 1810000 --liveoffset 10 --output http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml --counterperiod 10 --consolelevel information "
     }
   }
 }

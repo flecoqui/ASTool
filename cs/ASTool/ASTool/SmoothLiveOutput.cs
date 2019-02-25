@@ -420,6 +420,8 @@ namespace ASTool
         {
             bool bResult = false;
 
+            if (cache.TextChunkListList.Count == 0)
+                return true;
 
             int TextTrack = 0;
             foreach (var cl in cache.TextChunkListList)
@@ -548,6 +550,8 @@ namespace ASTool
         {
             bool bResult = false;
 
+            if (cache.AudioChunkListList.Count == 0)
+                return true;
 
             int AudioTrack = 0;
             foreach (var cl in cache.AudioChunkListList)
@@ -682,6 +686,8 @@ namespace ASTool
         {
             bool bResult = false;
 
+            if (cache.VideoChunkListList.Count == 0)
+                return true;
 
             int VideoTrack = 0;
             foreach (var cl in cache.VideoChunkListList)
