@@ -26,28 +26,18 @@ The latest releases are available [here](https://github.com/flecoqui/ASTool/tree
     [![Github Release][astool-version-badge]][win-download]
 
 
-- [Ubuntu  latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz)</p>
+- [Linux (Ubuntu, Centos, Debian,...)  latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.linux.tar.gz)</p>
 
-    [ubuntu-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
+    [linux-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.linux.tar.gz
     [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
-    [![Github Release][astool-version-badge]][ubuntu-download]
+    [![Github Release][astool-version-badge]][linux-download]
 
 
-- [Debian latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz)</p>
+- [Linux (Lightweight distributions using musl like Alpine Linux) latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.linux-musl.tar.gz)</p>
 
-
-    [debian-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
+    [linux-musl-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.linux-musl.tar.gz
     [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
-    [![Github Release][astool-version-badge]][debian-download]
-
-
-
-- [Centos latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz)</p>
-
-
-    [centos-download]:                 https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
-    [astool-version-badge]:            https://cdn.rawgit.com/flecoqui/ASTool/master/Docs/astoolbuild.svg
-    [![Github Release][astool-version-badge]][centos-download]
+    [![Github Release][astool-version-badge]][linux-musl-download]
 
 
 - [Red Hat latest release](https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz)</p>

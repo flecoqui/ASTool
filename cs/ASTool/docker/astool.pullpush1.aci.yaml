@@ -1,0 +1,20 @@
+apiVersion: 2018-06-01
+location: eastus2
+name: astoolpullpush1
+properties:
+  containers:
+  - name: astool
+    properties:
+      image: <AzureContainerRegistryName>.azurecr.io/astool:v1
+      command: ["dotnet","ASTool.dll","--pullpush", "--input", "https://<SourceDNSName>/<SourcePathName>/<SourceFileName>.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://<ChannelName>.channel.media.azure.net/ingest.isml","--counterperiod","300"]
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5          
+  osType: Linux
+  imageRegistryCredentials:
+  - server: <AzureContainerRegistryName>.azurecr.io
+    username: <AzureContainerRegistryUserName>
+    password: <AzureContainerRegistryPassword>
+tags: null
+type: Microsoft.ContainerInstance/containerGroups
