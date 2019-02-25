@@ -2319,10 +2319,10 @@ namespace ASTool
                     double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
                     LogMessage(Options.LogLevel.Information, "Download bitrate for the current session: " + bitrate.ToString() + " bps");
                     LogMessage(Options.LogLevel.Information, "Download Thread Saving Asset");
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " download completed downloadThread Saving asset for Uri: " + ManifestUri.ToString());
                     if (OutputManager != null)
                         await OutputManager.ProcessChunks(this);
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " download completed downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
                     ManifestStatus = AssetStatus.ChunksDownloaded;
                     downloadTaskRunning = false;
                     downloadManifestTaskRunning = false;
@@ -2349,10 +2349,10 @@ namespace ASTool
                     double bitrate = (this.DownloadThreadVideoCount + this.DownloadThreadAudioCount) * 8 / (time - DownloadThreadStartTime).TotalSeconds;
                     LogMessage(Options.LogLevel.Information, "Download bitrate for the current session: " + bitrate.ToString() + " bps");
                     LogMessage(Options.LogLevel.Information, "Download Thread Saving Asset");
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " maxduration downloadThread Saving asset for Uri: " + ManifestUri.ToString());
                     if (OutputManager != null)
                         await OutputManager.ProcessChunks(this);
-                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    LogMessage(Options.LogLevel.Information, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " maxduration downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
                     ManifestStatus = AssetStatus.ChunksDownloaded;
                     downloadTaskRunning = false;
                     downloadManifestTaskRunning = false;
@@ -2361,10 +2361,14 @@ namespace ASTool
                 ulong s = GetBufferSize();
                 if (s > MaxMemoryBufferSize)
                 {
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset for Uri: " + ManifestUri.ToString());
                     if (OutputManager != null)
-                        await OutputManager.ProcessChunks(this);
-                    LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    {
+                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " maxbuffersize downloadThread Saving asset for Uri: " + ManifestUri.ToString());
+                        bool r = await OutputManager.ProcessChunks(this);
+                        if(r==false)
+                            LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " maxbuffersize downloadThread Saving error done for Uri: " + ManifestUri.ToString());
+                        LogMessage(Options.LogLevel.Verbose, string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " maxbuffersize downloadThread Saving asset done for Uri: " + ManifestUri.ToString());
+                    }
 
                 }
 
