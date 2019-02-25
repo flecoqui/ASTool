@@ -58,7 +58,7 @@ namespace ASTool
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
+                LogMessage(Options.LogLevel.Error, "Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
             }
             return manifest;
@@ -88,7 +88,7 @@ namespace ASTool
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
+                LogMessage(Options.LogLevel.Error, "Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
             }
             return manifest;
@@ -112,7 +112,7 @@ namespace ASTool
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Exception while creating Live Manifest: " + ex.Message);
+                LogMessage(Options.LogLevel.Error, "Exception while creating Live Manifest: " + ex.Message);
                 manifest = string.Empty;
             }
             return manifest;
@@ -127,6 +127,30 @@ namespace ASTool
             AssetID = 22;
             StreamID = 0;
             pushurl = string.Empty;
+        }
+        void LogMessage(Options.LogLevel level, string Log)
+        {
+            if (options != null)
+            {
+                switch (level)
+                {
+                    case Options.LogLevel.Error:
+                        options.LogError(Log);
+                        break;
+                    case Options.LogLevel.Information:
+                        options.LogInformation(Log);
+                        break;
+                    case Options.LogLevel.Verbose:
+                        options.LogVerbose(Log);
+                        break;
+                    case Options.LogLevel.Warning:
+                        options.LogWarning(Log);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            System.Diagnostics.Debug.WriteLine(Log);
         }
         /// <summary>
         /// Initialize
@@ -166,17 +190,17 @@ namespace ASTool
             if (!(await SendAudioChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending audio chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending audio chunks for url: " + cache.ManifestUri.ToString());
             }
             if (!(await SendVideoChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending video chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending video chunks for url: " + cache.ManifestUri.ToString());
             }
             if (!(await SendTextChunks(cache)))
             {
                 bResult = false;
-                System.Diagnostics.Debug.WriteLine(string.Format("{0:d/M/yyyy HH:mm:ss.fff}", DateTime.Now) + " Error while sending text chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending text chunks for url: " + cache.ManifestUri.ToString());
             }
             return bResult;
 
@@ -197,7 +221,7 @@ namespace ASTool
                 }
                 else
                 {
-                    Console.WriteLine("Error while sending to Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                    LogMessage(Options.LogLevel.Error, "Error while sending to Source " + source + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                     return false;
                 }
 
@@ -232,13 +256,13 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            Console.WriteLine("Error while senfing audio chuncks");
+                            LogMessage(Options.LogLevel.Error, "Error while senfing audio chuncks");
                         }
                     }
                     else
                     {
                         result = false;
-                        System.Diagnostics.Debug.WriteLine("Error while sending audio chuncks");
+                        LogMessage(Options.LogLevel.Error, "Error while sending audio chuncks");
                     }
                 }
                 else
@@ -273,13 +297,13 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            Console.WriteLine("Error while senfing audio chuncks");
+                            LogMessage(Options.LogLevel.Error, "Error while senfing audio chuncks");
                         }
                     }
                     else
                     {
                         result = false;
-                        System.Diagnostics.Debug.WriteLine("Error while sending audio chuncks");
+                        LogMessage(Options.LogLevel.Error, "Error while sending audio chuncks");
                     }
                 }
                 else
@@ -313,13 +337,13 @@ namespace ASTool
                         else
                         {
                             result = false;
-                            Console.WriteLine("Error while sending video chunks");
+                            LogMessage(Options.LogLevel.Error, "Error while sending video chunks");
                         }
                     }
                     else
                     {
                         result = false;
-                        System.Diagnostics.Debug.WriteLine("Error while sending video chunks");
+                        LogMessage(Options.LogLevel.Error, "Error while sending video chunks");
                     }
                 }
                 else
@@ -353,7 +377,7 @@ namespace ASTool
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Exception while sending box: " + ex.Message);
+                    LogMessage(Options.LogLevel.Error, "Exception while sending box: " + ex.Message);
                     // Exit if in container 
                     if(Program.InDocker)
                         System.Environment.Exit(0);
@@ -443,7 +467,7 @@ namespace ASTool
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
 
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose,"Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if ((await SendBox(spm.NetworkStream, cl.ftypData)) == false)
                                                 return false;
                                             // Sending Live Manifest
@@ -472,7 +496,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -482,7 +506,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
@@ -569,7 +593,7 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (await SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
@@ -605,7 +629,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -615,7 +639,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
                                             // Sending the other boxes
@@ -704,7 +728,7 @@ namespace ASTool
                                             // Sending ftyp
                                             int BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.ftypData, 0);
                                             string BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.ftypData, 0);
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (await SendBox(spm.NetworkStream, cl.ftypData) == false)
                                                 return false;
 
@@ -736,7 +760,7 @@ namespace ASTool
                                                 {
                                                     BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(buffer, 0);
                                                     BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(buffer, 0);
-                                                    if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                                    LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
 
                                                     if (await SendBox(spm.NetworkStream, buffer) == false)
                                                         return false;
@@ -746,7 +770,7 @@ namespace ASTool
                                             // Sending moov
                                             BoxLen = ISMHelper.Mp4Box.ReadMp4BoxInt32(cl.moovData, 0);
                                             BoxType = ISMHelper.Mp4Box.ReadMp4BoxType(cl.moovData, 0);
-                                            if (options != null) options.LogVerbose("Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
+                                            LogMessage(Options.LogLevel.Verbose, "Source " + cl.Configuration.GetSourceName() + " Streaming MP4 Box " + BoxType + " " + BoxLen.ToString() + " Bytes");
                                             if (await SendBox(spm.NetworkStream, cl.moovData) == false)
                                                 return false;
 
