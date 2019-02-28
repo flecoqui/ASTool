@@ -538,10 +538,11 @@ For instance:
 
 
 4. Build the container image and register it in the new Azure Container Registry with Azure CLI using the following command:</p>
-**Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder"</p>
-For instance:
+**Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder" -f "DockerFilePath"</p>
+For instance below the creation of an image for Linux:
 
-        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool:v1 .
+        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool.linux:v1 . -f Dockerfile.linux
+
 
      After few minutes, the image should be available in the new registry:
 
@@ -570,43 +571,82 @@ For instance:
      The image is built using the DockerFile below:
 
 
-        FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
-        WORKDIR /app
-        
-        # copy csproj and restore as distinct layers
-        COPY  ASTool/*.csproj ./ASTool/
-        WORKDIR /app/ASTool
-        RUN dotnet restore
+            FROM microsoft/dotnet:2.2.103-sdk AS build-env
+            WORKDIR /app
+            
+            # copy csproj and restore as distinct layers
+            COPY  ASTool/*.csproj ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet restore
+                        
+            # copy everything else and build app
+            WORKDIR /app
+            #COPY outputvideo/. ./outputvideo/
 
-        # copy everything else and build app
-        WORKDIR /app
-        #COPY outputvideo/. ./outputvideo/
+            COPY ASTool/. ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
+            #RUN dotnet publish  -c Release -o out
 
-        COPY ASTool/. ./ASTool/
-        WORKDIR /app/ASTool
-        #RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
-        RUN dotnet publish  -c Release -o out
+            FROM microsoft/dotnet:2.2-runtime-deps AS runtime
+            WORKDIR /app
+            COPY --from=build-env /app/ASTool/out ./
+            #COPY --from=build-env /app/outputvideo ./outputvideo/
 
-        FROM microsoft/dotnet:2.2.1-runtime-alpine AS runtime
-        WORKDIR /app
-        COPY --from=build-env /app/ASTool/out ./
-        #COPY --from=build-env /app/outputvideo ./outputvideo/
-
-        ENTRYPOINT ["dotnet", "ASTool.dll"]
+            ENTRYPOINT ["./ASTool", "--version"]
 
 
-The DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile.linux) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+
+
+For instance below the creation of an image for Linux Alpine which will consume less resource than the default Linux image:
+
+        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool.linux-musl:v1 . -f Dockerfile.linux-musl
+
+
+     After few minutes, the image should be available in the new registry:
+
+     The image is built using the DockerFile below:
+
+
+            FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
+            WORKDIR /app
+            
+            # copy csproj and restore as distinct layers
+            COPY  ASTool/*.csproj ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet restore
+
+            # copy everything else and build app
+            WORKDIR /app
+            #COPY outputvideo/. ./outputvideo/
+
+            COPY ASTool/. ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet publish --self-contained -r linux-musl-x64 -c Release -o out
+            #RUN dotnet publish  -c Release -o out
+
+            FROM microsoft/dotnet:2.2-runtime-deps-alpine AS runtime
+            WORKDIR /app
+            COPY --from=build-env /app/ASTool/out ./
+            #COPY --from=build-env /app/outputvideo ./outputvideo/
+
+            ENTRYPOINT ["./ASTool", "--version"]
+
+
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+
 
 Moreover, as the entrypoint is :
 
-          ENTRYPOINT ["dotnet", "ASTool.dll"]
+          ENTRYPOINT ["./ASTool", "--version"]
 
-when the container will start, the ASTool application will only display the syntax error message and stop.
+when the container will start, the ASTool application will only display the version message and stop.
 
 If you want a image which runs always the same service, you can complete the entrypoint wth the ASTool arguments, for instance:
 
 
-          ENTRYPOINT ["dotnet", "ASTool.dll",  "--pullpush", "--input", "http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest", "--minbitrate", "300000"   ,"--maxbitrate" ,"1000000","--liveoffset","10" ,"--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+          ENTRYPOINT ["./ASTool",  "--pullpush", "--input", "http://b028.wpc.azureedge.net/80B028/Samples/a38e6323-95e9-4f1f-9b38-75eba91704e4/5f2ce531-d508-49fb-8152-647eba422aec.ism/manifest", "--minbitrate", "300000"   ,"--maxbitrate" ,"1000000","--liveoffset","10" ,"--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
 
 
 ### CONFIGURING REGISTRY AUTHENTICATION
@@ -720,12 +760,12 @@ Below the content of the file "file.yaml" :
             containers:
             - name: astool
               properties:
-                image: <ACRName>.azurecr.io/astool:v1
+                image: <ACRName>.azurecr.io/astool.linux:v1
                 command: ["dotnet","ASTool.dll","--pullpush", "--input", "<inputSmoothStreamingUrl>", "--minbitrate", "<minBitrate>", "--maxbitrate", "<maxBitrate>", "--liveoffset", "<LiveOffset>", "--output", "<outputSmoothStreamingUrl>"]
                 resources:
                   requests:
-                    cpu: 1
-                    memoryInGb: 1.5
+                    cpu: .4
+                    memoryInGb: .3
             osType: Linux
             imageRegistryCredentials:
             - server: <ACRName>.azurecr.io
@@ -735,35 +775,71 @@ Below the content of the file "file.yaml" :
           type: Microsoft.ContainerInstance/containerGroups
 
 
-For instance:
+For instance below the creation of a Linux container:
 
-        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush1 -f astool.pullpush1.aci.yaml -o json --debug --restart-policy OnFailure
+        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux -f astoolpullpush.linux.aci.yaml  -o json --debug --restart-policy OnFailure
 
 
  
 The content of the yaml file below:
 
 
-          apiVersion: 2018-06-01
-          location: eastus2
-          name: astoolpullpush1
-          properties:
+
+            apiVersion: 2018-06-01
+            location: eastus2
+            name: astoolpullpush.linux
+            properties:
             containers:
             - name: astool
-              properties:
-                image: testacreu2.azurecr.io/astool:v1
-                command: ["dotnet","ASTool.dll","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+                properties:
+                image: testacreu2.azurecr.io/astool.linux:v1
+                command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
                 resources:
-                  requests:
-                    cpu: 1
-                    memoryInGb: 1.5
+                    requests:
+                    cpu: .4
+                    memoryInGb: .3          
             osType: Linux
             imageRegistryCredentials:
             - server: testacreu2.azurecr.io
-              username: 40e21cbe-9b70-469f-80da-4369e02ebc58
-              password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
-          tags: null
-          type: Microsoft.ContainerInstance/containerGroups
+                username: 40e21cbe-9b70-469f-80da-4369e02ebc58
+                password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+            tags: null
+            type: Microsoft.ContainerInstance/containerGroups
+
+
+
+
+For instance below the creation of an Alpine container:
+
+        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux-musl -f astoolpullpush.linux-musl.aci.yaml  -o json --debug --restart-policy OnFailure
+
+
+ 
+The content of the yaml file below:
+
+
+
+            apiVersion: 2018-06-01
+            location: eastus2
+            name: astoolpullpush.linux-musl
+            properties:
+            containers:
+            - name: astool
+                properties:
+                image: testacreu2.azurecr.io/astool.linux-musl:v1
+                command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
+                resources:
+                    requests:
+                    cpu: .4
+                    memoryInGb: .3          
+            osType: Linux
+            imageRegistryCredentials:
+            - server: testacreu2.azurecr.io
+                username: 40e21cbe-9b70-469f-80da-4369e02ebc58
+                password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+            tags: null
+            type: Microsoft.ContainerInstance/containerGroups
+
 
 
 
@@ -790,14 +866,14 @@ You can receive on your local machine the logs from the Container running in Azu
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az container attach --resource-group testacrrg --name astoolpullpush1
+        C:\git\me\ASTool\cs\ASTool> az container attach --resource-group testacrrg --name astoolpullpush.linux
 
 
 If you want to browse the files and the folders in the container while the container instance is running, you can use the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush1 --exec-command "/bin/bash"
+        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
 
 
 #### TROUBLESHOOTING YOUR IMAGE
@@ -805,13 +881,13 @@ If your image keep on rebooting, you can troubleshoot the issue creating the fol
 **Azure CLI 2.0:** az container create -g "ResourceGroupName" --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --command-line "tail -f /dev/null" --registry-username "UserName" --registry-password "Password" </p>
 For instance:
 
-        C:\git\me\ASTool\cs\ASTool> az container create -g testacrrg --name astoolpush1 --image testacreu2.azurecr.io/astoolpush:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+        C:\git\me\ASTool\cs\ASTool> az container create -g testacrrg --name astoolpullpush.linux --image testacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
 
 After this command, your image should not keep on rebooting, and you could browse the files and the folders in the container while the container instance is running, with the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush1 --exec-command "/bin/bash"
+        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
 
 
 
