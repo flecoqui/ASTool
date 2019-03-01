@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astoolpushlinux-musl
+spec:
+  selector:
+    matchLabels:
+      run: astoolpushlinux-musl
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: astoolpushlinux-musl
+    spec:
+      containers:
+      - name: astoolpushlinux-musl
+        image: testacreu2.azurecr.io/astoolpush.linux-musl:v1
+        command: ["./ASTool","--push", "--input", "/app/outputvideo/audiovideo.ism", "--output", "http://channel1-testlivevi-use2.channel.media.azure.net/ingest.isml", "--loop", "0"]
+        imagePullPolicy: IfNotPresent
+        resources: 
+          requests:
+            cpu: .4
+            memory: 300Mi
+

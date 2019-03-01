@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astoolpullpushlinux-musl
+spec:
+  selector:
+    matchLabels:
+      run: astoolpullpushlinux-musl
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: astoolpullpushlinux-musl
+    spec:
+      containers:
+      - name: astoolpullpushlinux-musl
+        image: testacreu2.azurecr.io/astool.linux-musl:v1
+        command: ["./ASTool","--pullpush", "--input", "https://verizon-uhddstvstreamingno-euno.streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
+        imagePullPolicy: IfNotPresent
+        resources: 
+          requests:
+            cpu: .4
+            memory: 300Mi

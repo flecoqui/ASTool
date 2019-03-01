@@ -521,27 +521,27 @@ https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tut
 1. Open a command shell window in the project folder  
 
 
-        C:\git\me\ASTool\cs\ASTool> 
+        C:\git\me\ASTool> 
 
 2. Create a resource group with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az group create --resource-group "ResourceGroupName" --location "RegionName"</p>
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az group create --resource-group testacrrg --location eastus2
+        C:\git\me\ASTool> az group create --resource-group testacrrg --location eastus2
 
 3. Create an Azure Container Registry with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az acr create --resource-group "ResourceGroupName" --name "ACRName" --sku "ACRSku" --location "RegionName"</p>
 For instance:
 
-        C:\git\me\ASTool\cs\ASTool> az acr create --resource-group testacrrg --name testacreu2  --sku Standard --location eastus2  
+        C:\git\me\ASTool> az acr create --resource-group testacrrg --name testacreu2  --sku Standard --location eastus2  
 
 
 4. Build the container image and register it in the new Azure Container Registry with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder" -f "DockerFilePath"</p>
 For instance below the creation of an image for Linux:
 
-        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool.linux:v1 . -f Dockerfile.linux
+        C:\git\me\ASTool> az acr build --registry testacreu2   --image astool.linux:v1 . -f Docker\Dockerfile.linux
 
 
      After few minutes, the image should be available in the new registry:
@@ -575,15 +575,15 @@ For instance below the creation of an image for Linux:
             WORKDIR /app
             
             # copy csproj and restore as distinct layers
-            COPY  ASTool/*.csproj ./ASTool/
+            COPY  cs/ASTool/ASTool/*.csproj ./ASTool/
             WORKDIR /app/ASTool
             RUN dotnet restore
-                        
+
             # copy everything else and build app
             WORKDIR /app
-            #COPY outputvideo/. ./outputvideo/
+            #COPY Tests/SmoothAsset/. ./outputvideo/
 
-            COPY ASTool/. ./ASTool/
+            COPY cs/ASTool/ASTool/. ./ASTool/
             WORKDIR /app/ASTool
             RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
             #RUN dotnet publish  -c Release -o out
@@ -596,12 +596,20 @@ For instance below the creation of an image for Linux:
             ENTRYPOINT ["./ASTool", "--version"]
 
 
-This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile.linux) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docker/Dockerfile.linux) on line. The image built from this DockerFile contains only the ASTool binary. 
+It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder Tests\SmoothAsset.
+
+You can use for instance the following command  line:
+
+
+            C:\git\me\ASTool> az acr build --registry testacreu2   --image astoolpush.linux:v1 . -f Docker\Dockerfile.push.linux
+
+
 
 
 For instance below the creation of an image for Linux Alpine which will consume less resource than the default Linux image:
 
-        C:\git\me\ASTool\cs\ASTool> az acr build --registry testacreu2   --image astool.linux-musl:v1 . -f Dockerfile.linux-musl
+        C:\git\me\ASTool> az acr build --registry testacreu2   --image astool.linux-musl:v1 . -f Docker\Dockerfile.linux-musl
 
 
      After few minutes, the image should be available in the new registry:
@@ -613,15 +621,15 @@ For instance below the creation of an image for Linux Alpine which will consume 
             WORKDIR /app
             
             # copy csproj and restore as distinct layers
-            COPY  ASTool/*.csproj ./ASTool/
+            COPY  cs/ASTool/ASTool/*.csproj ./ASTool/
             WORKDIR /app/ASTool
             RUN dotnet restore
 
             # copy everything else and build app
             WORKDIR /app
-            #COPY outputvideo/. ./outputvideo/
+            COPY Tests/SmoothAsset/. ./outputvideo/
 
-            COPY ASTool/. ./ASTool/
+            COPY cs/ASTool/ASTool/. ./ASTool/
             WORKDIR /app/ASTool
             RUN dotnet publish --self-contained -r linux-musl-x64 -c Release -o out
             #RUN dotnet publish  -c Release -o out
@@ -629,12 +637,19 @@ For instance below the creation of an image for Linux Alpine which will consume 
             FROM microsoft/dotnet:2.2-runtime-deps-alpine AS runtime
             WORKDIR /app
             COPY --from=build-env /app/ASTool/out ./
-            #COPY --from=build-env /app/outputvideo ./outputvideo/
+            COPY --from=build-env /app/outputvideo ./outputvideo/
 
             ENTRYPOINT ["./ASTool", "--version"]
 
 
-This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/cs/ASTool/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder outputvideo and uncomment the lines containing outputvideo in the DockeFile.
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. 
+It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder Tests\SmoothAsset.
+You can use for instance the following command  line:
+
+
+            C:\git\me\ASTool> az acr build --registry testacreu2   --image astoolpush.linux-musl:v1 . -f Docker\Dockerfile.push.linux-musl
+
+
 
 
 Moreover, as the entrypoint is :
@@ -657,7 +672,7 @@ In this sections, you create an Azure Key Vault and Service Principal, then depl
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az keyvault create --resource-group testacrrg --name acrkv
+        C:\git\me\ASTool> az keyvault create --resource-group testacrrg --name acrkv
  
 2. Display the ID associated with the new Azure Container Registry using the following command:</p>
 In order to create the Service Principal you need to know the ID associated with the new Azure Container Registry, you can display this information with the following command:</p>
@@ -665,14 +680,14 @@ In order to create the Service Principal you need to know the ID associated with
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az acr show --name testacreu2 --query id --output tsv
+        C:\git\me\ASTool> az acr show --name testacreu2 --query id --output tsv
 
 3. Create a Service Principal and display the password with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az ad sp create-for-rbac --name "ACRSPName" --scopes "ACRID" --role acrpull --query password --output tsv</p>
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
+        C:\git\me\ASTool> az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
 
      After few seconds the result (ACR Password) is displayed:
 
@@ -687,14 +702,14 @@ For instance:
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-pwd --value yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+        C:\git\me\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-pwd --value yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
  
 5. Display the Application ID associated with the new Service Principal with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az ad sp show --id http://"ACRSPName" --query appId --output tsv</p>
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az ad sp show --id http://acrspeu2 --query appId --output tsv
+        C:\git\me\ASTool> az ad sp show --id http://acrspeu2 --query appId --output tsv
 
      After few seconds the result (ACR AppId) is displayed:
 
@@ -707,7 +722,7 @@ For instance:
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-usr --value wwwwwwww-wwww-wwww-wwww-wwwwwwwwwwww
+        C:\git\me\ASTool> az keyvault secret set  --vault-name acrkv --name acrspeu2-pull-usr --value wwwwwwww-wwww-wwww-wwww-wwwwwwwwwwww
  
 
      The Azure Key Vault contains now the Azure Container Registry AppID and Password. 
@@ -729,7 +744,7 @@ You can now deploy the image using the credentials stored in Azure Key Vault.
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-usr --query value -o tsv
+        C:\git\me\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-usr --query value -o tsv
  
      After few seconds the result (ACR AppId) is displayed:
 
@@ -740,7 +755,7 @@ For instance:
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-pwd --query value -o tsv
+        C:\git\me\ASTool> az keyvault secret show --vault-name acrkv --name acrspeu2-pull-pwd --query value -o tsv
  
      After few seconds the result (Password) is displayed:
 
@@ -761,7 +776,7 @@ Below the content of the file "file.yaml" :
             - name: astool
               properties:
                 image: <ACRName>.azurecr.io/astool.linux:v1
-                command: ["dotnet","ASTool.dll","--pullpush", "--input", "<inputSmoothStreamingUrl>", "--minbitrate", "<minBitrate>", "--maxbitrate", "<maxBitrate>", "--liveoffset", "<LiveOffset>", "--output", "<outputSmoothStreamingUrl>"]
+                command: ["./ASTool","--pullpush", "--input", "<inputSmoothStreamingUrl>", "--minbitrate", "<minBitrate>", "--maxbitrate", "<maxBitrate>", "--liveoffset", "<LiveOffset>", "--output", "<outputSmoothStreamingUrl>"]
                 resources:
                   requests:
                     cpu: .4
@@ -777,7 +792,7 @@ Below the content of the file "file.yaml" :
 
 For instance below the creation of a Linux container:
 
-        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux -f astoolpullpush.linux.aci.yaml  -o json --debug --restart-policy OnFailure
+        C:\git\me\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux -f Docker\astoolpullpush.linux.aci.yaml  -o json --debug --restart-policy OnFailure
 
 
  
@@ -811,7 +826,7 @@ The content of the yaml file below:
 
 For instance below the creation of an Alpine container:
 
-        C:\git\me\ASTool\cs\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux-musl -f astoolpullpush.linux-musl.aci.yaml  -o json --debug --restart-policy OnFailure
+        C:\git\me\ASTool> az container create --resource-group testacrrg --name astoolpullpush.linux-musl -f Docker\astoolpullpush.linux-musl.aci.yaml  -o json --debug --restart-policy OnFailure
 
 
  
@@ -866,14 +881,14 @@ You can receive on your local machine the logs from the Container running in Azu
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az container attach --resource-group testacrrg --name astoolpullpush.linux
+        C:\git\me\ASTool> az container attach --resource-group testacrrg --name astoolpullpush.linux
 
 
 If you want to browse the files and the folders in the container while the container instance is running, you can use the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
+        C:\git\me\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
 
 
 #### TROUBLESHOOTING YOUR IMAGE
@@ -881,13 +896,13 @@ If your image keep on rebooting, you can troubleshoot the issue creating the fol
 **Azure CLI 2.0:** az container create -g "ResourceGroupName" --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --command-line "tail -f /dev/null" --registry-username "UserName" --registry-password "Password" </p>
 For instance:
 
-        C:\git\me\ASTool\cs\ASTool> az container create -g testacrrg --name astoolpullpush.linux --image testacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+        C:\git\me\ASTool> az container create -g testacrrg --name astoolpullpush.linux --image testacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
 
 After this command, your image should not keep on rebooting, and you could browse the files and the folders in the container while the container instance is running, with the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\ASTool\cs\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
+        C:\git\me\ASTool> az container exec --resource-group testacrrg --name astoolpullpush.linux --exec-command "/bin/bash"
 
 
 
@@ -907,7 +922,7 @@ https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster
 For instance:
 
 
-          C:\git\me\ASTool\cs\ASTool> az ad sp create-for-rbac --skip-assignment
+          C:\git\me\ASTool> az ad sp create-for-rbac --skip-assignment
  
       The command returns the following information associated with the new Service Principal:
       - appID
@@ -931,7 +946,7 @@ In order to allow the Service Principal to have access to the Azure Container Re
 For instance:
 
 
-        C:\git\me\ASTool\cs\ASTool> az acr show --name testacreu2 --query id --output tsv
+        C:\git\me\ASTool> az acr show --name testacreu2 --query id --output tsv
 
      The command returns ACR resource ID.
 
@@ -944,7 +959,7 @@ For instance:
 **Azure CLI 2.0:** az role assignment create --assignee "AppID" --scope "ACRReourceID" --role Reader
  For instance:
 
-        C:\git\me\ASTool\cs\ASTool> az role assignment create --assignee d604dc61-d8c0-41e2-803e-443415a62825 --scope /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/testacreu2 --role Reader
+        C:\git\me\ASTool> az role assignment create --assignee d604dc61-d8c0-41e2-803e-443415a62825 --scope /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/testacreu2 --role Reader
 
 
 #### CREATING A KUBERNETES CLUSTER
@@ -1028,7 +1043,7 @@ For instance:
 
      For instance: 
 
-          C:\git\me\ASTool\cs\ASTool> kubectl apply -f astool.pullpush.aks.yaml
+          C:\git\me\ASTool> kubectl apply -f Docker\astoolpullpush.linux.aks.yaml
  
      Before launching this command you need to edit the file astool.pullpush.aks.yaml and update the line 28, and replace the field <AzureContainerRegistryName> with the Azure Container Registry Name. 
 
