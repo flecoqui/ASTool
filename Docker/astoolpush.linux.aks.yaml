@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: astoolpushlinux
-        image: testacreu2.azurecr.io/astoolpush.linux:v1
-        command: ["./ASTool","--push", "--input", "/app/outputvideo/audiovideo.ism", "--output", "http://channel1-testlivevi-use2.channel.media.azure.net/ingest.isml", "--loop", "0"]
+        image: <ACRName>.azurecr.io/astoolpush.linux:v1
+        command: ["./ASTool","--push", "--input", "/app/outputvideo/audiovideo.ism", "--output", "https://<DNSName>/ingest.isml", "--loop", "0"]
         imagePullPolicy: IfNotPresent
         resources: 
           requests:

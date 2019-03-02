@@ -604,6 +604,32 @@ You can use for instance the following command  line:
 
             C:\git\me\ASTool> az acr build --registry testacreu2   --image astoolpush.linux:v1 . -f Docker\Dockerfile.push.linux
 
+Dockerfile below for the push scenario where the smooth streaming asset is embedded in the image:
+
+
+            FROM microsoft/dotnet:2.2.103-sdk AS build-env
+            WORKDIR /app
+            
+            # copy csproj and restore as distinct layers
+            COPY  cs/ASTool/ASTool/*.csproj ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet restore
+
+            # copy everything else and build app
+            WORKDIR /app
+            COPY Tests/SmoothAsset/. ./outputvideo/
+
+            COPY cs/ASTool/ASTool/. ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
+            #RUN dotnet publish  -c Release -o out
+
+            FROM microsoft/dotnet:2.2-runtime-deps AS runtime
+            WORKDIR /app
+            COPY --from=build-env /app/ASTool/out ./
+            COPY --from=build-env /app/outputvideo ./outputvideo/
+
+            ENTRYPOINT ["./ASTool", "--version"]
 
 
 
@@ -615,6 +641,43 @@ For instance below the creation of an image for Linux Alpine which will consume 
      After few minutes, the image should be available in the new registry:
 
      The image is built using the DockerFile below:
+
+
+            FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
+            WORKDIR /app
+            
+            # copy csproj and restore as distinct layers
+            COPY  cs/ASTool/ASTool/*.csproj ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet restore
+
+            # copy everything else and build app
+            WORKDIR /app
+            #COPY Tests/SmoothAsset/. ./outputvideo/
+
+            COPY cs/ASTool/ASTool/. ./ASTool/
+            WORKDIR /app/ASTool
+            RUN dotnet publish --self-contained -r linux-musl-x64 -c Release -o out
+            #RUN dotnet publish  -c Release -o out
+
+            FROM microsoft/dotnet:2.2-runtime-deps-alpine AS runtime
+            WORKDIR /app
+            COPY --from=build-env /app/ASTool/out ./
+            #COPY --from=build-env /app/outputvideo ./outputvideo/
+
+            ENTRYPOINT ["./ASTool", "--version"]
+
+
+
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. 
+It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder Tests\SmoothAsset.
+You can use for instance the following command  line:
+
+
+            C:\git\me\ASTool> az acr build --registry testacreu2   --image astoolpush.linux-musl:v1 . -f Docker\Dockerfile.push.linux-musl
+
+
+Dockerfile below for the push scenario where the smooth streaming asset is embedded in the image:
 
 
             FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
@@ -640,15 +703,6 @@ For instance below the creation of an image for Linux Alpine which will consume 
             COPY --from=build-env /app/outputvideo ./outputvideo/
 
             ENTRYPOINT ["./ASTool", "--version"]
-
-
-This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/ASTool/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. 
-It's possible to create an image with an embedded Smooth Streaming Asset for a Push scenario, in that case, you need to copy the Smooth Streaming asset in the folder Tests\SmoothAsset.
-You can use for instance the following command  line:
-
-
-            C:\git\me\ASTool> az acr build --registry testacreu2   --image astoolpush.linux-musl:v1 . -f Docker\Dockerfile.push.linux-musl
-
 
 
 
@@ -799,7 +853,6 @@ For instance below the creation of a Linux container:
 The content of the yaml file below:
 
 
-
             apiVersion: 2018-06-01
             location: eastus2
             name: astoolpullpush.linux
@@ -820,7 +873,6 @@ The content of the yaml file below:
                 password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
             tags: null
             type: Microsoft.ContainerInstance/containerGroups
-
 
 
 
@@ -1038,7 +1090,7 @@ For instance:
 
 
 
-3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file astool.pullpush.aks.yaml with Kubernetes Command Line Client: </p>
+3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file astoolpullpush.linux.aks.yaml with Kubernetes Command Line Client: </p>
 **kubectl:** kubectl apply -f "yamlfile" </p>
 
      For instance: 
@@ -1058,30 +1110,56 @@ For instance:
      You also need to update the line 30 and add the arguments used to call ASTool</p>
      For instance replace:
 
-        command: ["dotnet","ASTool.dll"]
+        command: ["./ASTool","--version"]
 
 
     with:
 
 
-        command: ["dotnet","ASTool.dll","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+        command: ["./ASTool","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
+
+For instance below the content of a yaml file:
+
+
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+            name: astoolpullpushlinux
+            spec:
+            selector:
+                matchLabels:
+                run: astoolpullpushlinux
+            replicas: 1
+            template:
+                metadata:
+                labels:
+                    run: astoolpullpushlinux
+                spec:
+                containers:
+                - name: astoolpullpushlinux
+                    image: testacreu2.azurecr.io/astool.linux:v1
+                    command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
+                    imagePullPolicy: IfNotPresent
+                    resources: 
+                    requests:
+                        cpu: .4
+                        memory: 300Mi
 
 
 
 4. You can check the new deployment with Kubernetes Command Line Client: </p>
-**kubectl:** kubectl get services </p>
+**kubectl:** kubectl get deployments </p>
 
      For instance: 
  
 
-        kubectl get services
+        kubectl get deployments
 
      This command returns a result like this one below:
 
 
-        NAME                   TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)        AGE
-        astoolpullpush         LoadBalancer   10.0.15.205   104.210.7.67   80:30756/TCP   2h
-        kubernetes             ClusterIP      10.0.0.1      <none>         443/TCP        3h
+            NAME                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+            astoolpullpushlinux        0         0         0            0           23h
 
 
 #### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
@@ -1092,41 +1170,26 @@ For instance:
 
      It returns the list of pods associated with your deployment for instance:
 
-          NAME                              READY     STATUS    RESTARTS   AGE
-          astoolpullpush-749df6cbbc-dlrpt   1/1       Running   0          15h
+            NAME                                        READY     STATUS    RESTARTS   AGE
+            astoolpullpushlinux-64556b657f-khct7   1/1       Running   2          22h
 
 
-2. You can scale up your AKS Deployment with Kubernetes Command Line Client: </p>
-**kubectl:** kubectl scale deployment astoolpullpush --replicas=4 </p>
+2. You can stop the pod using the following command with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl scale --replicas=0 deployment/astoolpullpushlinux-musl </p>
 
-     If you run the command "kubectl get pods" again, you'll see the 4 pods for instance:
-
-
-        NAME                              READY     STATUS    RESTARTS   AGE
-        astoolpullpush-5dcfbd44df-h8wpc   1/1       Running   0          14s
-        astoolpullpush-5dcfbd44df-tkkl6   1/1       Running   0          14s
-        astoolpullpush-5dcfbd44df-w9qbf   1/1       Running   0          14s
-        astoolpullpush-5dcfbd44df-wcfjx   1/1       Running   0          15m
+     If you run the command "kubectl get pods" again, you'll see the pod is not running anymore.
 
 
-3. You can test resiliency in deleting a pod with Kubernetes Command Line Client: </p>
-**kubectl:** kubectl delete pod "PodName" </p>
+3. You can restart the pod using the following command with Kubernetes Command Line Client: </p>
+**kubectl:** kubectl scale --replicas=1 deployment/astoolpullpushlinux-musl </p>
+
+     If you run the command "kubectl get pods" again, you'll see the pod is running again.
 
      For instance:
 
+            NAME                                        READY     STATUS    RESTARTS   AGE
+            astoolpullpushlinux-84556b657f-khct7   1/1       Running   2          43s
 
-        kubectl delete pod astoolpullpush-5dcfbd44df-w9qbf
-
-
-     If you run the command "kubectl get pods" again, you'll see the 1 pod terminating and one new pod, for instance:
-
-
-        NAME                              READY     STATUS        RESTARTS   AGE
-        astoolpullpush-5dcfbd44df-2tkpv   1/1       Running       0          14s
-        astoolpullpush-5dcfbd44df-w9qbf   0/1       Terminating   0          45s
-        astoolpullpush-5dcfbd44df-h8wpc   1/1       Running       0          7m
-        astoolpullpush-5dcfbd44df-tkkl6   1/1       Running       0          7m
-        astoolpullpush-5dcfbd44df-wcfjx   1/1       Running       0          22m
 
 4. With your favorite Browser open the Azure portal https://portal.azure.com/ 
 Navigate to the resource group where you deployed your Kubernetes service.
@@ -1146,4 +1209,5 @@ Check that the Kubernetes service has been created.
 # Next Steps
 
 1. Deploy ASTool as Micro Service in Service Fabric
-2. Support incoming streams protected with PlayReady 
+2. Support incoming streams protected with PlayReady
+3. Support Smooth Streaming Assets stored on Azure Storage 

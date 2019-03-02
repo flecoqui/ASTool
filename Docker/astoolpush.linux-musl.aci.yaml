@@ -1,20 +1,20 @@
 apiVersion: 2018-06-01
-location: eastus2
+location: <Region>
 name: astoolpush.linux-musl
 properties:
   containers:
   - name: astoolpushlinux-musl
     properties:
-      image: testacreu2.azurecr.io/astoolpush.linux-musl:v1
-      command: ["./ASTool","--push", "--input", "/app/outputvideo/audiovideo.ism", "--output", "http://channel1-testlivevi-use2.channel.media.azure.net/ingest.isml", "--loop", "0"]
+      image: <ACRName>.azurecr.io/astoolpush.linux-musl:v1
+      command: ["./ASTool","--push", "--input", "/app/outputvideo/audiovideo.ism", "--output", "https://<DNSName>/ingest.isml", "--loop", "0"]
       resources:
         requests:
           cpu: .4
           memoryInGb: .3
   osType: Linux
   imageRegistryCredentials:
-  - server: testacreu2.azurecr.io
-    username: 40e21cbe-9b70-469f-80da-4369e02ebc58
-    password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+  - server: <ACRName>.azurecr.io
+    username: <AppUserName>
+    password: <AppPassword>
 tags: null
 type: Microsoft.ContainerInstance/containerGroups
