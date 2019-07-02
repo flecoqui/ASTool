@@ -1205,6 +1205,17 @@ Check that the Kubernetes service has been created.
      
      <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aksmonitor.png"/>
    
+# Run ASTool as Webjob on Azure App Services
+1. Download the latest ASTool release for Windows locally to you PC
+2. Navigate to the folder and create a run.cmd file
+3. Put your command line for ASTool in the run.cmd (i.e. ASTool.exe --pullpush --input http://sourceserver/pubpoint.isml/manifest --minbitrate 300000   --maxbitrate 0  --output http://ams-euwe.channel.media.azure.net/ingest.isml --consolelevel error)
+4. Put the run.cmd into the zipfile you downloaded in step 1
+5. Navigate to the Azure Portal and create an App Service (https://azure.microsoft.com/en-us/services/app-service/)
+6. Go to the created Web App and go to "Webjobs"
+<img src="Docs/Webjob.png">
+7. Click "Add" at the top and populate the settings for the new webjob and point to the zipfile containing the run.cmd and ASTool files. 
+<img src="Docs/AddWebjob.png">
+8. The webjob will be deployed and started. To verify operation go to "Logs" and you should see ASTool command logs.
 
 # Next Steps
 
