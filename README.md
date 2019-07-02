@@ -1217,7 +1217,9 @@ Check that the Kubernetes service has been created.
 7. Click "Add" at the top and populate the settings for the new webjob and point to the zipfile containing the run.cmd and ASTool files. 
 <img src="Docs/AddWebjob.png">
 8. The webjob will be deployed and press "Start" to start the webjob.
-9. To verify operation you can check console logs by clicking "Logs" button.
+
+9. To verify operation you can check console logs by clicking "Logs" button. Or go to Log Stream to see a realtime console output.
+<img src="Docs/WebJob-LogStream.png">
 
 
 # Next Steps
