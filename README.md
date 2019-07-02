@@ -1219,6 +1219,7 @@ Check that the Kubernetes service has been created.
 8. The webjob will be deployed and press "Start" to start the webjob.
 9. To verify operation go to "Logs" and you should see ASTool command logs.
 
+
 # Next Steps
 
 1. Deploy ASTool as Micro Service in Service Fabric
