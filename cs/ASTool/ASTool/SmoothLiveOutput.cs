@@ -190,17 +190,17 @@ namespace ASTool
             if (!(await SendAudioChunks(cache)))
             {
                 bResult = false;
-                LogMessage(Options.LogLevel.Error, "Error while sending audio chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending audio chunks from url " + cache.ManifestUri.ToString() + " to url: " + pushurl);
             }
             if (!(await SendVideoChunks(cache)))
             {
                 bResult = false;
-                LogMessage(Options.LogLevel.Error, "Error while sending video chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending video chunks for url: " + cache.ManifestUri.ToString() + " to url: " + pushurl);
             }
             if (!(await SendTextChunks(cache)))
             {
                 bResult = false;
-                LogMessage(Options.LogLevel.Error, "Error while sending text chunks for url: " + cache.ManifestUri.ToString());
+                LogMessage(Options.LogLevel.Error, "Error while sending text chunks for url: " + cache.ManifestUri.ToString() + " to url: " + pushurl);
             }
             return bResult;
 
